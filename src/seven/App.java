@@ -35,7 +35,7 @@ public class App extends Application {
             Parent root = FXMLLoader.load(getClass().getResource("/seven/fxml/Main.fxml"));            
             Scene scene = new Scene(root);
             scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
-            stage.getIcons().add(new Image(App.class.getResourceAsStream("resources/icon.png")));
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
             stage.setTitle(String.format("%s v%.1f%n", Configuration.TITLE, Configuration.VERSION));
             stage.centerOnScreen();
             stage.setResizable(false);

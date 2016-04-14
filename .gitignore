@@ -1,5 +1,6 @@
 /bin/
-
+/build/
 /.settings/
-/.classpath/
-/.project/
+.classpath
+.project
+build.fxbuild

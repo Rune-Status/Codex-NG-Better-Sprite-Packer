@@ -164,11 +164,11 @@ public final class MainController implements Initializable {
 
             titledPane.heightProperty().addListener((obs, oldHeight, newHeight) -> resizeStage());
 
-            Image clearImage = new Image(App.class.getResourceAsStream("resources/clear.png"));
-            Image saveArchiveImage = new Image(App.class.getResourceAsStream("resources/saveArchive.png"));
-            Image loadSpriteImage = new Image(App.class.getResourceAsStream("resources/loadSprite.png"));
-            Image loadArchiveImage = new Image(App.class.getResourceAsStream("resources/loadArchive.png"));
-            Image saveSpritesImage = new Image(App.class.getResourceAsStream("resources/saveSprites.png"));
+            Image clearImage = new Image(getClass().getResourceAsStream("/clear.png"));
+            Image saveArchiveImage = new Image(getClass().getResourceAsStream("/saveArchive.png"));
+            Image loadSpriteImage = new Image(getClass().getResourceAsStream("/loadSprite.png"));
+            Image loadArchiveImage = new Image(getClass().getResourceAsStream("/loadArchive.png"));
+            Image saveSpritesImage = new Image(getClass().getResourceAsStream("/saveSprites.png"));
             
             clearBtn.setGraphic(new ImageView(clearImage));
             writeSprite.setGraphic(new ImageView(saveArchiveImage));
@@ -325,8 +325,9 @@ public final class MainController implements Initializable {
 
                         String p = file.getName().replaceAll(".png", "").replaceAll(".PNG", "");
 
-                        sortedFiles[Integer.valueOf(p)] = file;
-
+                        int index = Integer.valueOf(p);
+                        
+                        sortedFiles[index] = file;
                   }
             }
 
