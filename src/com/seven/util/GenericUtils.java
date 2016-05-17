@@ -1,15 +1,15 @@
-package seven.util;
+package com.seven.util;
 
 import java.lang.reflect.Method;
 
-import seven.util.msg.ExceptionMessage;
+import com.seven.util.msg.ExceptionMessage;
 
 /**
  * The non specific type of utility methods.
  * 
  * @author Seven
  */
-public final class GenericUtil {
+public final class GenericUtils {
 
       /**
        * A universal method to launch a {@code url} from a users computer.

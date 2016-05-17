@@ -1,4 +1,4 @@
-package seven;
+package com.seven;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -32,7 +32,7 @@ public class App extends Application {
       @Override
       public void start(Stage stage) throws Exception {
             App.mainStage = stage;
-            Parent root = FXMLLoader.load(getClass().getResource("/seven/fxml/Main.fxml"));            
+            Parent root = FXMLLoader.load(getClass().getResource("/com/seven/fxml/Main.fxml"));            
             Scene scene = new Scene(root);
             scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));

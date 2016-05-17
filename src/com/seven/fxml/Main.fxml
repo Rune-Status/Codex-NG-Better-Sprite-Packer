@@ -9,14 +9,26 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seven.controller.MainController">
+<BorderPane minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.seven.controller.MainController">
    <left>
       <VBox alignment="CENTER" BorderPane.alignment="TOP_CENTER">
          <children>
-            <ListView fx:id="list" minHeight="274.0" minWidth="198.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS" />
+            <ListView fx:id="list" minHeight="274.0" minWidth="198.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
+               <VBox.margin>
+                  <Insets left="5.0" />
+               </VBox.margin>
+               <contextMenu>
+                  <ContextMenu>
+                    <items>
+                      <MenuItem fx:id="dumpSpriteMI" mnemonicParsing="false" onAction="#dumpSprite" text="Dump Sprite" />
+                        <MenuItem fx:id="dumpAllSpritesMI" mnemonicParsing="false" onAction="#dumpSprites" text="Dump All" />
+                        <MenuItem fx:id="viewDirectoryMI" mnemonicParsing="false" onAction="#viewCurrentDirectory" text="View Directory" />
+                    </items>
+                  </ContextMenu>
+               </contextMenu></ListView>
             <TextField fx:id="searchTf" alignment="CENTER" promptText="Search..." VBox.vgrow="NEVER">
                <VBox.margin>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  <Insets bottom="5.0" left="5.0" top="5.0" />
                </VBox.margin>
             </TextField>
          </children>
@@ -64,6 +76,13 @@
                         <Tooltip text="Clear screen" />
                      </tooltip>
                   </Button>
+                  <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" visible="false" />
+                  <ProgressIndicator fx:id="progressI" progress="0.0" visible="false" />
+                  <Text fx:id="progressText" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Text>
                </items>
             </ToolBar>
          </children>
@@ -94,36 +113,39 @@
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.vgrow="NEVER">
                            <children>
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Index: " />
-                              <Text fx:id="indexT" strokeType="OUTSIDE" strokeWidth="0.0" />
+                              <Text fx:id="indexT" strokeType="OUTSIDE" strokeWidth="0.0" text="0" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
                            <children>
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Width: " />
-                              <Text fx:id="widthT" strokeType="OUTSIDE" strokeWidth="0.0" />
+                              <Text fx:id="widthT" strokeType="OUTSIDE" strokeWidth="0.0" text="0" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="NEVER">
                            <children>
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Height: " />
-                              <Text fx:id="heightT" strokeType="OUTSIDE" strokeWidth="0.0" />
+                              <Text fx:id="heightT" strokeType="OUTSIDE" strokeWidth="0.0" text="0" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2" GridPane.vgrow="NEVER">
                            <children>
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="SpriteOffsetX: " />
-                              <Text fx:id="drawOffsetXT" strokeType="OUTSIDE" strokeWidth="0.0" />
+                              <Text fx:id="drawOffsetXT" strokeType="OUTSIDE" strokeWidth="0.0" text="0" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.vgrow="NEVER">
                            <children>
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="SpriteOffsetY: " />
-                              <Text fx:id="drawOffsetYT" strokeType="OUTSIDE" strokeWidth="0.0" />
+                              <Text fx:id="drawOffsetYT" strokeType="OUTSIDE" strokeWidth="0.0" text="0" />
                            </children>
                         </HBox>
                      </children>
                   </GridPane>
                </content>
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" />
+               </VBox.margin>
             </TitledPane>
             <TitledPane fx:id="titledPane" contentDisplay="CENTER" text="Sprite" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
                <content>
@@ -132,6 +154,9 @@
                <BorderPane.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </BorderPane.margin>
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" />
+               </VBox.margin>
             </TitledPane>
          </children>
       </VBox>

@@ -1,4 +1,4 @@
-package seven.util.msg;
+package com.seven.util.msg;
 
 import javafx.scene.control.Alert;
 

@@ -1,4 +1,4 @@
-package seven.sprite;
+package com.seven.sprite;
 
 import java.io.DataInputStream;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package seven.util.msg;
+package com.seven.util.msg;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

@@ -1,4 +1,4 @@
-package seven.util;
+package com.seven.util;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -12,15 +12,15 @@ import java.util.zip.GZIPInputStream;
 
 import javax.imageio.ImageIO;
 
-import seven.controller.MainController;
-import seven.sprite.Sprite;
+import com.seven.controller.MainController;
+import com.seven.sprite.Sprite;
 
 /**
  * The class that contains operations for files.
  * 
  * @author Seven
  */
-public final class FileUtil {
+public final class FileUtils {
 
       /**
        * The number of sprites found in a sprite archive.
