@@ -2,18 +2,11 @@ package com.seven.util;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
-import java.nio.file.Path;
-import java.util.zip.GZIPInputStream;
-
 import javax.imageio.ImageIO;
-
-import com.seven.controller.MainController;
-import com.seven.sprite.Sprite;
 
 /**
  * The class that contains operations for files.
@@ -21,53 +14,6 @@ import com.seven.sprite.Sprite;
  * @author Seven
  */
 public final class FileUtils {
-
-      /**
-       * The number of sprites found in a sprite archive.
-       */
-      public static int totalArchivedSprites;
-      
-      /**
-       * The number of sprites found in a file directory.
-       */
-      public static int totalSprites = 0;
-
-      /**
-       * Reads the sequence of pixels in a given sprite archive and converts them into a sprite.
-       * 
-       * @param name
-       *    The name of this archive.
-       *    
-       * @param path
-       *    The path to this archive.
-       *    
-       * @throws Exception
-       *    The exception thrown.
-       */
-      public static void loadArchivedSprites(String name, Path path) throws Exception {
-            MainController.SPRITES.clear();
-
-            byte[] idx = readFile(path.toString() + System.getProperty("file.separator") + name + ".idx");
-            byte[] dat = readFile(path.toString() + System.getProperty("file.separator") + name + ".dat");
-
-            DataInputStream indexFile = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(idx)));
-            DataInputStream dataFile = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(dat)));
-
-            totalArchivedSprites = indexFile.readInt();
-
-            for (int i = 0; i < totalArchivedSprites; ++i) {
-                  int id = indexFile.readInt();
-
-                  Sprite sprite = new Sprite();
-
-                  sprite.decode(indexFile, dataFile);
-
-                  MainController.SPRITES.add(id, sprite);
-
-            }
-            indexFile.close();
-            dataFile.close();
-      }
 
       /**
        * Reads an array of bytes from a file.

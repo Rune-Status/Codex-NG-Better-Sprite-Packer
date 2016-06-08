@@ -36,7 +36,7 @@ public class App extends Application {
             Scene scene = new Scene(root);
             scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
             stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
-            stage.setTitle(String.format("%s v%.1f%n", Configuration.TITLE, Configuration.VERSION));
+            stage.setTitle(String.format("%s v%.2f%n", Configuration.TITLE, Configuration.VERSION));
             stage.centerOnScreen();
             stage.setResizable(false);
             stage.setScene(scene);

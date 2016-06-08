@@ -49,7 +49,7 @@
                 </Menu>
               </menus>
             </MenuBar>
-            <ToolBar prefHeight="8.0" prefWidth="578.0">
+            <ToolBar>
                <items>
                   <Button fx:id="loadArchive" mnemonicParsing="false" onAction="#openArchiveDirectory" prefWidth="100.0">
                      <tooltip>
@@ -76,11 +76,20 @@
                         <Tooltip text="Clear screen" />
                      </tooltip>
                   </Button>
-                  <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" visible="false" />
+                  <StackPane>
+                     <children>
+                        <ProgressBar fx:id="progressBar" prefHeight="32.0" prefWidth="200.0" progress="0.0" visible="false" />
+                        <Text fx:id="progressBarText" strokeType="OUTSIDE" strokeWidth="0.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Text>
+                     </children>
+                  </StackPane>
                   <ProgressIndicator fx:id="progressI" progress="0.0" visible="false" />
                   <Text fx:id="progressText" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0">
                      <font>
-                        <Font size="14.0" />
+                        <Font size="18.0" />
                      </font>
                   </Text>
                </items>

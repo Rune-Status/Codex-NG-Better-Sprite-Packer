@@ -1,4 +1,4 @@
-package com.seven.sprite;
+package com.seven.model;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public final class Sprite {
       /**
        * The name of this image.
        */
-      private String name = "Unknown";
+      private String name = "None";
       
       /**
        * The off set x position.
