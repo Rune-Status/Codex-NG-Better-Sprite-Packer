@@ -130,25 +130,25 @@ public final class MainController implements Initializable {
 
 		searchTf.textProperty().addListener((observable, oldValue, newValue) -> {
 			filteredSprites.setPredicate($it -> {
-				
+
 				if ($it.getSprite() == null) {
 					return false;
 				}
-				
+
 				Sprite sprite = $it.getSprite();
 
 				if (newValue == null || newValue.isEmpty()) {
 					return true;
 				}
 
-				if (sprite.getName().contains(newValue)) {					
+				if (sprite.getName().contains(newValue)) {
 					return true;
 				}
-				
+
 				if (Integer.toString(sprite.getIndex()).contains(newValue)) {
 					return true;
 				}
-				
+
 				return false;
 			});
 		});
@@ -177,7 +177,7 @@ public final class MainController implements Initializable {
 					setGraphic(null);
 				} else {
 					try {
-						BufferedImage image = ImageIO.read(new ByteArrayInputStream(value.getSprite().getData()));
+						final BufferedImage image = ImageIO.read(new ByteArrayInputStream(value.getSprite().getData()));
 
 						listIconView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
 						listIconView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
@@ -205,7 +205,9 @@ public final class MainController implements Initializable {
 
 					try {
 						currentSpriteIndex = newValue.getIndex();
-						Sprite sprite = newValue.getSprite();
+						
+						final Sprite sprite = newValue.getSprite();
+						
 						if (!sprite.getName().equalsIgnoreCase("None")) {
 							nameTf.setText(sprite.getName());
 						} else {
@@ -220,8 +222,13 @@ public final class MainController implements Initializable {
 						}
 						drawOffsetXT.setText(Integer.toString(sprite.getDrawOffsetX()));
 						drawOffsetYT.setText(Integer.toString(sprite.getDrawOffsetY()));
+						
+						
 
 						displaySprite(newValue);
+						
+						App.getMainStage().sizeToScene();
+						
 					} catch (Exception ex) {
 						new ExceptionMessage("A problem was encountered while trying to display a sprite.", ex);
 					}
@@ -229,13 +236,11 @@ public final class MainController implements Initializable {
 			}
 		});
 
-		titledPane.heightProperty().addListener((obs, oldHeight, newHeight) -> resizeStage());
-
-		Image clearImage = new Image(getClass().getResourceAsStream("/clear.png"));
-		Image saveArchiveImage = new Image(getClass().getResourceAsStream("/saveArchive.png"));
-		Image loadSpriteImage = new Image(getClass().getResourceAsStream("/loadSprite.png"));
-		Image loadArchiveImage = new Image(getClass().getResourceAsStream("/loadArchive.png"));
-		Image saveSpritesImage = new Image(getClass().getResourceAsStream("/saveSprites.png"));
+		final Image clearImage = new Image(getClass().getResourceAsStream("/clear.png"));
+		final Image saveArchiveImage = new Image(getClass().getResourceAsStream("/saveArchive.png"));
+		final Image loadSpriteImage = new Image(getClass().getResourceAsStream("/loadSprite.png"));
+		final Image loadArchiveImage = new Image(getClass().getResourceAsStream("/loadArchive.png"));
+		final Image saveSpritesImage = new Image(getClass().getResourceAsStream("/saveSprites.png"));
 
 		clearBtn.setGraphic(new ImageView(clearImage));
 		writeSprite.setGraphic(new ImageView(saveArchiveImage));
@@ -270,11 +275,6 @@ public final class MainController implements Initializable {
 				new ExceptionMessage("A problem was encountered when opening the sprites directory.", ex);
 			}
 		}
-	}
-
-	@FXML
-	private void resizeStage() {
-		App.getMainStage().sizeToScene();
 	}
 
 	@FXML
@@ -331,11 +331,11 @@ public final class MainController implements Initializable {
 		if (event.getSource() == nameTf) {
 			if (event.getCode() == KeyCode.ENTER) {
 				if (!nameTf.getText().isEmpty() && nameTf.getText().length() <= 14) {
-					
+
 					Sprite sprite = elements.get(currentSpriteIndex).getSprite();
-					
+
 					sprite.setName(nameTf.getText());
-					
+
 					elements.set(currentSpriteIndex, new Entry(this.currentSpriteIndex, sprite));
 					nameTf.clear();
 				}
@@ -488,21 +488,32 @@ public final class MainController implements Initializable {
 	private void loadSprites(Path path) throws IOException {
 		this.elements.clear();
 
-		File[] files = (new File(path.toString())).listFiles();
+		final File[] files = (new File(path.toString())).listFiles();
+
 		totalSprites = files.length;
 
-		File[] sortedFiles = new File[files.length];
+		if (files == null || files.length <= 0) {
+			return;
+		}
+
+		final File[] sortedFiles = new File[files.length];
 
 		boolean valid = false;
 
 		for (File file : files) {
 			if (file != null) {
 
-				if (file.getName().contains(".png")) {
-					String p = file.getName().replaceAll(".png", "").replaceAll(".PNG", "");
+				final String p = file.getName().replaceAll(".PNG", "").replaceAll(".png", "");
 
-					int index = Integer.valueOf(p);
+				int index = -1;
 
+				try {
+					index = Integer.valueOf(p);
+				} catch (Exception ex) {
+					continue;
+				}
+
+				if (index != -1) {
 					sortedFiles[index] = file;
 					valid = true;
 				}
@@ -515,33 +526,39 @@ public final class MainController implements Initializable {
 			createTask(new Task<Boolean>() {
 
 				@Override
-				protected Boolean call() throws Exception {
-					for (int index = 0; index < sortedFiles.length; index++) {
-						byte[] data = new byte[(int) sortedFiles[index].length()];
-						try {
-							FileInputStream d = new FileInputStream(sortedFiles[index]);
-							d.read(data);
-							d.close();
-						} catch (Exception ex) {
-							new ExceptionMessage("A problem was encountered while loading sprites.", ex);
-						}
-						if (data != null && data.length > 0) {
-							Sprite sprite = new Sprite(index, data);
+				protected Boolean call() {
+
+					try {
+						for (int index = 0; index < sortedFiles.length; index++) {
+
+							byte[] data = new byte[(int) sortedFiles[index].length()];
+
+							try (FileInputStream d = new FileInputStream(sortedFiles[index])) {
+								d.read(data);
+							}
+							
+							if (data != null && data.length > 0) {
+								Sprite sprite = new Sprite(index, data);
+
+								Platform.runLater(() -> {
+									elements.add(new Entry(sprite.getIndex(), sprite));
+								});
+
+							}
+							updateProgress(index + 1, sortedFiles.length);
+							updateMessage("(" + (index + 1) + "/" + sortedFiles.length + ")");
 
 							Platform.runLater(() -> {
-								elements.add(new Entry(sprite.getIndex(), sprite));
+								App.getMainStage().setTitle(String.format("%s v%.2f%n [%d]", Configuration.TITLE,
+										Configuration.VERSION, elements.size()));
 							});
 
 						}
-						updateProgress(index + 1, sortedFiles.length);
-						updateMessage("(" + (index + 1) + "/" + sortedFiles.length + ")");
+					} catch (Exception ex) {
+						Platform.runLater(() -> {
+							new ExceptionMessage("A problem was encountered while loading sprites.", ex);
+						});
 					}
-
-					Platform.runLater(() -> {
-						App.getMainStage().setTitle(String.format("%s v%.2f%n [%d]", Configuration.TITLE,
-								Configuration.VERSION, elements.size()));
-					});
-
 					return true;
 				}
 
@@ -598,8 +615,8 @@ public final class MainController implements Initializable {
 	}
 
 	private void displaySprite(Entry entry) throws Exception {
-		Sprite sprite = elements.get(entry.getIndex()).getSprite();
-		BufferedImage image = ImageIO.read(new ByteArrayInputStream(sprite.getData()));
+		final Sprite sprite = elements.get(entry.getIndex()).getSprite();
+		final BufferedImage image = ImageIO.read(new ByteArrayInputStream(sprite.getData()));
 		newImage = SwingFXUtils.toFXImage(image, null);
 
 		imageView.setFitWidth(newImage.getWidth() > 512 ? 512 : newImage.getWidth());
@@ -726,7 +743,8 @@ public final class MainController implements Initializable {
 			}
 
 			try {
-				e = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(Paths.get(output, archiveName + ".idx").toFile())));
+				e = new DataOutputStream(
+						new GZIPOutputStream(new FileOutputStream(Paths.get(output, archiveName + ".idx").toFile())));
 				e.writeInt(elements.size());
 
 				for (index = 0; index < elements.size(); ++index) {

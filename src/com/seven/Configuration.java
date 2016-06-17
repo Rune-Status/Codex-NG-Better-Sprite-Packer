@@ -15,6 +15,6 @@ public final class Configuration {
       /**
        * The current version of this application.
        */
-      public static final double VERSION = 1.41;
+      public static final double VERSION = 1.42;
       
 }

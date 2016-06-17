@@ -13,7 +13,7 @@
    <left>
       <VBox alignment="CENTER" BorderPane.alignment="TOP_CENTER">
          <children>
-            <ListView fx:id="list" minHeight="274.0" minWidth="198.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
+            <ListView fx:id="list" minHeight="274.0" minWidth="198.0" BorderPane.alignment="CENTER" VBox.vgrow="SOMETIMES">
                <VBox.margin>
                   <Insets left="5.0" />
                </VBox.margin>
@@ -26,7 +26,7 @@
                     </items>
                   </ContextMenu>
                </contextMenu></ListView>
-            <TextField fx:id="searchTf" alignment="CENTER" promptText="Search..." VBox.vgrow="NEVER">
+            <TextField fx:id="searchTf" alignment="CENTER" promptText="Search...">
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" top="5.0" />
                </VBox.margin>
@@ -156,7 +156,7 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" />
                </VBox.margin>
             </TitledPane>
-            <TitledPane fx:id="titledPane" contentDisplay="CENTER" text="Sprite" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
+            <TitledPane fx:id="titledPane" contentDisplay="CENTER" text="Sprite" BorderPane.alignment="CENTER" VBox.vgrow="SOMETIMES">
                <content>
                   <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="true" />
                </content>
