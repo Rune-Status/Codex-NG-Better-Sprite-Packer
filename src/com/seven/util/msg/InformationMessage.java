@@ -1,13 +1,17 @@
 package com.seven.util.msg;
 
 import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
 
 /**
  * The {@link Alert} implementation that creates a simplified Information message.
  * 
  * @author Seven
  */
-public class InformationMessage extends Alert {
+public final class InformationMessage extends Alert {
+	
+		private final Image icon = new Image(getClass().getResourceAsStream("/info_icon.png"));
       
       /**
        * Creates a new {@link InformationMessage}.
@@ -39,6 +43,8 @@ public class InformationMessage extends Alert {
             setTitle(title);
             setHeaderText(header);
             setContentText(content);
+            Stage stage = (Stage) getDialogPane().getScene().getWindow();            
+            stage.getIcons().add(icon);
             showAndWait();
       }
 

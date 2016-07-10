@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,10 +25,10 @@ import com.seven.App;
 import com.seven.Configuration;
 import com.seven.model.Entry;
 import com.seven.model.Sprite;
+import com.seven.util.Dialogue;
 import com.seven.util.FileUtils;
 import com.seven.util.GenericUtils;
-import com.seven.util.msg.ExceptionMessage;
-import com.seven.util.msg.InformationMessage;
+import com.seven.util.msg.InputMessage;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -41,10 +42,7 @@ import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
@@ -53,10 +51,8 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -186,7 +182,7 @@ public final class MainController implements Initializable {
 						newImage = SwingFXUtils.toFXImage(image, null);
 
 						listIconView.setImage(newImage);
-						setText(value.getName());
+						setText(Integer.toString(value.getIndex()));
 						setGraphic(listIconView);
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -205,9 +201,9 @@ public final class MainController implements Initializable {
 
 					try {
 						currentSpriteIndex = newValue.getIndex();
-						
+
 						final Sprite sprite = newValue.getSprite();
-						
+
 						if (!sprite.getName().equalsIgnoreCase("None")) {
 							nameTf.setText(sprite.getName());
 						} else {
@@ -222,15 +218,13 @@ public final class MainController implements Initializable {
 						}
 						drawOffsetXT.setText(Integer.toString(sprite.getDrawOffsetX()));
 						drawOffsetYT.setText(Integer.toString(sprite.getDrawOffsetY()));
-						
-						
 
 						displaySprite(newValue);
-						
+
 						App.getMainStage().sizeToScene();
-						
+
 					} catch (Exception ex) {
-						new ExceptionMessage("A problem was encountered while trying to display a sprite.", ex);
+						Dialogue.showException("A problem was encountered while trying to display a sprite.", ex);
 					}
 				}
 			}
@@ -260,9 +254,17 @@ public final class MainController implements Initializable {
 	private void openSpriteDirectory() {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Select the directory that contains your sprites.");
-		String homePath = System.getProperty("user.home");
+		
+		String homePath = Configuration.CACHE_PATH;
+
 		File file = new File(homePath);
+
+		if (!file.exists()) {
+			file = new File(System.getProperty("user.home"));
+		}
+
 		chooser.setInitialDirectory(file);
+		
 		File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
 
 		if (selectedDirectory != null) {
@@ -272,7 +274,7 @@ public final class MainController implements Initializable {
 			try {
 				loadSprites(selectedDirectory.toPath());
 			} catch (Exception ex) {
-				new ExceptionMessage("A problem was encountered when opening the sprites directory.", ex);
+				Dialogue.showException("A problem was encountered when opening the sprites directory.", ex);
 			}
 		}
 	}
@@ -281,14 +283,25 @@ public final class MainController implements Initializable {
 	private void openArchiveDirectory() {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Select the directory that contains your sprite archive files.");
-		String homePath = System.getProperty("user.home");
-		File file = new File(homePath);
+
+		File file = new File(Configuration.CACHE_PATH);
+
+		if (!file.exists()) {
+			file = new File(System.getProperty("user.home"));
+		}
+
 		chooser.setInitialDirectory(file);
 		File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
 
 		if (selectedDirectory != null) {
 
 			currentDirectory = selectedDirectory;
+
+			try {
+				FileUtils.writeCachePathResource("cache_path.txt", selectedDirectory.getPath());
+			} catch (IOException | URISyntaxException e) {
+				Dialogue.showException("Was unable to save current directory.", e);
+			}
 
 			File[] files = selectedDirectory.listFiles();
 
@@ -314,15 +327,16 @@ public final class MainController implements Initializable {
 						try {
 							loadArchivedSprites(archiveName, selectedDirectory.toPath());
 						} catch (Exception ex) {
-							new ExceptionMessage("A problem was encountered while loading the sprites archive.", ex);
+							Dialogue.showException("A problem was encountered while loading the sprites archive.", ex);
 							return;
 						}
-						new InformationMessage("Information", null, "Successfully loaded sprite archives!");
+						
+						Dialogue.showInfo("Information", "Successfully loaded sprite archives!");
 						return;
 					}
 				}
 			}
-			new InformationMessage("Information", null, "No sprite archives have been found.");
+			Dialogue.showInfo("Information", "No sprite archives have been found.");
 		}
 	}
 
@@ -347,15 +361,23 @@ public final class MainController implements Initializable {
 	private void dumpSprite() {
 
 		if (elements.isEmpty()) {
-			new InformationMessage("Information", null, "There are no sprites to write.");
+			Dialogue.showInfo("Information", "There are no sprites to write.");
 			return;
 		}
 
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Select the directory to place the sprites in.");
-		String homePath = System.getProperty("user.home");
+
+		String homePath = Configuration.CACHE_PATH;
+
 		File file = new File(homePath);
+
+		if (!file.exists()) {
+			file = new File(System.getProperty("user.home"));
+		}
+
 		chooser.setInitialDirectory(file);
+		
 		File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
 
 		if (selectedDirectory != null) {
@@ -387,7 +409,7 @@ public final class MainController implements Initializable {
 						updateMessage("(" + (sprite.getIndex() + 1) + "/" + elements.size() + ")");
 
 						Platform.runLater(() -> {
-							openDirectoryDialog("Success! Would you like to view this sprite?", selectedDirectory);
+							Dialogue.openDirectory("Success! Would you like to view this directory?", selectedDirectory);
 						});
 
 					}
@@ -403,14 +425,21 @@ public final class MainController implements Initializable {
 	private void dumpSprites() {
 
 		if (elements.isEmpty()) {
-			new InformationMessage("Information", null, "There are no sprites to write.");
+			Dialogue.showInfo("Information", "There are no sprites to write.");
 			return;
 		}
 
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Select the directory to place the sprites in.");
-		String homePath = System.getProperty("user.home");
+		
+		String homePath = Configuration.CACHE_PATH;
+
 		File file = new File(homePath);
+
+		if (!file.exists()) {
+			file = new File(System.getProperty("user.home"));
+		}
+
 		chooser.setInitialDirectory(file);
 		File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
 
@@ -446,7 +475,7 @@ public final class MainController implements Initializable {
 					}
 
 					Platform.runLater(() -> {
-						openDirectoryDialog("Success! Would you like to view these sprites?", selectedDirectory);
+						Dialogue.openDirectory("Success! Would you like to view this directory?", selectedDirectory);
 					});
 
 					return true;
@@ -457,33 +486,7 @@ public final class MainController implements Initializable {
 
 	}
 
-	private void openDirectoryDialog(String headerText, File dir) {
-		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle("Information");
-		alert.setHeaderText(headerText);
-		alert.setContentText("Choose your option.");
 
-		ButtonType choiceOne = new ButtonType("Yes.");
-		ButtonType close = new ButtonType("No", ButtonData.CANCEL_CLOSE);
-
-		alert.getButtonTypes().setAll(choiceOne, close);
-
-		Optional<ButtonType> result = alert.showAndWait();
-
-		if (result.isPresent()) {
-
-			ButtonType type = result.get();
-
-			if (type == choiceOne) {
-				try {
-					Desktop.getDesktop().open(dir);
-				} catch (Exception ex) {
-					new ExceptionMessage("Error while trying to view image on desktop.", ex);
-				}
-			}
-
-		}
-	}
 
 	private void loadSprites(Path path) throws IOException {
 		this.elements.clear();
@@ -536,7 +539,7 @@ public final class MainController implements Initializable {
 							try (FileInputStream d = new FileInputStream(sortedFiles[index])) {
 								d.read(data);
 							}
-							
+
 							if (data != null && data.length > 0) {
 								Sprite sprite = new Sprite(index, data);
 
@@ -556,7 +559,7 @@ public final class MainController implements Initializable {
 						}
 					} catch (Exception ex) {
 						Platform.runLater(() -> {
-							new ExceptionMessage("A problem was encountered while loading sprites.", ex);
+							Dialogue.showException("A problem was encountered while loading sprites.", ex);
 						});
 					}
 					return true;
@@ -565,7 +568,7 @@ public final class MainController implements Initializable {
 			});
 
 		} else {
-			new InformationMessage("Information", "No sprites were found.");
+			Dialogue.showInfo("Information", "No sprites were found.");
 		}
 
 	}
@@ -629,35 +632,37 @@ public final class MainController implements Initializable {
 	@FXML
 	private void buildCache() {
 		if (elements.isEmpty()) {
-			new InformationMessage("Information", null,
-					"There are no sprites to write, load sprites before trying to create an archive.");
+			Dialogue.showInfo("Information", "There are no sprites to write, load sprites before trying to create an archive.");
 			return;
 		}
-
-		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle("Information");
-		alert.setHeaderText("Where would you like to output these files?");
-		alert.setContentText("Choose your option.");
-
-		ButtonType buttonTypeOne = new ButtonType("I would like the default output.");
-		ButtonType buttonTypeTwo = new ButtonType("I would like to choose my own output.");
-		ButtonType buttonTypeThree = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-
-		alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeThree);
-
-		String output = "";
-
+		
 		String archiveName = "sprites";
 
-		Optional<ButtonType> result = alert.showAndWait();
-		if (result.get() == buttonTypeOne) {
-			output = "./";
+		DirectoryChooser chooser = new DirectoryChooser();
+		chooser.setTitle("Select the directory to output your files to.");
+		
+		String homePath = Configuration.CACHE_PATH;
 
-			TextInputDialog inputDialog = new TextInputDialog("sprites");
-			inputDialog.setTitle("Information");
-			inputDialog.setHeaderText(null);
-			inputDialog.setContentText("Please enter the name of the archives:");
+		File file = new File(homePath);
 
+		if (!file.exists()) {
+			file = new File(System.getProperty("user.home"));
+		}
+
+		chooser.setInitialDirectory(file);
+		
+		File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
+		
+		if (selectedDirectory != null) {
+			
+			try {
+				FileUtils.writeCachePathResource("cache_path.txt", selectedDirectory.getPath());
+			} catch (IOException | URISyntaxException e) {
+				Dialogue.showException("Was unable to save current directory.", e);
+			}	
+			
+			InputMessage inputDialog = Dialogue.showInput("Information", "Please enter the name of the archives:", "sprites");
+		
 			Optional<String> result2 = inputDialog.showAndWait();
 
 			if (result2.isPresent()) {
@@ -665,34 +670,8 @@ public final class MainController implements Initializable {
 			} else {
 				return;
 			}
-		} else if (result.get() == buttonTypeTwo) {
-			DirectoryChooser chooser = new DirectoryChooser();
-			chooser.setTitle("Select the directory to output your files to.");
-			String homePath = System.getProperty("user.home");
-			File file = new File(homePath);
-			chooser.setInitialDirectory(file);
-			File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
-			if (selectedDirectory != null) {
-				output = selectedDirectory.toPath().toString();
-
-				TextInputDialog inputDialog = new TextInputDialog("sprites");
-				inputDialog.setTitle("Information");
-				inputDialog.setHeaderText(null);
-				inputDialog.setContentText("Please enter the name of the archives:");
-
-				Optional<String> result2 = inputDialog.showAndWait();
-
-				if (result2.isPresent()) {
-					archiveName = result2.get();
-				} else {
-					return;
-				}
-			} else {
-				return;
-			}
 		} else {
 			return;
-
 		}
 
 		boolean successful = true;
@@ -701,7 +680,7 @@ public final class MainController implements Initializable {
 			int index;
 			try {
 				e = new DataOutputStream(
-						new GZIPOutputStream(new FileOutputStream(Paths.get(output, archiveName + ".dat").toFile())));
+						new GZIPOutputStream(new FileOutputStream(Paths.get(selectedDirectory.getPath(), archiveName + ".dat").toFile())));
 
 				for (index = 0; index < elements.size(); index++) {
 					Sprite sprite = elements.get(index).getSprite();
@@ -739,12 +718,12 @@ public final class MainController implements Initializable {
 				e.close();
 			} catch (Exception ex) {
 				successful = false;
-				new ExceptionMessage("A problem was encountered while trying to write a sprite archive.", ex);
+				Dialogue.showException("A problem was encountered while trying to write a sprite archive.", ex);
 			}
 
 			try {
 				e = new DataOutputStream(
-						new GZIPOutputStream(new FileOutputStream(Paths.get(output, archiveName + ".idx").toFile())));
+						new GZIPOutputStream(new FileOutputStream(Paths.get(selectedDirectory.getPath(), archiveName + ".idx").toFile())));
 				e.writeInt(elements.size());
 
 				for (index = 0; index < elements.size(); ++index) {
@@ -756,11 +735,13 @@ public final class MainController implements Initializable {
 				e.close();
 			} catch (Exception ex) {
 				successful = false;
-				new ExceptionMessage("A problem was encountered while trying to write a sprite archive.", ex);
+				Dialogue.showException("A problem was encountered while trying to write a sprite archive.", ex);
 			}
 
 			if (successful) {
-				new InformationMessage("Information", "Successful!");
+				Platform.runLater(() -> {
+					Dialogue.openDirectory("Success! Would you like to view this directory?", selectedDirectory);
+				});
 			}
 
 		}
@@ -776,7 +757,7 @@ public final class MainController implements Initializable {
 		try {
 			Desktop.getDesktop().open(currentDirectory);
 		} catch (Exception ex) {
-			new ExceptionMessage("A problem was encountered while trying to view the current directory.", ex);
+			Dialogue.showException("A problem was encountered while trying to view the current directory.", ex);
 		}
 	}
 
