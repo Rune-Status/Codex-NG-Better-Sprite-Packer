@@ -20,7 +20,10 @@
                <contextMenu>
                   <ContextMenu>
                     <items>
-                      <MenuItem fx:id="dumpSpriteMI" mnemonicParsing="false" onAction="#dumpSprite" text="Dump Sprite" />
+                        <MenuItem mnemonicParsing="false" onAction="#addSprite" text="Add" />
+                        <MenuItem mnemonicParsing="false" onAction="#replaceSprite" text="Replace" />
+                        <MenuItem mnemonicParsing="false" onAction="#removeSprite" text="Remove" />
+                      <MenuItem fx:id="dumpSpriteMI" mnemonicParsing="false" onAction="#dumpSprite" text="Dump" />
                         <MenuItem fx:id="dumpAllSpritesMI" mnemonicParsing="false" onAction="#dumpSprites" text="Dump All" />
                         <MenuItem fx:id="viewDirectoryMI" mnemonicParsing="false" onAction="#viewCurrentDirectory" text="View Directory" />
                     </items>

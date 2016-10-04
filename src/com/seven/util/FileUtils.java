@@ -12,6 +12,8 @@ import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
+import java.nio.file.Files;
+
 import javax.imageio.ImageIO;
 
 import com.seven.Configuration;
@@ -60,6 +62,10 @@ public final class FileUtils {
 			writer.println(path);
 			Configuration.CACHE_PATH = path;
 		}
+	}
+	
+	public static byte[] fileToByteArray(File file) throws IOException {		
+		return Files.readAllBytes(file.toPath());
 	}
 
 	/**

@@ -10,6 +10,10 @@ public final class Entry implements Comparable<Entry> {
 		this.index = index;
 		this.sprite = sprite;
 	}
+	
+	public Entry copy() {
+		return new Entry(index, sprite);
+	}
 
 	public int getIndex() {
 		return index;

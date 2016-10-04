@@ -13,7 +13,7 @@ public final class Sprite {
       /**
        * The current index of this sprite.
        */
-      private int index = -1; 
+      private int index = 0; 
       
       /**
        * The array of pixels that make up this image.
@@ -44,16 +44,12 @@ public final class Sprite {
       
       /**
        * Creates a new {@link Sprite} from a file directory.
-       * 
-       * @param index
-       *    The index of the image file in the directory.
        *    
        * @param data
        *    The array of pixels that make up the image.    
        *    
        */
-      public Sprite(int index, byte[] data) {
-            this.index = index;
+      public Sprite(byte[] data) {
             this.data = data;
       }
       
@@ -99,6 +95,14 @@ public final class Sprite {
        */
       public byte[] getData() {
          return this.data;
+      }
+      
+      public void setData(byte[] data) {
+    	  this.data = data;
+      }
+      
+      public void setIndex(int index) {
+    	  this.index = index;
       }
 
       /**

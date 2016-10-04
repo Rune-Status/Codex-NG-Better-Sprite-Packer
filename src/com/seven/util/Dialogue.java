@@ -8,6 +8,7 @@ import com.seven.util.msg.ExceptionMessage;
 import com.seven.util.msg.InformationMessage;
 import com.seven.util.msg.InputMessage;
 import com.seven.util.msg.OptionMessage;
+import com.seven.util.msg.WarningMessage;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -56,6 +57,10 @@ public final class Dialogue {
 			}
 
 		}
+	}
+	
+	public static WarningMessage showWarning(String message) {
+		return new WarningMessage(message);
 	}
 	
 	/**
