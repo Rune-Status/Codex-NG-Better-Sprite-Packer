@@ -15,7 +15,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.zip.GZIPInputStream;
@@ -39,7 +38,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -114,8 +112,6 @@ public final class MainController implements Initializable {
 
 	private FilteredList<Entry> filteredSprites;
 
-	private SortedList<Entry> sortedList;
-
 	private ObservableList<Entry> elements = FXCollections.observableArrayList();
 
 	private int currentSpriteIndex = 0;
@@ -156,17 +152,7 @@ public final class MainController implements Initializable {
 			});
 		});
 
-		sortedList = new SortedList<>(filteredSprites);
-		sortedList.setComparator(new Comparator<Entry>() {
-
-			@Override
-			public int compare(Entry oldValue, Entry newValue) {
-				return oldValue.compareTo(newValue);
-			}
-
-		});
-
-		list.setItems(sortedList);
+		list.setItems(this.filteredSprites);
 
 		list.setCellFactory(param -> new ListCell<Entry>() {
 
@@ -285,7 +271,6 @@ public final class MainController implements Initializable {
 	@FXML
 	private void clearEditor() {
 		elements.clear();
-		sortedList.clear();
 		filteredSprites.clear();
 		list.getItems().clear();
 		imageView.setImage(null);
@@ -324,6 +309,7 @@ public final class MainController implements Initializable {
 
 	@FXML
 	private void openArchiveDirectory() {
+		
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Select the directory that contains your sprite archive files.");
 
@@ -366,7 +352,6 @@ public final class MainController implements Initializable {
 					}
 
 					if (count == 2) {
-						elements.clear();
 						try {
 							loadArchivedSprites(archiveName, selectedDirectory.toPath());
 						} catch (Exception ex) {
@@ -797,6 +782,8 @@ public final class MainController implements Initializable {
 			int id = indexFile.readInt();
 
 			Sprite sprite = new Sprite();
+			
+			sprite.setIndex(id);
 
 			sprite.decode(indexFile, dataFile);
 
@@ -881,7 +868,7 @@ public final class MainController implements Initializable {
 
 			try (DataOutputStream e = new DataOutputStream(new GZIPOutputStream(
 					new FileOutputStream(Paths.get(selectedDirectory.getPath(), archiveName + ".dat").toFile())))) {
-
+				
 				for (index = 0; index < elements.size(); index++) {
 					
 					Sprite sprite = elements.get(index).getSprite();
