@@ -45,7 +45,10 @@ public final class SpriteDecoder {
                       int[] pixels = new int[indexLength];                      
                       
                       for (int i = 0; i < pixels.length; i++) {
-                    	  pixels[i] = dat.readInt();
+                    	  
+                    	  int color = dat.readInt();
+                    	  
+                    	  pixels[i] = color;
                       }
                       
                       sprite.setData(pixels);

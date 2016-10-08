@@ -179,7 +179,7 @@ public final class Controller implements Initializable {
 							return;
 						}
 					
-						final BufferedImage image = new BufferedImage(value.getSprite().getWidth(), value.getSprite().getHeight(), BufferedImage.TYPE_INT_ARGB);
+						BufferedImage image = new BufferedImage(value.getSprite().getWidth(), value.getSprite().getHeight(), BufferedImage.TYPE_INT_ARGB);
 						
 						final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 						
@@ -189,7 +189,7 @@ public final class Controller implements Initializable {
 						listIconView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
 						listIconView.setPreserveRatio(true);
 
-						newImage = SwingFXUtils.toFXImage(image, null);
+						newImage = SwingFXUtils.toFXImage(ImageUtils.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)), null);
 
 						listIconView.setImage(newImage);
 						setText(Integer.toString(value.getIndex()));
@@ -547,7 +547,7 @@ public final class Controller implements Initializable {
 					this.currentDirectory = selectedFile;
 				}
 				
-				BufferedImage image = ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB);
+				BufferedImage image = ImageUtils.makeColorTransparent(ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB), new java.awt.Color(0xFF00FF, true));
 	
 				int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 				
@@ -598,7 +598,7 @@ public final class Controller implements Initializable {
 				
 				Entry copy = entry.copy();
 				
-				BufferedImage selectedImage = ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB);
+				BufferedImage selectedImage = ImageUtils.makeColorTransparent(ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB), new java.awt.Color(0xFF00FF, true));
 				
 				int[] pixels = ((DataBufferInt) selectedImage.getRaster().getDataBuffer()).getData();
 				
@@ -835,7 +835,7 @@ public final class Controller implements Initializable {
 		
 		System.arraycopy(sprite.getData(), 0, pixels, 0, sprite.getData().length);
 
-		newImage = SwingFXUtils.toFXImage(image, null);
+		newImage = SwingFXUtils.toFXImage(ImageUtils.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)), null);
 
 		imageView.setFitWidth(newImage.getWidth() > 512 ? 512 : newImage.getWidth());
 		imageView.setFitHeight(newImage.getHeight() > 512 ? 512 : newImage.getHeight());
