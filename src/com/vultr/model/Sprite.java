@@ -1,12 +1,9 @@
-package com.seven.model;
-
-import java.io.DataInputStream;
-import java.io.IOException;
+package com.vultr.model;
 
 /**
  * Represents a single sprite either in a sprite archive or file directory.
  * 
- * @author Seven
+ * @author Vult-R
  */
 public final class Sprite {      
 
@@ -18,7 +15,7 @@ public final class Sprite {
       /**
        * The array of pixels that make up this image.
        */
-      private byte[] data;
+      private int[] pixels;      
 
       /**
        * The name of this image.
@@ -35,57 +32,16 @@ public final class Sprite {
        */
       private int drawOffsetY = 0;
       
-      /**
-       * Creates a new {@link Sprite} from a sprite archive.
-       */
+      private int width;
+      
+      private int height;
+      
       public Sprite() {
-            
+    	  
       }
       
-      /**
-       * Creates a new {@link Sprite} from a file directory.
-       *    
-       * @param data
-       *    The array of pixels that make up the image.    
-       *    
-       */
-      public Sprite(byte[] data) {
-            this.data = data;
-      }
-      
-      /**
-       * Decodes a {@link Sprite} from a given sprite archive.
-       * 
-       * @param idx
-       *    The idx file associated with the archive.
-       *    
-       * @param dat
-       *    The dat file associated with the archive.
-       */
-      public void decode(DataInputStream idx, DataInputStream dat) throws IOException {            
-            while (true) {
-                  
-                  byte opcode = dat.readByte();
-                  
-                  if (opcode == 0) {
-                        return;
-                  }
-
-                  if (opcode == 1) {
-                        this.index = dat.readShort();
-                  } else if (opcode == 2) {
-                        this.name = dat.readUTF();
-                  } else if (opcode == 3) {
-                        this.drawOffsetX = dat.readShort();
-                  } else if (opcode == 4) {
-                        this.drawOffsetY = dat.readShort();
-                  } else if (opcode == 5) {
-                        int indexLength = idx.readInt();
-                        byte[] dataread = new byte[indexLength];
-                        dat.readFully(dataread);
-                        this.data = dataread;
-                  }
-            }
+      public Sprite(int index) {
+    	  this.index = index;
       }
 
       /**
@@ -93,12 +49,12 @@ public final class Sprite {
        * 
        * @return The data or pixels.
        */
-      public byte[] getData() {
-         return this.data;
+      public int[] getData() {
+         return this.pixels;
       }
       
-      public void setData(byte[] data) {
-    	  this.data = data;
+      public void setData(int[] data) {
+    	  this.pixels = data;
       }
       
       public void setIndex(int index) {
@@ -170,5 +126,23 @@ public final class Sprite {
       public void setDrawOffsetY(int drawOffsetY) {
             this.drawOffsetY = drawOffsetY;
       }
+
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
+	}
+      
+      
       
    }

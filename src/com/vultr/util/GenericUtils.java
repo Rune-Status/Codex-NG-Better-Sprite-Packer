@@ -1,13 +1,13 @@
-package com.seven.util;
+package com.vultr.util;
 
 import java.lang.reflect.Method;
 
-import com.seven.util.msg.ExceptionMessage;
+import com.vultr.util.msg.ExceptionMessage;
 
 /**
  * The non specific type of utility methods.
  * 
- * @author Seven
+ * @author Vult-R
  */
 public final class GenericUtils {
 

@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.seven.controller.MainController">
+<BorderPane minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vultr.controller.Controller">
    <left>
       <VBox alignment="CENTER" BorderPane.alignment="TOP_CENTER">
          <children>
@@ -142,14 +142,14 @@
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2" GridPane.vgrow="NEVER">
                            <children>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="SpriteOffsetX: " />
-                              <Text fx:id="drawOffsetXT" strokeType="OUTSIDE" strokeWidth="0.0" text="0" />
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="OffsetX: " />
+                              <TextField fx:id="offsetXTf" alignment="CENTER" promptText="OffsetX" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.vgrow="NEVER">
                            <children>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="SpriteOffsetY: " />
-                              <Text fx:id="drawOffsetYT" strokeType="OUTSIDE" strokeWidth="0.0" text="0" />
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="OffsetY: " />
+                              <TextField fx:id="offsetYTf" alignment="CENTER" promptText="OffsetY" />
                            </children>
                         </HBox>
                      </children>

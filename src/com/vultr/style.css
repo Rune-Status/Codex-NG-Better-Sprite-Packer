@@ -17,6 +17,10 @@
     -fx-background-insets: 0;
 }
 
+.progress-indicator .percentage {
+    -fx-fill: white ;
+}
+
 .tool-bar {
 	-fx-background-color : #262831;
 }

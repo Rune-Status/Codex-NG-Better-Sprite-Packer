@@ -1,4 +1,4 @@
-package com.seven.util.msg;
+package com.vultr.util.msg;
 
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;

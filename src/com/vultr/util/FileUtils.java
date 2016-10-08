@@ -1,4 +1,4 @@
-package com.seven.util;
+package com.vultr.util;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -16,12 +16,12 @@ import java.nio.file.Files;
 
 import javax.imageio.ImageIO;
 
-import com.seven.Configuration;
+import com.vultr.Configuration;
 
 /**
  * The class that contains operations for files.
  * 
- * @author Seven
+ * @author Vult-R
  */
 public final class FileUtils {
 

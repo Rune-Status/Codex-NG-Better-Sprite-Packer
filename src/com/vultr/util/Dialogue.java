@@ -1,14 +1,14 @@
-package com.seven.util;
+package com.vultr.util;
 
 import java.awt.Desktop;
 import java.io.File;
 import java.util.Optional;
 
-import com.seven.util.msg.ExceptionMessage;
-import com.seven.util.msg.InformationMessage;
-import com.seven.util.msg.InputMessage;
-import com.seven.util.msg.OptionMessage;
-import com.seven.util.msg.WarningMessage;
+import com.vultr.util.msg.ExceptionMessage;
+import com.vultr.util.msg.InformationMessage;
+import com.vultr.util.msg.InputMessage;
+import com.vultr.util.msg.OptionMessage;
+import com.vultr.util.msg.WarningMessage;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;

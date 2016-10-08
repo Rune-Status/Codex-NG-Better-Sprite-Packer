@@ -1,13 +1,13 @@
-package com.seven.controller;
+package com.vultr.controller;
 
 import java.awt.Desktop;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,14 +22,17 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.imageio.ImageIO;
 
-import com.seven.App;
-import com.seven.Configuration;
-import com.seven.model.Entry;
-import com.seven.model.Sprite;
-import com.seven.util.Dialogue;
-import com.seven.util.FileUtils;
-import com.seven.util.GenericUtils;
-import com.seven.util.msg.InputMessage;
+import com.vultr.App;
+import com.vultr.Configuration;
+import com.vultr.codec.decoder.SpriteDecoder;
+import com.vultr.codec.encoder.SpriteEncoder;
+import com.vultr.model.Entry;
+import com.vultr.model.Sprite;
+import com.vultr.util.Dialogue;
+import com.vultr.util.FileUtils;
+import com.vultr.util.GenericUtils;
+import com.vultr.util.ImageUtils;
+import com.vultr.util.msg.InputMessage;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -70,9 +73,9 @@ import javafx.util.Duration;
 /**
  * The class that is an association with the Main.FXML document.
  * 
- * @author Seven
+ * @author Vult-R
  */
-public final class MainController implements Initializable {
+public final class Controller implements Initializable {
 
 	@FXML
 	private ListView<Entry> list;
@@ -90,10 +93,10 @@ public final class MainController implements Initializable {
 	private MenuItem openMI, openArchiveMI, creditMI, closeMI;
 
 	@FXML
-	private Text indexT, widthT, heightT, drawOffsetXT, drawOffsetYT;
+	private Text indexT, widthT, heightT;
 
 	@FXML
-	private TextField searchTf, nameTf;
+	private TextField searchTf, nameTf, offsetXTf, offsetYTf;
 
 	@FXML
 	private TitledPane titledPane;
@@ -166,8 +169,7 @@ public final class MainController implements Initializable {
 					setGraphic(null);
 					setText("");
 				} else {
-					try {
-						
+					
 						if (value.getSprite() == null || value.getSprite().getData() == null || value.getSprite().getData().length == 0) {
 							listIconView.setImage(new Image(getClass().getResourceAsStream("/question_mark.png")));
 							listIconView.setFitHeight(32);
@@ -177,7 +179,11 @@ public final class MainController implements Initializable {
 							return;
 						}
 					
-						final BufferedImage image = ImageIO.read(new ByteArrayInputStream(value.getSprite().getData()));
+						final BufferedImage image = new BufferedImage(value.getSprite().getWidth(), value.getSprite().getHeight(), BufferedImage.TYPE_INT_ARGB);
+						
+						final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+						
+						System.arraycopy(value.getSprite().getData(), 0, pixels, 0, value.getSprite().getData().length);
 						
 						listIconView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
 						listIconView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
@@ -188,9 +194,7 @@ public final class MainController implements Initializable {
 						listIconView.setImage(newImage);
 						setText(Integer.toString(value.getIndex()));
 						setGraphic(listIconView);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+
 				}
 			}
 
@@ -220,8 +224,9 @@ public final class MainController implements Initializable {
 							widthT.setText(Double.toString(newImage.getWidth()));
 							heightT.setText(Double.toString(newImage.getHeight()));
 						}
-						drawOffsetXT.setText(Integer.toString(sprite.getDrawOffsetX()));
-						drawOffsetYT.setText(Integer.toString(sprite.getDrawOffsetY()));
+						
+						offsetXTf.setText(Integer.toString(sprite.getDrawOffsetX()));
+						offsetYTf.setText(Integer.toString(sprite.getDrawOffsetY()));
 
 						displaySprite(newValue);
 
@@ -334,26 +339,15 @@ public final class MainController implements Initializable {
 
 			File[] files = selectedDirectory.listFiles();
 
-			int count = 0;
-
 			String archiveName = "sprites";
 
 			for (File check : files) {
 				if (check != null) {
 
-					if (check.getName().contains("sprites.idx")) {
-						archiveName = check.getName().replaceAll(".idx", "");
-						count++;
-					}
-
-					if (check.getName().contains("sprites.dat")) {
-						archiveName = check.getName().replaceAll(".dat", "");
-						count++;
-					}
-
-					if (count == 2) {
 						try {
+							
 							loadArchivedSprites(archiveName, selectedDirectory.toPath());
+							
 						} catch (Exception ex) {
 							Dialogue.showException("A problem was encountered while loading the sprites archive.", ex);
 							return;
@@ -361,7 +355,6 @@ public final class MainController implements Initializable {
 
 						Dialogue.showInfo("Information", "Successfully loaded sprite archives!");
 						return;
-					}
 				}
 			}
 			Dialogue.showInfo("Information", "No sprite archives have been found.");
@@ -370,18 +363,27 @@ public final class MainController implements Initializable {
 
 	@FXML
 	private void handleKeyEventPressed(KeyEvent event) {
-		if (event.getSource() == nameTf) {
-			if (event.getCode() == KeyCode.ENTER) {
-				if (!nameTf.getText().isEmpty() && nameTf.getText().length() <= 14) {
-
-					Sprite sprite = elements.get(currentSpriteIndex).getSprite();
-
-					sprite.setName(nameTf.getText());
-
-					elements.set(currentSpriteIndex, new Entry(this.currentSpriteIndex, sprite));
-					nameTf.clear();
-				}
+		if (event.getCode() == KeyCode.ENTER) {
+			
+			Sprite sprite = elements.get(currentSpriteIndex).getSprite();
+			
+			if (!nameTf.getText().isEmpty() && nameTf.getText().length() <= 14) {
+				sprite.setName(nameTf.getText());
+				nameTf.clear();
 			}
+			
+			if (!offsetXTf.getText().isEmpty() && offsetXTf.getText().length() < 3) {
+				sprite.setDrawOffsetX(Integer.parseInt(offsetXTf.getText()));
+				offsetXTf.clear();
+			}
+			
+			if (!offsetYTf.getText().isEmpty() && offsetYTf.getText().length() < 3) {
+				sprite.setDrawOffsetY(Integer.parseInt(offsetYTf.getText()));
+				offsetYTf.clear();
+			}
+			
+			elements.set(currentSpriteIndex, new Entry(this.currentSpriteIndex, sprite));
+			
 		}
 	}
 
@@ -421,10 +423,14 @@ public final class MainController implements Initializable {
 
 					if (sprite != null) {
 
-						byte[] data = sprite.getData();
+						int[] pixels = sprite.getData();						
 
 						try {
-							final BufferedImage image = FileUtils.byteArrayToImage(data);
+							final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
+							
+							int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+							
+							System.arraycopy(pixels, 0, data, 0, pixels.length);
 
 							ImageIO.write(image, "png", Paths
 									.get(selectedDirectory.toString(), Integer.toString(sprite.getIndex()) + ".png")
@@ -487,14 +493,18 @@ public final class MainController implements Initializable {
 
 							if (sprite != null) {
 
-								byte[] data = sprite.getData();
+								int[] pixels = sprite.getData();								
 								
-								if (data.length == 0) {
+								if (pixels.length == 0) {
 									continue;
 								}
 
 								try {
-									final BufferedImage image = FileUtils.byteArrayToImage(data);
+									final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
+									
+									int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+									
+									System.arraycopy(pixels, 0, data, 0, pixels.length);
 
 									ImageIO.write(image, "png", Paths.get(selectedDirectory.toString(),
 											Integer.toString(entry.getIndex()) + ".png").toFile());
@@ -537,13 +547,17 @@ public final class MainController implements Initializable {
 					this.currentDirectory = selectedFile;
 				}
 				
-				ImageIO.read(selectedFile);
+				BufferedImage image = ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB);
+	
+				int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 				
-				Sprite sprite = new Sprite(FileUtils.fileToByteArray(selectedFile));
+				Sprite sprite = new Sprite(elements.size());				
+					
+				sprite.setWidth(image.getWidth());
+				sprite.setHeight(image.getHeight());
+				sprite.setData(pixels);
 				
 				Entry entry = new Entry(elements.size(), sprite);
-				
-				sprite.setIndex(elements.size());
 
 				elements.add(entry);
 
@@ -578,15 +592,20 @@ public final class MainController implements Initializable {
 		File selectedFile = fileChooser.showOpenDialog(App.getMainStage());
 		if (selectedFile != null) {
 			
-			try {
-				ImageIO.read(selectedFile);				
+			try {		
 				
 				Entry entry = elements.get(selectedIndex);
 				
 				Entry copy = entry.copy();
 				
+				BufferedImage selectedImage = ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB);
+				
+				int[] pixels = ((DataBufferInt) selectedImage.getRaster().getDataBuffer()).getData();
+				
 				if (copy.getSprite() != null) {
-					copy.getSprite().setData(FileUtils.fileToByteArray(selectedFile));					
+					copy.getSprite().setWidth(selectedImage.getWidth());
+					copy.getSprite().setHeight(selectedImage.getHeight());
+					copy.getSprite().setData(pixels);
 				}
 			
 				elements.remove(selectedIndex);
@@ -614,7 +633,7 @@ public final class MainController implements Initializable {
 		Entry copy = entry.copy();
 		
 		if (copy.getSprite() != null) {
-			copy.getSprite().setData(new byte[0]);
+			copy.getSprite().setData(new int[0]);
 		}
 	
 		elements.remove(selectedIndex);
@@ -698,9 +717,9 @@ public final class MainController implements Initializable {
 							
 							if (file == null) {
 								
-								Sprite sprite = new Sprite(new byte[0]);
+								Sprite sprite = new Sprite(index);
 								
-								sprite.setIndex(index);	
+								sprite.setData(new int[0]);
 								
 								Platform.runLater(() -> {									
 									elements.add(new Entry(sprite.getIndex(), sprite));
@@ -711,17 +730,17 @@ public final class MainController implements Initializable {
 								
 								continue;
 							}
-
-							byte[] data = new byte[(int) file.length()];
-
-							try (FileInputStream d = new FileInputStream(file)) {
-								d.read(data);
-							}
+							
+							BufferedImage image = ImageUtils.convert(ImageIO.read(file), BufferedImage.TYPE_INT_ARGB);
+							
+							int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
 							if (data != null && data.length > 0) {
-								Sprite sprite = new Sprite(data);
-								
-								sprite.setIndex(index);
+								Sprite sprite = new Sprite(index);								
+
+								sprite.setWidth(image.getWidth());
+								sprite.setHeight(image.getHeight());
+								sprite.setData(data);
 
 								Platform.runLater(() -> {
 									elements.add(new Entry(sprite.getIndex(), sprite));
@@ -768,40 +787,54 @@ public final class MainController implements Initializable {
 	 */
 	private void loadArchivedSprites(String name, Path path) throws Exception {
 		clearEditor();
+		
+		createTask(new Task<Boolean>() {
 
-		byte[] idx = FileUtils.readFile(path.toString() + System.getProperty("file.separator") + name + ".idx");
-		byte[] dat = FileUtils.readFile(path.toString() + System.getProperty("file.separator") + name + ".dat");
+			@Override
+			protected Boolean call() throws Exception {
+				byte[] dat = FileUtils.readFile(path.toString() + System.getProperty("file.separator") + name + ".dat");
 
-		DataInputStream indexFile = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(idx)));
-		DataInputStream dataFile = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(dat)));
+				try(DataInputStream dataFile = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(dat)))) {
+					
+					totalSprites = dataFile.readInt();
 
-		totalSprites = indexFile.readInt();
+					for (int index = 0; index < totalSprites; index++) {
+						
+						Sprite sprite = SpriteDecoder.decode(dataFile);
 
-		for (int index = 0; index < totalSprites; index++) {
+						Platform.runLater(() -> {
+							elements.add(new Entry(sprite.getIndex(), sprite));
+						});
+						
+						updateProgress(index + 1, totalSprites);
+						updateMessage("(" + (index + 1) + "/" + totalSprites + ")");
+						
+					}
 
-			int id = indexFile.readInt();
-
-			Sprite sprite = new Sprite();
+				}
+				
+				Platform.runLater(() -> {
+					App.getMainStage()
+					.setTitle(String.format("%s v%.2f%n [%d]", Configuration.TITLE, Configuration.VERSION, totalSprites));
+				});
+				
+				return true;
+			}
 			
-			sprite.setIndex(id);
-
-			sprite.decode(indexFile, dataFile);
-
-			elements.add(new Entry(id, sprite));
-
-		}
-
-		App.getMainStage()
-				.setTitle(String.format("%s v%.2f%n [%d]", Configuration.TITLE, Configuration.VERSION, totalSprites));
-
-		indexFile.close();
-		dataFile.close();
+		});
+		
 	}
 
 	private void displaySprite(Entry entry) throws Exception {
 		try {
 		final Sprite sprite = elements.get(entry.getIndex()).getSprite();
-		final BufferedImage image = ImageIO.read(new ByteArrayInputStream(sprite.getData()));
+		
+		BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		
+		int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+		
+		System.arraycopy(sprite.getData(), 0, pixels, 0, sprite.getData().length);
+
 		newImage = SwingFXUtils.toFXImage(image, null);
 
 		imageView.setFitWidth(newImage.getWidth() > 512 ? 512 : newImage.getWidth());
@@ -861,75 +894,53 @@ public final class MainController implements Initializable {
 			return;
 		}
 
-		boolean successful = true;
+		final String tempArchiveName = archiveName;
+
 		if (elements.size() != 0) {
+			
+			createTask(new Task<Boolean>() {
 
-			int index;
-
-			try (DataOutputStream e = new DataOutputStream(new GZIPOutputStream(
-					new FileOutputStream(Paths.get(selectedDirectory.getPath(), archiveName + ".dat").toFile())))) {
-				
-				for (index = 0; index < elements.size(); index++) {
+				@Override
+				protected Boolean call() throws Exception {
 					
-					Sprite sprite = elements.get(index).getSprite();
+					boolean successful = true;
 					
-					if (sprite.getIndex() == index) {
-						if (sprite.getIndex() != -1) {
-							e.writeByte(1);
-							e.writeShort(sprite.getIndex());
+					try (DataOutputStream e = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(Paths.get(selectedDirectory.getPath(), tempArchiveName + ".dat").toFile())))) {
+						
+						e.writeInt(elements.size());				
+						
+						for (int index = 0; index < elements.size(); index++) {
+							
+							Sprite sprite = elements.get(index).getSprite();
+							
+							if (sprite.getIndex() == index) {
+								SpriteEncoder.encode(e, sprite);						
+							} else {
+								System.out.println("index: " + index + " does not match: " + sprite.getIndex());
+							}
+							
+							updateProgress(index + 1, elements.size());
+							updateMessage("(" + (index + 1) + "/" + elements.size() + ")");
+							
 						}
 
-						if (sprite.getName() != null) {
-							e.writeByte(2);
-							e.writeUTF(sprite.getName());
-						}
+					} catch (Exception ex) {
+						successful = false;
+						Platform.runLater(() -> {
+							Dialogue.showException("A problem was encountered while trying to write a sprite archive.", ex);	
+						});
 
-						if (sprite.getDrawOffsetX() != 0) {
-							e.writeByte(3);
-							e.writeShort(sprite.getDrawOffsetX());
-						}
-
-						if (sprite.getDrawOffsetY() != 0) {
-							e.writeByte(4);
-							e.writeShort(sprite.getDrawOffsetY());
-						}
-
-						if (sprite.getData() != null) {
-							e.writeByte(5);
-							e.write(sprite.getData(), 0, sprite.getData().length);
-						}
-						e.writeByte(0);
-					} else {
-						System.out.println("index: " + index + " does not match: " + sprite.getIndex());
 					}
+					
+					if (successful) {
+						Platform.runLater(() -> {
+							Dialogue.openDirectory("Success! Would you like to view this directory?", selectedDirectory);
+						});
+					}
+					return true;
 				}
-
-			} catch (Exception ex) {
-				successful = false;
-				Dialogue.showException("A problem was encountered while trying to write a sprite archive.", ex);
-			}
-
-			try (DataOutputStream e = new DataOutputStream(new GZIPOutputStream(
-					new FileOutputStream(Paths.get(selectedDirectory.getPath(), archiveName + ".idx").toFile())))) {
 				
-				e.writeInt(elements.size());
-				
-				for (Entry entry : elements) {
-					e.writeInt(entry.getIndex());
-					e.writeInt(entry.getSprite().getData().length);
-				}
-
-			} catch (IOException ex) {
-				successful = false;
-				Dialogue.showException("A problem was encountered while trying to write a sprite archive.", ex);
-			}
-
-			if (successful) {
-				Platform.runLater(() -> {
-					Dialogue.openDirectory("Success! Would you like to view this directory?", selectedDirectory);
-				});
-			}
-
+			});
 		}
 	}
 
@@ -1008,7 +1019,7 @@ public final class MainController implements Initializable {
 
 	@FXML
 	private void credits() {
-		GenericUtils.launchURL("http://www.rune-server.org/members/seven/");
+		GenericUtils.launchURL("http://www.rune-server.org/members/free/");
 	}
 
 	@FXML

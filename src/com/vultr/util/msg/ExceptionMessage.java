@@ -1,4 +1,4 @@
-package com.seven.util.msg;
+package com.vultr.util.msg;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

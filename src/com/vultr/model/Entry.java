@@ -1,4 +1,4 @@
-package com.seven.model;
+package com.vultr.model;
 
 public final class Entry implements Comparable<Entry> {
 	
