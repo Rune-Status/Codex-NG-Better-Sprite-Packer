@@ -170,38 +170,41 @@ public final class Controller implements Initializable {
 					setGraphic(null);
 					setText("");
 				} else {
-					
-						if (value.getSprite() == null || value.getSprite().getData() == null || value.getSprite().getData().length == 0) {
-							listIconView.setImage(new Image(getClass().getResourceAsStream("/question_mark.png")));
-							listIconView.setFitHeight(32);
-							listIconView.setFitWidth(32);
-							setText(Integer.toString(value.getIndex()));
-							setGraphic(listIconView);
-							return;
-						}
-					
-						BufferedImage image = new BufferedImage(value.getSprite().getWidth(), value.getSprite().getHeight(), BufferedImage.TYPE_INT_ARGB);
-						
-						final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-						
-						System.arraycopy(value.getSprite().getData(), 0, pixels, 0, value.getSprite().getData().length);
-						
-						listIconView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
-						listIconView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
-						listIconView.setPreserveRatio(true);
 
-						newImage = SwingFXUtils.toFXImage(ImageUtils.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)), null);
-
-						listIconView.setImage(newImage);
+					if (value.getSprite() == null || value.getSprite().getData() == null
+							|| value.getSprite().getData().length == 0) {
+						listIconView.setImage(new Image(getClass().getResourceAsStream("/question_mark.png")));
+						listIconView.setFitHeight(32);
+						listIconView.setFitWidth(32);
 						setText(Integer.toString(value.getIndex()));
 						setGraphic(listIconView);
+						return;
+					}
+
+					BufferedImage image = new BufferedImage(value.getSprite().getWidth(), value.getSprite().getHeight(),
+							BufferedImage.TYPE_INT_ARGB);
+
+					final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
+					System.arraycopy(value.getSprite().getData(), 0, pixels, 0, value.getSprite().getData().length);
+
+					listIconView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
+					listIconView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
+					listIconView.setPreserveRatio(true);
+
+					newImage = SwingFXUtils.toFXImage(
+							ImageUtils.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)), null);
+
+					listIconView.setImage(newImage);
+					setText(Integer.toString(value.getIndex()));
+					setGraphic(listIconView);
 
 				}
 			}
 
 		});
 
-		list.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+		list.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		list.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Entry>() {
 			@Override
 			public void changed(ObservableValue<? extends Entry> observable, Entry oldValue, Entry newValue) {
@@ -225,7 +228,7 @@ public final class Controller implements Initializable {
 							widthT.setText(Double.toString(newImage.getWidth()));
 							heightT.setText(Double.toString(newImage.getHeight()));
 						}
-						
+
 						offsetXTf.setText(Integer.toString(sprite.getDrawOffsetX()));
 						offsetYTf.setText(Integer.toString(sprite.getDrawOffsetY()));
 
@@ -252,26 +255,27 @@ public final class Controller implements Initializable {
 		loadArchive.setGraphic(new ImageView(loadArchiveImage));
 		dumpSprite.setGraphic(new ImageView(saveSpritesImage));
 
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL(Configuration.VERSION_LINK).openStream()))) {
-        	double version = Double.parseDouble(in.readLine().trim());
-        	
-        	if (Configuration.VERSION != version) {
-        		Alert alert = new Alert(AlertType.CONFIRMATION);
-        		alert.setTitle("Update");
-        		alert.setHeaderText("Update " + version + " available");
-        		alert.setContentText("Would you like to update to version: " + version + "?");
+		try (BufferedReader in = new BufferedReader(
+				new InputStreamReader(new URL(Configuration.VERSION_LINK).openStream()))) {
+			double version = Double.parseDouble(in.readLine().trim());
 
-        		Optional<ButtonType> result = alert.showAndWait();
-        		if (result.get() == ButtonType.OK){
-        		   GenericUtils.launchURL(Configuration.CREATOR_LINK);
-        		   System.exit(1);
-        		}
-        	}
-        	
-        } catch (Exception ex) {
-        	ex.printStackTrace();
-        }
-		
+			if (Configuration.VERSION != version) {
+				Alert alert = new Alert(AlertType.CONFIRMATION);
+				alert.setTitle("Update");
+				alert.setHeaderText("Update " + version + " available");
+				alert.setContentText("Would you like to update to version: " + version + "?");
+
+				Optional<ButtonType> result = alert.showAndWait();
+				if (result.get() == ButtonType.OK) {
+					GenericUtils.launchURL(Configuration.CREATOR_LINK);
+					System.exit(1);
+				}
+			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
 	}
 
 	@FXML
@@ -280,7 +284,7 @@ public final class Controller implements Initializable {
 		filteredSprites.clear();
 		list.getItems().clear();
 		imageView.setImage(null);
-	
+
 		App.getMainStage().setTitle(String.format("%s v%.2f%n", Configuration.TITLE, Configuration.VERSION));
 	}
 
@@ -289,17 +293,13 @@ public final class Controller implements Initializable {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Select the directory that contains your sprites.");
 
-		String homePath = Configuration.CACHE_PATH;
-
-		File file = new File(homePath);
-
-		if (!file.exists()) {
-			file = new File(System.getProperty("user.home"));
+		if (!currentDirectory.isDirectory()) {
+			currentDirectory = new File(System.getProperty("user.home"));
 		}
 
-		chooser.setInitialDirectory(file);
+		chooser.setInitialDirectory(currentDirectory);
 
-		File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
+		File selectedDirectory = chooser.showDialog(App.getMainStage());
 
 		if (selectedDirectory != null) {
 
@@ -315,11 +315,11 @@ public final class Controller implements Initializable {
 
 	@FXML
 	private void openArchiveDirectory() {
-		
+
 		FileChooser fileChooser = new FileChooser();
-		
+
 		fileChooser.setInitialDirectory(currentDirectory);
-		
+
 		fileChooser.setTitle("Open Resource File");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Data files", "*.dat", "*.bsp"));
 
@@ -328,14 +328,14 @@ public final class Controller implements Initializable {
 		}
 
 		fileChooser.setInitialDirectory(currentDirectory);
-		
-		File selectedFile = fileChooser.showOpenDialog(App.getMainStage());		
+
+		File selectedFile = fileChooser.showOpenDialog(App.getMainStage());
 
 		if (selectedFile != null) {
 
 			if (!selectedFile.isDirectory()) {
 				currentDirectory = selectedFile.getParentFile();
-				
+
 				try {
 					FileUtils.writeCachePathResource("cache_path.txt", selectedFile.getPath());
 				} catch (IOException | URISyntaxException e) {
@@ -344,13 +344,13 @@ public final class Controller implements Initializable {
 			}
 
 			String archiveName = "sprites";
-			
+
 			try {
-				
+
 				loadArchivedSprites(archiveName, selectedFile.toPath());
-				
+
 				Dialogue.showInfo("Information", "Successfully loaded sprite archives!");
-				
+
 			} catch (Exception ex) {
 				Dialogue.showException("A problem was encountered while loading the sprites archive.", ex);
 				return;
@@ -362,26 +362,26 @@ public final class Controller implements Initializable {
 	@FXML
 	private void handleKeyEventPressed(KeyEvent event) {
 		if (event.getCode() == KeyCode.ENTER) {
-			
+
 			Sprite sprite = elements.get(currentSpriteIndex).getSprite();
-			
+
 			if (!nameTf.getText().isEmpty() && nameTf.getText().length() <= 14) {
 				sprite.setName(nameTf.getText());
 				nameTf.clear();
 			}
-			
+
 			if (!offsetXTf.getText().isEmpty() && offsetXTf.getText().length() < 3) {
 				sprite.setDrawOffsetX(Integer.parseInt(offsetXTf.getText()));
 				offsetXTf.clear();
 			}
-			
+
 			if (!offsetYTf.getText().isEmpty() && offsetYTf.getText().length() < 3) {
 				sprite.setDrawOffsetY(Integer.parseInt(offsetYTf.getText()));
 				offsetYTf.clear();
 			}
-			
+
 			elements.set(currentSpriteIndex, new Entry(this.currentSpriteIndex, sprite));
-			
+
 		}
 	}
 
@@ -396,17 +396,13 @@ public final class Controller implements Initializable {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Select the directory to place the sprites in.");
 
-		String homePath = Configuration.CACHE_PATH;
-
-		File file = new File(homePath);
-
-		if (!file.exists()) {
-			file = new File(System.getProperty("user.home"));
+		if (!currentDirectory.isDirectory()) {
+			currentDirectory = new File(System.getProperty("user.home"));
 		}
 
-		chooser.setInitialDirectory(file);
+		chooser.setInitialDirectory(currentDirectory);
 
-		File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
+		File selectedDirectory = chooser.showDialog(App.getMainStage());
 
 		if (selectedDirectory != null) {
 
@@ -421,13 +417,14 @@ public final class Controller implements Initializable {
 
 					if (sprite != null) {
 
-						int[] pixels = sprite.getData();						
+						int[] pixels = sprite.getData();
 
 						try {
-							final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
-							
+							final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(),
+									BufferedImage.TYPE_INT_ARGB);
+
 							int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-							
+
 							System.arraycopy(pixels, 0, data, 0, pixels.length);
 
 							ImageIO.write(image, "png", Paths
@@ -465,16 +462,13 @@ public final class Controller implements Initializable {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Select the directory to place the sprites in.");
 
-		String homePath = Configuration.CACHE_PATH;
-
-		File file = new File(homePath);
-
-		if (!file.exists()) {
-			file = new File(System.getProperty("user.home"));
+		if (!currentDirectory.isDirectory()) {
+			currentDirectory = new File(System.getProperty("user.home"));
 		}
 
-		chooser.setInitialDirectory(file);
-		File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
+		chooser.setInitialDirectory(currentDirectory);
+
+		File selectedDirectory = chooser.showDialog(App.getMainStage());
 
 		if (selectedDirectory != null) {
 
@@ -491,17 +485,18 @@ public final class Controller implements Initializable {
 
 							if (sprite != null) {
 
-								int[] pixels = sprite.getData();								
-								
+								int[] pixels = sprite.getData();
+
 								if (pixels.length == 0) {
 									continue;
 								}
 
 								try {
-									final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
-									
+									final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(),
+											BufferedImage.TYPE_INT_ARGB);
+
 									int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-									
+
 									System.arraycopy(pixels, 0, data, 0, pixels.length);
 
 									ImageIO.write(image, "png", Paths.get(selectedDirectory.toString(),
@@ -529,39 +524,41 @@ public final class Controller implements Initializable {
 
 	@FXML
 	private void addSprite() {
-		
+
 		if (!currentDirectory.isDirectory()) {
 			currentDirectory = new File(System.getProperty("user.home"));
 		}
-		
+
 		FileChooser fileChooser = new FileChooser();
-		
+
 		fileChooser.setInitialDirectory(currentDirectory);
-		
+
 		fileChooser.setTitle("Open Resource File");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
-		
-		List<File> selectedFiles = fileChooser.showOpenMultipleDialog(App.getMainStage());		
-		
+
+		List<File> selectedFiles = fileChooser.showOpenMultipleDialog(App.getMainStage());
+
 		if (selectedFiles != null) {
-			
-			for(File selectedFile : selectedFiles) {
-				
-				try {					
+
+			for (File selectedFile : selectedFiles) {
+
+				try {
 					if (!selectedFile.isDirectory()) {
 						this.currentDirectory = selectedFile.getParentFile();
 					}
-					
-					BufferedImage image = ImageUtils.makeColorTransparent(ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB), new java.awt.Color(0xFF00FF, true));
-		
+
+					BufferedImage image = ImageUtils.makeColorTransparent(
+							ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB),
+							new java.awt.Color(0xFF00FF, true));
+
 					int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-					
-					Sprite sprite = new Sprite(elements.size());				
-						
+
+					Sprite sprite = new Sprite(elements.size());
+
 					sprite.setWidth(image.getWidth());
 					sprite.setHeight(image.getHeight());
 					sprite.setData(pixels);
-					
+
 					Entry entry = new Entry(elements.size(), sprite);
 
 					elements.add(entry);
@@ -569,213 +566,174 @@ public final class Controller implements Initializable {
 				} catch (IOException ex) {
 					Dialogue.showWarning("Could not read selected file as an image.");
 				}
-				
+
 			}
-			
+
 		}
 
 	}
-	
+
 	@FXML
 	private void replaceSprite() {
 		if (elements.isEmpty()) {
 			Dialogue.showWarning("There are no sprites to replace.");
 			return;
 		}
-		
-		int selectedIndex = this.list.getSelectionModel().getSelectedIndex();
-		
-		if (selectedIndex < 0) {
-			Dialogue.showWarning("Select a sprite to replace.");
-			return;
-		}
 
 		FileChooser fileChooser = new FileChooser();
-		
-		fileChooser.setInitialDirectory(this.currentDirectory == null ? new File(Configuration.CACHE_PATH) : this.currentDirectory);
-		
+
+		fileChooser.setInitialDirectory(
+				this.currentDirectory == null ? new File(Configuration.CACHE_PATH) : this.currentDirectory);
+
 		fileChooser.setTitle("Open Resource File");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
 		File selectedFile = fileChooser.showOpenDialog(App.getMainStage());
+
 		if (selectedFile != null) {
-			
-			try {		
-				
+
+			try {
+
+				int selectedIndex = list.getSelectionModel().getSelectedIndex();
+
+				if (selectedIndex < 0) {
+					return;
+				}
+
 				Entry entry = elements.get(selectedIndex);
-				
+
 				Entry copy = entry.copy();
-				
-				BufferedImage selectedImage = ImageUtils.makeColorTransparent(ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB), new java.awt.Color(0xFF00FF, true));
-				
+
+				BufferedImage selectedImage = ImageUtils.makeColorTransparent(
+						ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB),
+						new java.awt.Color(0xFF00FF, true));
+
 				int[] pixels = ((DataBufferInt) selectedImage.getRaster().getDataBuffer()).getData();
-				
+
 				if (copy.getSprite() != null) {
 					copy.getSprite().setWidth(selectedImage.getWidth());
 					copy.getSprite().setHeight(selectedImage.getHeight());
 					copy.getSprite().setData(pixels);
 				}
-			
+
 				elements.remove(selectedIndex);
-				
-				elements.add(selectedIndex, copy);				
-				
-			} catch (IOException ex) {
-				Dialogue.showWarning("The file you selected is not a valid image.");
+
+				elements.add(selectedIndex, copy);
+
+			} catch (Exception ex) {
+				Dialogue.showWarning("You have selected an invalid sprite. Valid sprites are png, jpg, or gif images.");
 			}
-			
-		}		
-		
+
+		}
+
 	}
 
 	@FXML
 	private void removeSprite() {
-		int selectedIndex = this.list.getSelectionModel().getSelectedIndex();
+		List<Integer> selectedIndexes = this.list.getSelectionModel().getSelectedIndices();
 
-		if (selectedIndex < 0) {
-			return;
+		for (int selectedIndex : selectedIndexes) {
+			if (selectedIndex < 0) {
+				return;
+			}
+
+			Entry entry = elements.get(selectedIndex);
+
+			Entry copy = entry.copy();
+
+			if (copy.getSprite() != null) {
+				copy.getSprite().setData(new int[0]);
+			}
+
+			if (selectedIndex == elements.size() - 1) {
+				elements.remove(selectedIndex);
+			} else {
+				elements.remove(selectedIndex);
+
+				elements.add(selectedIndex, copy);
+			}
+
 		}
-		
-		Entry entry = elements.get(selectedIndex);
-		
-		Entry copy = entry.copy();
-		
-		if (copy.getSprite() != null) {
-			copy.getSprite().setData(new int[0]);
-		}
-	
-		elements.remove(selectedIndex);
-		
-		elements.add(selectedIndex, copy);
-		
+
 	}
 
 	private void loadSprites(Path path) throws IOException {
 		clearEditor();
-		
+
 		final File[] files = new File(path.toString()).listFiles();
-		
-		int imageIndex = 0;
-		
-		int largest = 0;
-		
-		boolean valid = false;
-		
-		for (int index = 0; index < files.length; index++) {
-			
-			File file = files[index];
-			
-			if (file.getName().contains("png") || file.getName().contains("jpg") || file.getName().contains("gif")) {
-				valid = true;
-			}
-			
-			final String p = file.getName().replace(file.getName().substring(file.getName().lastIndexOf(".")), "");			
-			
-			try {
-				imageIndex = Integer.parseInt(p);
-				
-				if (largest < imageIndex) {
-					largest = imageIndex;
-				}
-			} catch (NumberFormatException ex) {
-				continue;
-			}
-			
-		}
-		
-		final File[] sorted = new File[largest + 1];
+
+		final File[] sorted = FileUtils.sortImages(files);
 
 		totalSprites = sorted.length;
 
 		if (files == null || files.length <= 0) {
 			return;
 		}
-				
-		for (int index = 0; index < sorted.length; index++) {
-			
-			File pngFile = new File(path.toString() + File.separator + index + ".png");
-			
-			File jpgFile = new File(path.toString() + File.separator + index + ".jpg");
-			
-			File gifFile = new File(path.toString() + File.separator + index + ".gif");
-			
-			if (pngFile.exists()) {
-				sorted[index] = pngFile;
-			} else if (jpgFile.exists()) {
-				sorted[index] = jpgFile;
-			} else if (gifFile.exists()) {
-				sorted[index] = gifFile;
-			} else {
-				sorted[index] = null;
-			}
-			
+
+		if (sorted.length <= 0) {
+			Dialogue.showInfo("Information", "No sprites were found.");
+			return;
 		}
 
-		if (valid) {
+		createTask(new Task<Boolean>() {
 
-			createTask(new Task<Boolean>() {
+			@Override
+			protected Boolean call() {
 
-				@Override
-				protected Boolean call() {
+				try {
+					for (int index = 0; index < sorted.length; index++) {
 
-					try {
-						for (int index = 0; index < sorted.length; index++) {
-							
-							File file = sorted[index];
-							
-							if (file == null) {
-								
-								Sprite sprite = new Sprite(index);
-								
-								sprite.setData(new int[0]);
-								
-								Platform.runLater(() -> {									
-									elements.add(new Entry(sprite.getIndex(), sprite));
-								});
-								
-								updateProgress(index + 1, sorted.length);
-								updateMessage("(" + (index + 1) + "/" + sorted.length + ")");
-								
-								continue;
-							}
-							
-							BufferedImage image = ImageUtils.convert(ImageIO.read(file), BufferedImage.TYPE_INT_ARGB);
-							
-							int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+						File file = sorted[index];
 
-							if (data != null && data.length > 0) {
-								Sprite sprite = new Sprite(index);								
+						if (file == null) {
 
-								sprite.setWidth(image.getWidth());
-								sprite.setHeight(image.getHeight());
-								sprite.setData(data);
+							Sprite sprite = new Sprite(index);
 
-								Platform.runLater(() -> {
-									elements.add(new Entry(sprite.getIndex(), sprite));
-								});
+							sprite.setData(new int[0]);
 
-							}
+							Platform.runLater(() -> {
+								elements.add(new Entry(sprite.getIndex(), sprite));
+							});
+
 							updateProgress(index + 1, sorted.length);
 							updateMessage("(" + (index + 1) + "/" + sorted.length + ")");
 
+							continue;
+						}
+
+						BufferedImage image = ImageUtils.convert(ImageIO.read(file), BufferedImage.TYPE_INT_ARGB);
+
+						int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
+						if (data != null && data.length > 0) {
+							Sprite sprite = new Sprite(index);
+
+							sprite.setWidth(image.getWidth());
+							sprite.setHeight(image.getHeight());
+							sprite.setData(data);
+
 							Platform.runLater(() -> {
-								App.getMainStage().setTitle(String.format("%s v%.2f%n [%d]", Configuration.TITLE,
-										Configuration.VERSION, elements.size()));
+								elements.add(new Entry(sprite.getIndex(), sprite));
 							});
 
 						}
-					} catch (Exception ex) {
+						updateProgress(index + 1, sorted.length);
+						updateMessage("(" + (index + 1) + "/" + sorted.length + ")");
+
 						Platform.runLater(() -> {
-							Dialogue.showException("A problem was encountered while loading sprites.", ex);
+							App.getMainStage().setTitle(String.format("%s v%.2f%n [%d]", Configuration.TITLE,
+									Configuration.VERSION, elements.size()));
 						});
+
 					}
-					return true;
+				} catch (Exception ex) {
+					Platform.runLater(() -> {
+						Dialogue.showException("A problem was encountered while loading sprites.", ex);
+					});
 				}
+				return true;
+			}
 
-			});
-
-		} else {
-			Dialogue.showInfo("Information", "No sprites were found.");
-		}
+		});
 
 	}
 
@@ -794,61 +752,64 @@ public final class Controller implements Initializable {
 	 */
 	private void loadArchivedSprites(String name, Path path) throws Exception {
 		clearEditor();
-		
+
 		createTask(new Task<Boolean>() {
 
 			@Override
 			protected Boolean call() throws Exception {
 				byte[] dat = FileUtils.readFile(path.toString());
 
-				try(DataInputStream dataFile = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(dat)))) {
-					
+				try (DataInputStream dataFile = new DataInputStream(
+						new GZIPInputStream(new ByteArrayInputStream(dat)))) {
+
 					totalSprites = dataFile.readInt();
 
 					for (int index = 0; index < totalSprites; index++) {
-						
+
 						Sprite sprite = SpriteDecoder.decode(dataFile);
 
 						Platform.runLater(() -> {
 							elements.add(new Entry(sprite.getIndex(), sprite));
 						});
-						
+
 						updateProgress(index + 1, totalSprites);
 						updateMessage("(" + (index + 1) + "/" + totalSprites + ")");
-						
+
 					}
 
 				}
-				
+
 				Platform.runLater(() -> {
-					App.getMainStage()
-					.setTitle(String.format("%s v%.2f%n [%d]", Configuration.TITLE, Configuration.VERSION, totalSprites));
+					App.getMainStage().setTitle(
+							String.format("%s v%.2f%n [%d]", Configuration.TITLE, Configuration.VERSION, totalSprites));
 				});
-				
+
 				return true;
 			}
-			
+
 		});
-		
+
 	}
 
 	private void displaySprite(Entry entry) throws Exception {
 		try {
-		final Sprite sprite = elements.get(entry.getIndex()).getSprite();
-		
-		BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		
-		int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-		
-		System.arraycopy(sprite.getData(), 0, pixels, 0, sprite.getData().length);
+			final Sprite sprite = elements.get(entry.getIndex()).getSprite();
 
-		newImage = SwingFXUtils.toFXImage(ImageUtils.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)), null);
+			BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
-		imageView.setFitWidth(newImage.getWidth() > 512 ? 512 : newImage.getWidth());
-		imageView.setFitHeight(newImage.getHeight() > 512 ? 512 : newImage.getHeight());
+			int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
-		imageView.setImage(newImage);
-		Tooltip.install(imageView, new Tooltip("Width: " + newImage.getWidth() + " Height: " + newImage.getHeight()));
+			System.arraycopy(sprite.getData(), 0, pixels, 0, sprite.getData().length);
+
+			newImage = SwingFXUtils
+					.toFXImage(ImageUtils.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)), null);
+
+			imageView.setFitWidth(newImage.getWidth() > 512 ? 512 : newImage.getWidth());
+			imageView.setFitHeight(newImage.getHeight() > 512 ? 512 : newImage.getHeight());
+
+			imageView.setImage(newImage);
+			Tooltip.install(imageView,
+					new Tooltip("Width: " + newImage.getWidth() + " Height: " + newImage.getHeight()));
 		} catch (Exception ex) {
 			imageView.setImage(new Image(getClass().getResourceAsStream("/question_mark.png")));
 		}
@@ -866,14 +827,14 @@ public final class Controller implements Initializable {
 
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Select the directory to output your files to.");
-		
+
 		if (!currentDirectory.isDirectory()) {
 			currentDirectory = new File(System.getProperty("user.home"));
-		}	
+		}
 
 		chooser.setInitialDirectory(currentDirectory);
 
-		File selectedFile = chooser.showDialog(App.getMainStage());		
+		File selectedFile = chooser.showDialog(App.getMainStage());
 
 		if (selectedFile != null) {
 
@@ -900,41 +861,43 @@ public final class Controller implements Initializable {
 		final String tempArchiveName = archiveName;
 
 		if (elements.size() != 0) {
-			
+
 			createTask(new Task<Boolean>() {
 
 				@Override
 				protected Boolean call() throws Exception {
-					
+
 					boolean successful = true;
-					
-					try (DataOutputStream e = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(Paths.get(selectedFile.getPath(), tempArchiveName + ".dat").toFile())))) {
-						
-						e.writeInt(elements.size());				
-						
+
+					try (DataOutputStream e = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(
+							Paths.get(selectedFile.getPath(), tempArchiveName + ".dat").toFile())))) {
+
+						e.writeInt(elements.size());
+
 						for (int index = 0; index < elements.size(); index++) {
-							
+
 							Sprite sprite = elements.get(index).getSprite();
-							
+
 							if (sprite.getIndex() == index) {
-								SpriteEncoder.encode(e, sprite);						
+								SpriteEncoder.encode(e, sprite);
 							} else {
 								System.out.println("index: " + index + " does not match: " + sprite.getIndex());
 							}
-							
+
 							updateProgress(index + 1, elements.size());
 							updateMessage("(" + (index + 1) + "/" + elements.size() + ")");
-							
+
 						}
 
 					} catch (Exception ex) {
 						successful = false;
 						Platform.runLater(() -> {
-							Dialogue.showException("A problem was encountered while trying to write a sprite archive.", ex);	
+							Dialogue.showException("A problem was encountered while trying to write a sprite archive.",
+									ex);
 						});
 
 					}
-					
+
 					if (successful) {
 						Platform.runLater(() -> {
 							Dialogue.openDirectory("Success! Would you like to view this directory?", selectedFile);
@@ -942,7 +905,7 @@ public final class Controller implements Initializable {
 					}
 					return true;
 				}
-				
+
 			});
 		}
 	}

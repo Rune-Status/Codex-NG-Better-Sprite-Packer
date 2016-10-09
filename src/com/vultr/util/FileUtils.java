@@ -29,7 +29,7 @@ public final class FileUtils {
 	 * Will read the text file resource containing the current directory.
 	 * 
 	 * @param fileName
-	 * 		The name of the resource.
+	 *            The name of the resource.
 	 * 
 	 * @throws IOException
 	 */
@@ -38,10 +38,9 @@ public final class FileUtils {
 				new FileInputStream(new File(System.getProperty("user.home") + File.separator + fileName))))) {
 
 			final String line = input.readLine();
-			
-			if (line != null) {		
-				Configuration.CACHE_PATH = line.equalsIgnoreCase("user.home") ? System.getProperty("user.home")
-					: line;
+
+			if (line != null) {
+				Configuration.CACHE_PATH = line.equalsIgnoreCase("user.home") ? System.getProperty("user.home") : line;
 			}
 		}
 	}
@@ -50,12 +49,13 @@ public final class FileUtils {
 	 * Will write the current directory to the resource file.
 	 * 
 	 * @param fileName
-	 * 		The name of the file to write.
+	 *            The name of the file to write.
 	 * 
 	 * @param path
-	 * 		The current directory.
+	 *            The current directory.
 	 * 
-	 * @throws IOException, URISyntaxException
+	 * @throws IOException,
+	 *             URISyntaxException
 	 */
 	public static void writeCachePathResource(String fileName, String path) throws IOException, URISyntaxException {
 		try (PrintWriter writer = new PrintWriter(System.getProperty("user.home") + File.separator + fileName)) {
@@ -63,8 +63,8 @@ public final class FileUtils {
 			Configuration.CACHE_PATH = path;
 		}
 	}
-	
-	public static byte[] fileToByteArray(File file) throws IOException {		
+
+	public static byte[] fileToByteArray(File file) throws IOException {
 		return Files.readAllBytes(file.toPath());
 	}
 
@@ -105,6 +105,89 @@ public final class FileUtils {
 		ByteArrayInputStream in = new ByteArrayInputStream(data);
 		BufferedImage image = ImageIO.read(in);
 		return image;
+	}
+
+	public static int calculateLargestImageIndex(File[] files) {
+
+		int largest = 0;
+
+		for (int index = 0; index < files.length; index++) {
+
+			File file = files[index];
+			
+			if (file == null) {
+				continue;
+			}
+
+			if (!FileUtils.isValidImage(file.getName())) {
+				continue;
+			}
+
+			final String modifiedName = file.getName().replace(file.getName().substring(file.getName().lastIndexOf(".")), "");			
+
+			try {
+				int imageIndex = Integer.parseInt(modifiedName);
+
+				if (largest < imageIndex) {
+					largest = imageIndex;
+				}
+			} catch (NumberFormatException ex) {
+				if (index > largest) {
+					largest = index;
+				}
+				continue;
+			}
+		}
+		return largest;
+	}
+	
+	public static File[] sortImages(File[] files) {
+		
+		File[] sorted = new File[FileUtils.calculateLargestImageIndex(files) + 1];
+		
+		for (int index = 0; index < files.length; index++) {
+			
+			File file = files[index];
+			
+			if (file == null) {
+				continue;
+			}
+			
+			if (!FileUtils.isValidImage(file.getName())) {
+				continue;
+			}			
+			
+			final String modifiedName = file.getName().replace(file.getName().substring(file.getName().lastIndexOf(".")), "");			
+			
+			try {
+				int imageIndex = Integer.parseInt(modifiedName);
+
+				sorted[imageIndex] = file;
+			} catch (NumberFormatException ex) {
+				sorted[FileUtils.findFreeIndex(sorted)] = file;
+			}
+			
+		}
+		
+		return sorted;
+	}
+	
+	public static <T> int findFreeIndex(T[] array) {
+		for (int index = 0; index < array.length; index++) {
+			if (array[index] == null) {
+				return index;
+			}
+		}
+		return -1;
+	}
+
+	public static boolean isValidImage(String name) {
+		name = name.toLowerCase();
+		if (name.endsWith(".png") || name.endsWith("gif") || name.endsWith("jpg") || name.endsWith("jpeg")) {
+			return true;
+		}
+
+		return false;
 	}
 
 }
