@@ -26,4 +26,6 @@ public final class Configuration {
       
       public static final String CREATOR_LINK = "https://www.rune-server.org/runescape-development/rs2-client/tools/626093-better-sprite-packer.html";
       
+      public static final String BSP_EXTENSION = ".bsp";
+      
 }

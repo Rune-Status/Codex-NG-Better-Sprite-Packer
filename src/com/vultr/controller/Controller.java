@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.zip.GZIPInputStream;
@@ -315,49 +316,46 @@ public final class Controller implements Initializable {
 	@FXML
 	private void openArchiveDirectory() {
 		
-		DirectoryChooser chooser = new DirectoryChooser();
-		chooser.setTitle("Select the directory that contains your sprite archive files.");
+		FileChooser fileChooser = new FileChooser();
+		
+		fileChooser.setInitialDirectory(currentDirectory);
+		
+		fileChooser.setTitle("Open Resource File");
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Data files", "*.dat", "*.bsp"));
 
-		File file = new File(Configuration.CACHE_PATH);
-
-		if (!file.exists()) {
-			file = new File(System.getProperty("user.home"));
+		if (!currentDirectory.isDirectory()) {
+			currentDirectory = new File(System.getProperty("user.home"));
 		}
 
-		chooser.setInitialDirectory(file);
-		File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
+		fileChooser.setInitialDirectory(currentDirectory);
+		
+		File selectedFile = fileChooser.showOpenDialog(App.getMainStage());		
 
-		if (selectedDirectory != null) {
+		if (selectedFile != null) {
 
-			currentDirectory = selectedDirectory;
-
-			try {
-				FileUtils.writeCachePathResource("cache_path.txt", selectedDirectory.getPath());
-			} catch (IOException | URISyntaxException e) {
-				Dialogue.showException("Was unable to save current directory.", e);
-			}
-
-			File[] files = selectedDirectory.listFiles();
-
-			String archiveName = "sprites";
-
-			for (File check : files) {
-				if (check != null) {
-
-						try {
-							
-							loadArchivedSprites(archiveName, selectedDirectory.toPath());
-							
-						} catch (Exception ex) {
-							Dialogue.showException("A problem was encountered while loading the sprites archive.", ex);
-							return;
-						}
-
-						Dialogue.showInfo("Information", "Successfully loaded sprite archives!");
-						return;
+			if (!selectedFile.isDirectory()) {
+				currentDirectory = selectedFile.getParentFile();
+				
+				try {
+					FileUtils.writeCachePathResource("cache_path.txt", selectedFile.getPath());
+				} catch (IOException | URISyntaxException e) {
+					Dialogue.showException("Was unable to save current directory.", e);
 				}
 			}
-			Dialogue.showInfo("Information", "No sprite archives have been found.");
+
+			String archiveName = "sprites";
+			
+			try {
+				
+				loadArchivedSprites(archiveName, selectedFile.toPath());
+				
+				Dialogue.showInfo("Information", "Successfully loaded sprite archives!");
+				
+			} catch (Exception ex) {
+				Dialogue.showException("A problem was encountered while loading the sprites archive.", ex);
+				return;
+			}
+
 		}
 	}
 
@@ -531,38 +529,47 @@ public final class Controller implements Initializable {
 
 	@FXML
 	private void addSprite() {
+		
+		if (!currentDirectory.isDirectory()) {
+			currentDirectory = new File(System.getProperty("user.home"));
+		}
+		
 		FileChooser fileChooser = new FileChooser();
 		
-		fileChooser.setInitialDirectory(this.currentDirectory == null ? new File(Configuration.CACHE_PATH) : this.currentDirectory);
+		fileChooser.setInitialDirectory(currentDirectory);
 		
 		fileChooser.setTitle("Open Resource File");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
-		File selectedFile = fileChooser.showOpenDialog(App.getMainStage());
-		if (selectedFile != null) {
-			try {
+		
+		List<File> selectedFiles = fileChooser.showOpenMultipleDialog(App.getMainStage());		
+		
+		if (selectedFiles != null) {
+			
+			for(File selectedFile : selectedFiles) {
 				
-				if (!selectedFile.isDirectory()) {
-					this.currentDirectory = selectedFile.getParentFile();
-				} else {
-					this.currentDirectory = selectedFile;
+				try {					
+					if (!selectedFile.isDirectory()) {
+						this.currentDirectory = selectedFile.getParentFile();
+					}
+					
+					BufferedImage image = ImageUtils.makeColorTransparent(ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB), new java.awt.Color(0xFF00FF, true));
+		
+					int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+					
+					Sprite sprite = new Sprite(elements.size());				
+						
+					sprite.setWidth(image.getWidth());
+					sprite.setHeight(image.getHeight());
+					sprite.setData(pixels);
+					
+					Entry entry = new Entry(elements.size(), sprite);
+
+					elements.add(entry);
+
+				} catch (IOException ex) {
+					Dialogue.showWarning("Could not read selected file as an image.");
 				}
 				
-				BufferedImage image = ImageUtils.makeColorTransparent(ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB), new java.awt.Color(0xFF00FF, true));
-	
-				int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-				
-				Sprite sprite = new Sprite(elements.size());				
-					
-				sprite.setWidth(image.getWidth());
-				sprite.setHeight(image.getHeight());
-				sprite.setData(pixels);
-				
-				Entry entry = new Entry(elements.size(), sprite);
-
-				elements.add(entry);
-
-			} catch (IOException ex) {
-				Dialogue.showWarning("Could not read selected file as an image.");
 			}
 			
 		}
@@ -792,7 +799,7 @@ public final class Controller implements Initializable {
 
 			@Override
 			protected Boolean call() throws Exception {
-				byte[] dat = FileUtils.readFile(path.toString() + System.getProperty("file.separator") + name + ".dat");
+				byte[] dat = FileUtils.readFile(path.toString());
 
 				try(DataInputStream dataFile = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(dat)))) {
 					
@@ -859,23 +866,19 @@ public final class Controller implements Initializable {
 
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Select the directory to output your files to.");
+		
+		if (!currentDirectory.isDirectory()) {
+			currentDirectory = new File(System.getProperty("user.home"));
+		}	
 
-		String homePath = Configuration.CACHE_PATH;
+		chooser.setInitialDirectory(currentDirectory);
 
-		File file = new File(homePath);
+		File selectedFile = chooser.showDialog(App.getMainStage());		
 
-		if (!file.exists()) {
-			file = new File(System.getProperty("user.home"));
-		}
-
-		chooser.setInitialDirectory(file);
-
-		File selectedDirectory = chooser.showDialog(loadSprite.getScene().getWindow());
-
-		if (selectedDirectory != null) {
+		if (selectedFile != null) {
 
 			try {
-				FileUtils.writeCachePathResource("cache_path.txt", selectedDirectory.getPath());
+				FileUtils.writeCachePathResource("cache_path.txt", currentDirectory.getPath());
 			} catch (IOException | URISyntaxException e) {
 				Dialogue.showException("Was unable to save current directory.", e);
 			}
@@ -905,7 +908,7 @@ public final class Controller implements Initializable {
 					
 					boolean successful = true;
 					
-					try (DataOutputStream e = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(Paths.get(selectedDirectory.getPath(), tempArchiveName + ".dat").toFile())))) {
+					try (DataOutputStream e = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(Paths.get(selectedFile.getPath(), tempArchiveName + ".dat").toFile())))) {
 						
 						e.writeInt(elements.size());				
 						
@@ -934,7 +937,7 @@ public final class Controller implements Initializable {
 					
 					if (successful) {
 						Platform.runLater(() -> {
-							Dialogue.openDirectory("Success! Would you like to view this directory?", selectedDirectory);
+							Dialogue.openDirectory("Success! Would you like to view this directory?", selectedFile);
 						});
 					}
 					return true;
