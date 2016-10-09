@@ -121,7 +121,7 @@ public final class Controller implements Initializable {
 
 	private Image newImage;
 
-	private File currentDirectory;
+	private File currentDirectory = new File(System.getProperty("user.home"));
 
 	private int totalSprites;
 
