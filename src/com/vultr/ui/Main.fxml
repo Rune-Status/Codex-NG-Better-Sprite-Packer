@@ -79,7 +79,8 @@
                         <Tooltip text="Clear screen" />
                      </tooltip>
                   </Button>
-                  <StackPane>
+                  <ColorPicker fx:id="colorPicker" />
+                  <StackPane prefHeight="40.0" prefWidth="253.0">
                      <children>
                         <ProgressBar fx:id="progressBar" prefHeight="32.0" prefWidth="200.0" progress="0.0" visible="false" />
                         <Text fx:id="progressBarText" strokeType="OUTSIDE" strokeWidth="0.0">

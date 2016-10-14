@@ -39,6 +39,30 @@ public final class ImageUtils {
 
     	return ImageUtils.imageToBufferedImage(Toolkit.getDefaultToolkit().createImage(new FilteredImageSource(im.getSource(), filter)));
     }
+    
+    public static javafx.scene.paint.Color swingToFXColor(java.awt.Color color) {
+    	int r = color.getRed();
+    	int g = color.getGreen();
+    	int b = color.getBlue();
+    	int a = color.getAlpha();
+    	double opacity = a / 255.0 ;
+    	
+    	return javafx.scene.paint.Color.rgb(r, g, b, opacity);
+    }
+    
+    public static BufferedImage createColoredBackground(BufferedImage image, java.awt.Color color) {
+    	BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+    	Graphics2D g2d = copy.createGraphics();
+    	g2d.setColor(color); // Or what ever fill color you want...
+    	g2d.fillRect(0, 0, copy.getWidth(), copy.getHeight());
+    	g2d.drawImage(image, 0, 0, null);
+    	g2d.dispose();    	
+    	return copy;
+    }
+    
+    public static java.awt.Color fxColorToAWTColor(javafx.scene.paint.Color fxColor) {
+    	return new java.awt.Color((float) fxColor.getRed(), (float) fxColor.getGreen(), (float) fxColor.getBlue(), (float) fxColor.getOpacity());
+    }
 
     public static BufferedImage imageToBufferedImage(Image img)
     {

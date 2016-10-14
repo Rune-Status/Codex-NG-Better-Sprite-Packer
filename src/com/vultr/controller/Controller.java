@@ -47,7 +47,9 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
@@ -125,9 +127,14 @@ public final class Controller implements Initializable {
 	private File currentDirectory = new File(System.getProperty("user.home"));
 
 	private int totalSprites;
+	
+	@FXML
+	private ColorPicker colorPicker;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		
+		colorPicker.setValue(Color.FUCHSIA);
 
 		filteredSprites = new FilteredList<>(elements, it -> true);
 
@@ -419,8 +426,66 @@ public final class Controller implements Initializable {
 		if (selectedDirectory != null) {
 
 			currentDirectory = selectedDirectory;
+			
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			alert.setTitle("Options");
+			alert.setHeaderText(null);
+			alert.setContentText("Choose your option.");
 
-			createTask(new Task<Boolean>() {
+			ButtonType buttonTypeOne = new ButtonType("Transparent background");
+			ButtonType buttonTypeTwo = new ButtonType("Colored Background");
+			ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);			
+
+			alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
+
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.get() == buttonTypeOne){
+				
+				createTask(new Task<Boolean>() {
+
+					@Override
+					protected Boolean call() throws Exception {
+
+						Sprite sprite = elements.get(currentSpriteIndex).getSprite();
+
+						if (sprite != null) {
+
+							int[] pixels = sprite.getData();
+
+							try {
+								final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(),
+										BufferedImage.TYPE_INT_ARGB);
+
+								int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
+								System.arraycopy(pixels, 0, data, 0, pixels.length);
+								
+								
+
+								ImageIO.write(image, "png", Paths
+										.get(selectedDirectory.toString(), Integer.toString(sprite.getIndex()) + ".png")
+										.toFile());
+							} catch (IOException ex) {
+								ex.printStackTrace();
+							}
+
+							updateProgress(sprite.getIndex() + 1, elements.size());
+							updateMessage("(" + (sprite.getIndex() + 1) + "/" + elements.size() + ")");
+
+							Platform.runLater(() -> {
+								Dialogue.openDirectory("Success! Would you like to view this directory?",
+										selectedDirectory);
+							});
+
+						}
+
+						return true;
+					}
+				});
+				
+			} else if (result.get() == buttonTypeTwo) {
+				
+				createTask(new Task<Boolean>() {
 
 				@Override
 				protected Boolean call() throws Exception {
@@ -439,7 +504,7 @@ public final class Controller implements Initializable {
 
 							System.arraycopy(pixels, 0, data, 0, pixels.length);
 
-							ImageIO.write(image, "png", Paths
+							ImageIO.write(ImageUtils.createColoredBackground(image, ImageUtils.fxColorToAWTColor(colorPicker.getValue())), "png", Paths
 									.get(selectedDirectory.toString(), Integer.toString(sprite.getIndex()) + ".png")
 									.toFile());
 						} catch (IOException ex) {
@@ -458,11 +523,17 @@ public final class Controller implements Initializable {
 
 					return true;
 				}
-
 			});
+				
+			} else {
+				return;
+			}
+
+
 		}
 	}
 
+	// TODO
 	@FXML
 	private void dumpSprites() {
 
@@ -485,51 +556,117 @@ public final class Controller implements Initializable {
 		if (selectedDirectory != null) {
 
 			currentDirectory = selectedDirectory;
+			
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			alert.setTitle("Options");
+			alert.setHeaderText(null);
+			alert.setContentText("Choose your option.");
 
-			createTask(new Task<Boolean>() {
+			ButtonType buttonTypeOne = new ButtonType("Transparent background");
+			ButtonType buttonTypeTwo = new ButtonType("Colored Background");
+			ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);			
 
-				@Override
-				protected Boolean call() throws Exception {
-					for (Entry entry : elements) {
-						if (entry != null) {
+			alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
 
-							Sprite sprite = entry.getSprite();
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.get() == buttonTypeOne){
+				
+				createTask(new Task<Boolean>() {
 
-							if (sprite != null) {
+					@Override
+					protected Boolean call() throws Exception {
+						for (Entry entry : elements) {
+							if (entry != null) {
 
-								int[] pixels = sprite.getData();
+								Sprite sprite = entry.getSprite();
 
-								if (pixels.length == 0) {
-									continue;
+								if (sprite != null) {
+
+									int[] pixels = sprite.getData();
+
+									if (pixels.length == 0) {
+										continue;
+									}
+
+									try {
+										final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(),
+												BufferedImage.TYPE_INT_ARGB);
+
+										int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
+										System.arraycopy(pixels, 0, data, 0, pixels.length);
+
+										ImageIO.write(image, "png", Paths.get(selectedDirectory.toString(),
+												Integer.toString(entry.getIndex()) + ".png").toFile());
+									} catch (IOException ex) {
+										ex.printStackTrace();
+									}
+									updateProgress(entry.getIndex() + 1, elements.size());
+									updateMessage("(" + (entry.getIndex() + 1) + "/" + elements.size() + ")");
 								}
-
-								try {
-									final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(),
-											BufferedImage.TYPE_INT_ARGB);
-
-									int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-
-									System.arraycopy(pixels, 0, data, 0, pixels.length);
-
-									ImageIO.write(image, "png", Paths.get(selectedDirectory.toString(),
-											Integer.toString(entry.getIndex()) + ".png").toFile());
-								} catch (IOException ex) {
-									ex.printStackTrace();
-								}
-								updateProgress(entry.getIndex() + 1, elements.size());
-								updateMessage("(" + (entry.getIndex() + 1) + "/" + elements.size() + ")");
 							}
 						}
+
+						Platform.runLater(() -> {
+							Dialogue.openDirectory("Success! Would you like to view this directory?", selectedDirectory);
+						});
+
+						return true;
 					}
 
-					Platform.runLater(() -> {
-						Dialogue.openDirectory("Success! Would you like to view this directory?", selectedDirectory);
-					});
+				});
+				
+			} else if (result.get() == buttonTypeTwo) {
+				
+				createTask(new Task<Boolean>() {
 
-					return true;
-				}
+					@Override
+					protected Boolean call() throws Exception {
+						for (Entry entry : elements) {
+							if (entry != null) {
 
-			});
+								Sprite sprite = entry.getSprite();
+
+								if (sprite != null) {
+
+									int[] pixels = sprite.getData();
+
+									if (pixels.length == 0) {
+										continue;
+									}
+
+									try {
+										final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(),
+												BufferedImage.TYPE_INT_ARGB);
+
+										int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
+										System.arraycopy(pixels, 0, data, 0, pixels.length);
+
+										ImageIO.write(ImageUtils.createColoredBackground(image, ImageUtils.fxColorToAWTColor(colorPicker.getValue())), "png", Paths.get(selectedDirectory.toString(),
+												Integer.toString(entry.getIndex()) + ".png").toFile());
+									} catch (IOException ex) {
+										ex.printStackTrace();
+									}
+									updateProgress(entry.getIndex() + 1, elements.size());
+									updateMessage("(" + (entry.getIndex() + 1) + "/" + elements.size() + ")");
+								}
+							}
+						}
+
+						Platform.runLater(() -> {
+							Dialogue.openDirectory("Success! Would you like to view this directory?", selectedDirectory);
+						});
+
+						return true;
+					}
+
+				});
+				
+			} else {
+				return;
+			}
+
 		}
 
 	}
@@ -713,7 +850,7 @@ public final class Controller implements Initializable {
 							continue;
 						}
 
-						BufferedImage image = ImageUtils.makeColorTransparent(ImageUtils.convert(ImageIO.read(file), BufferedImage.TYPE_INT_ARGB), java.awt.Color.WHITE);
+						BufferedImage image = ImageUtils.makeColorTransparent(ImageUtils.convert(ImageIO.read(file), BufferedImage.TYPE_INT_ARGB), ImageUtils.fxColorToAWTColor(colorPicker.getValue()));
 						
 						int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 

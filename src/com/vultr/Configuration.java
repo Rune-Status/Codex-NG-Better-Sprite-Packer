@@ -17,7 +17,7 @@ public final class Configuration {
        */
       public static final double VERSION = 1.47;
       
-      public static final boolean DEBUG = true;
+      public static final boolean DEBUG = false;
       
       /**
        * The current path to where the users directory viewer will open.
