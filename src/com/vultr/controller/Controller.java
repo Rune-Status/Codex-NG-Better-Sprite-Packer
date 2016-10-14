@@ -111,7 +111,7 @@ public final class Controller implements Initializable {
 	private ProgressIndicator progressI;
 
 	@FXML
-	private Text progressText, progressBarText;
+	private Text progressBarText;
 
 	@FXML
 	private MenuItem dumpSpriteMI, dumpAllSpritesMI, viewDirectoryMI;
@@ -1089,23 +1089,16 @@ public final class Controller implements Initializable {
 		progressI.progressProperty().unbind();
 		progressI.progressProperty().bind(task.progressProperty());
 
-		progressText.setText("In Progress");
-		progressText.setFill(Color.WHITE);
-
 		new Thread(task).start();
 
 		task.setOnSucceeded(e -> {
-
-			progressText.setText("Complete");
-			progressText.setFill(Color.GREEN);
 
 			PauseTransition pause = new PauseTransition(Duration.seconds(1));
 
 			pause.setOnFinished(event -> {
 				progressBar.setVisible(false);
 				progressI.setVisible(false);
-				progressText.setText("");
-
+	
 				progressBarText.textProperty().unbind();
 				progressBarText.setText("");
 			});
@@ -1115,15 +1108,11 @@ public final class Controller implements Initializable {
 
 		task.setOnFailed(e -> {
 
-			progressText.setText("Failed");
-			progressText.setFill(Color.RED);
-
 			PauseTransition pause = new PauseTransition(Duration.seconds(1));
 
 			pause.setOnFinished(event -> {
 				progressBar.setVisible(false);
 				progressI.setVisible(false);
-				progressText.setText("");
 
 				progressBarText.textProperty().unbind();
 				progressBarText.setText("");

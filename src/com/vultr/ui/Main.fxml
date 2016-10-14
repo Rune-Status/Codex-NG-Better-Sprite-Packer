@@ -80,7 +80,7 @@
                      </tooltip>
                   </Button>
                   <ColorPicker fx:id="colorPicker" />
-                  <StackPane prefHeight="40.0" prefWidth="253.0">
+                  <StackPane prefHeight="40.0" prefWidth="246.0">
                      <children>
                         <ProgressBar fx:id="progressBar" prefHeight="32.0" prefWidth="200.0" progress="0.0" visible="false" />
                         <Text fx:id="progressBarText" strokeType="OUTSIDE" strokeWidth="0.0">
@@ -91,11 +91,7 @@
                      </children>
                   </StackPane>
                   <ProgressIndicator fx:id="progressI" progress="0.0" visible="false" />
-                  <Text fx:id="progressText" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0">
-                     <font>
-                        <Font size="18.0" />
-                     </font>
-                  </Text>
+                  <Region prefHeight="0.0" prefWidth="5.0" />
                </items>
             </ToolBar>
          </children>
