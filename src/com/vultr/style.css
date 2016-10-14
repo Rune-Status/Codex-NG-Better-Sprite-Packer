@@ -17,6 +17,11 @@
     -fx-background-insets: 0;
 }
 
+#spriteTitledPane > *.content 
+{
+-fx-background-color:  transparent;
+ }
+
 .progress-indicator .percentage {
     -fx-fill: white ;
 }
