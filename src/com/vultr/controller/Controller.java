@@ -289,6 +289,13 @@ public final class Controller implements Initializable {
 		filteredSprites.clear();
 		list.getItems().clear();
 		imageView.setImage(null);
+		
+		nameTf.clear();
+		offsetXTf.clear();
+		offsetYTf.clear();
+		indexT.setText("");
+		widthT.setText("");
+		heightT.setText("");
 
 		App.getMainStage().setTitle(String.format("%s v%.2f%n", Configuration.TITLE, Configuration.VERSION));
 	}
