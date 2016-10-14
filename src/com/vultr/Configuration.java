@@ -15,7 +15,9 @@ public final class Configuration {
       /**
        * The current version of this application.
        */
-      public static final double VERSION = 1.45;
+      public static final double VERSION = 1.47;
+      
+      public static final boolean DEBUG = true;
       
       /**
        * The current path to where the users directory viewer will open.

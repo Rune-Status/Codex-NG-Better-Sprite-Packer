@@ -22,7 +22,7 @@ public final class SpriteEncoder {
 			dat.writeShort(sprite.getIndex());
 		}
 
-		if (sprite.getName() != null) {
+		if (sprite.getName() != null && !sprite.getName().equals("None")) {
 			dat.writeByte(2);
 			dat.writeUTF(sprite.getName());
 		}

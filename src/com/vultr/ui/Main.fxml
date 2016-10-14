@@ -159,7 +159,7 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" />
                </VBox.margin>
             </TitledPane>
-            <TitledPane fx:id="titledPane" contentDisplay="CENTER" text="Sprite" BorderPane.alignment="CENTER" VBox.vgrow="SOMETIMES">
+            <TitledPane fx:id="spriteTitledPane" contentDisplay="CENTER" prefHeight="329.0" prefWidth="644.0" text="Sprite" BorderPane.alignment="CENTER" VBox.vgrow="SOMETIMES">
                <content>
                   <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="true" />
                </content>

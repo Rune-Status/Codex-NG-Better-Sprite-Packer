@@ -132,19 +132,19 @@ public final class Controller implements Initializable {
 		filteredSprites = new FilteredList<>(elements, it -> true);
 
 		searchTf.textProperty().addListener((observable, oldValue, newValue) -> {
-			filteredSprites.setPredicate($it -> {
+			filteredSprites.setPredicate(it -> {				
 
-				if ($it.getSprite() == null) {
+				if (it.getSprite() == null) {
 					return false;
 				}
 
-				Sprite sprite = $it.getSprite();
+				Sprite sprite = it.getSprite();
 
 				if (newValue.isEmpty()) {
 					return true;
-				}
+				}				
 
-				if (sprite.getName().contains(newValue)) {
+				if (sprite.getName().toLowerCase().contains(newValue)) {
 					return true;
 				}
 
@@ -221,6 +221,8 @@ public final class Controller implements Initializable {
 						} else {
 							nameTf.clear();
 						}
+						
+						System.out.println(sprite.getIndex() + " " + sprite.getName());
 
 						indexT.setText(Integer.toString(sprite.getIndex()));
 
@@ -255,25 +257,28 @@ public final class Controller implements Initializable {
 		loadArchive.setGraphic(new ImageView(loadArchiveImage));
 		dumpSprite.setGraphic(new ImageView(saveSpritesImage));
 
-		try (BufferedReader in = new BufferedReader(
-				new InputStreamReader(new URL(Configuration.VERSION_LINK).openStream()))) {
-			double version = Double.parseDouble(in.readLine().trim());
+		if (!Configuration.DEBUG) {
+			try (BufferedReader in = new BufferedReader(
+					new InputStreamReader(new URL(Configuration.VERSION_LINK).openStream()))) {
+				double version = Double.parseDouble(in.readLine().trim());
 
-			if (Configuration.VERSION != version) {
-				Alert alert = new Alert(AlertType.CONFIRMATION);
-				alert.setTitle("Update");
-				alert.setHeaderText("Update " + version + " available");
-				alert.setContentText("Would you like to update to version: " + version + "?");
+				if (Configuration.VERSION != version) {
+					
+					Alert alert = new Alert(AlertType.CONFIRMATION);
+					alert.setTitle("Update");
+					alert.setHeaderText("Update " + version + " available");
+					alert.setContentText("Would you like to update to version: " + version + "?");
 
-				Optional<ButtonType> result = alert.showAndWait();
-				if (result.get() == ButtonType.OK) {
-					GenericUtils.launchURL(Configuration.CREATOR_LINK);
-					System.exit(1);
+					Optional<ButtonType> result = alert.showAndWait();
+					if (result.get() == ButtonType.OK) {
+						GenericUtils.launchURL(Configuration.CREATOR_LINK);
+						System.exit(1);
+					}
 				}
-			}
 
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 
 	}
@@ -555,6 +560,7 @@ public final class Controller implements Initializable {
 
 					Sprite sprite = new Sprite(elements.size());
 
+					sprite.setName(selectedFile.getName());					
 					sprite.setWidth(image.getWidth());
 					sprite.setHeight(image.getHeight());
 					sprite.setData(pixels);
@@ -700,13 +706,14 @@ public final class Controller implements Initializable {
 							continue;
 						}
 
-						BufferedImage image = ImageUtils.convert(ImageIO.read(file), BufferedImage.TYPE_INT_ARGB);
-
+						BufferedImage image = ImageUtils.makeColorTransparent(ImageUtils.convert(ImageIO.read(file), BufferedImage.TYPE_INT_ARGB), java.awt.Color.WHITE);
+						
 						int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
 						if (data != null && data.length > 0) {
 							Sprite sprite = new Sprite(index);
-
+							
+							sprite.setName(file.getName());
 							sprite.setWidth(image.getWidth());
 							sprite.setHeight(image.getHeight());
 							sprite.setData(data);
