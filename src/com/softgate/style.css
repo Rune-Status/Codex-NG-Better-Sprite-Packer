@@ -1,0 +1,250 @@
+* {
+	-fx-font-size: 11pt;
+	-fx-font-family: "Segoe UI Semibold";
+}
+
+.root {
+	-fx-background-color : #34495e;	
+}
+
+.tree-view, .tree-cell {
+	-fx-background-color: #2B3D4F;
+}
+
+.tool-bar {
+	-fx-background-color: #2B3D4F;
+}
+
+.button {
+	-fx-background-color: transparent;
+}
+
+#loadArchiveBtn {
+	-fx-graphic: url('images/load_icon.png');
+}
+
+#loadArchiveBtn:hover {
+	-fx-background-color: #243342;
+}
+
+#loadArchiveBtn:pressed {
+	-fx-background-color: #1D2935;
+}
+
+#loadSpriteBtn {
+	-fx-graphic: url('images/find_icon.png');
+}
+
+#loadSpriteBtn:hover {
+    -fx-background-color:#243342;
+}
+
+#loadSpriteBtn:pressed {
+    -fx-background-color: #1D2935;
+}
+
+#writeSpriteBtn {
+	-fx-graphic: url('images/save_icon.png');
+}
+
+#writeSpriteBtn:hover {
+    -fx-background-color:#243342;
+}
+
+#writeSpriteBtn:pressed {
+    -fx-background-color: #1D2935;
+}
+
+#dumpSpriteBtn {
+	-fx-graphic: url('images/save_image_icon.png');
+}
+
+#dumpSpriteBtn:hover {
+    -fx-background-color:#243342;
+}
+
+#dumpSpriteBtn:pressed {
+    -fx-background-color: #1D2935;
+}
+
+#clearBtn {
+	-fx-graphic: url('images/clear_icon.png');
+}
+
+#clearBtn:hover {
+	-fx-background-color:#243342;
+}
+
+#clearBtn:pressed {
+	-fx-background-color: #1D2935;
+}
+
+#minBtn {
+	-fx-graphic: url('images/minimize_icon.png');
+}
+
+#minBtn:hover {
+	-fx-background-color:transparent;
+	-fx-background-color:#243342;
+}
+
+#minBtn:pressed {
+	-fx-background-color:transparent;
+    -fx-background-color: #1D2935;
+}
+
+#maxBtn {
+	-fx-graphic: url('images/maximize_icon.png');
+}
+
+#maxBtn:hover {
+	-fx-background-color:transparent;
+	-fx-background-color:#243342;
+}
+
+#maxBtn:pressed {
+	-fx-background-color:transparent;
+    -fx-background-color: #1D2935;
+}
+
+#closeBtn {
+	-fx-graphic: url('images/close_icon.png');
+}
+
+#closeBtn:hover {
+	-fx-background-color: #E81123;
+}
+
+#closeBtn:pressed {
+	-fx-background-color: #F1707A;
+}
+
+.titled-pane * {
+	-fx-background-color: transparent;
+}
+
+.titled-pane {
+	-fx-text-fill: white;
+}
+
+.titled-pane > .title 
+{
+	-fx-background-color: #2B3D4F;
+	-fx-text-fill: white;
+}
+
+.titled-pane > .title > .arrow-button .arrow 
+{
+	-fx-background-color: none;
+}
+
+.titled-pane > *.content 
+{
+	-fx-background-color: #2B3D4F;
+	-fx-box-border: transparent;
+}
+
+.scroll-bar:horizontal {
+    -fx-opacity: 0;
+}
+
+.scroll-bar:vertical *.thumb {
+    -fx-background-color: #243342;
+    -fx-padding: 10px;
+
+}
+
+*.scroll-bar:vertical *.increment-button,
+*.scroll-bar:vertical *.decrement-button {
+    -fx-background-color: #243342;
+    -fx-padding:0 10 0 0;
+    -fx-border-color: #243342;
+    -fx-background-insets: 0, 0, 0;
+}
+
+*.scroll-bar:vertical *.increment-arrow, 
+*.scroll-bar:vertical *.decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding:10px; 
+}
+
+*.scroll-bar:vertical *.track {
+	-fx-background-color: #2B3D4F;
+	-fx-padding: 10px;
+}
+
+.list-view .list-cell {
+	-fx-text-fill: white;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: linear-gradient(
+        from 0px .75em to .75em 0px,
+        repeat,
+        -fx-accent 0%,
+        -fx-accent 49%,
+        derive(-fx-accent, 30%) 50%,
+        derive(-fx-accent, 30%) 99%
+    );
+    -fx-background-insets: 0;
+}
+
+.progress-bar > .track {
+	-fx-background-color: #34495e;
+	-fx-text-box-border: #34495e;
+	-fx-control-inner-background: #34495e;
+}
+
+.context-menu {
+	-fx-background-color: #243342;
+}
+
+.menu-item .label {
+    -fx-text-fill: white;
+}
+
+.tooltip {
+	-fx-background-color: #243342;
+}
+
+.list-view {
+	-fx-background-color: #2B3D4F;
+}
+
+.list-cell {
+	-fx-text-fill: white;
+}
+
+.list-cell:even {
+    -fx-background-color: #2B3D4F;
+}
+
+.list-cell:odd {
+	-fx-background-color: #2B3D4F;
+}
+
+.list-cell:hover {
+	-fx-background-color: #3A5269;
+}
+
+#spriteRefIdT, #spriteRefId, #spriteFrameIdT, #spriteFrameId, #spriteWidthT, #spriteWidth, #spriteHeightT, #spriteHeight, #spritePixelsT, #spritePixels {
+	-fx-fill: white;
+}
+
+.sprite-item:hover {
+	opacity: 0.8;
+}
+
+.text-field {
+    -fx-background-color: #3A5269;
+    -fx-text-fill: white;
+	-fx-prompt-text-fill: white;
+}
+
+.text-field:focused, .text-field:hover {
+    -fx-background-color: #415C76;
+}
+
+.white-text {
+	-fx-fill: white;
+}

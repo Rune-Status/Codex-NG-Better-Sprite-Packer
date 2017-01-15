@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.softgate.controller.Controller">
+   <left>
+      <VBox alignment="CENTER" BorderPane.alignment="TOP_CENTER">
+         <children>
+            <ListView fx:id="list" minHeight="274.0" minWidth="198.0" BorderPane.alignment="CENTER" VBox.vgrow="SOMETIMES">
+               <VBox.margin>
+                  <Insets left="5.0" top="5.0" />
+               </VBox.margin>
+               <contextMenu>
+                  <ContextMenu>
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#addSprite" text="Add" />
+                        <MenuItem mnemonicParsing="false" onAction="#replaceSprite" text="Replace" />
+                        <MenuItem mnemonicParsing="false" onAction="#removeSprite" text="Remove" />
+                      <MenuItem fx:id="dumpSpriteMI" mnemonicParsing="false" onAction="#dumpSprite" text="Dump" />
+                        <MenuItem fx:id="dumpAllSpritesMI" mnemonicParsing="false" onAction="#dumpSprites" text="Dump All" />
+                        <MenuItem fx:id="viewDirectoryMI" mnemonicParsing="false" onAction="#viewCurrentDirectory" text="View Directory" />
+                    </items>
+                  </ContextMenu>
+               </contextMenu>
+            </ListView>
+            <TextField fx:id="searchTf" alignment="CENTER" promptText="Search...">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" top="5.0" />
+               </VBox.margin>
+            </TextField>
+         </children>
+      </VBox>
+   </left>
+   <top>
+      <AnchorPane VBox.vgrow="NEVER">
+         <children>
+            <Group AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <HBox alignment="CENTER">
+                     <children>
+                        <Button fx:id="loadArchiveBtn" mnemonicParsing="false" onAction="#openArchiveDirectory" prefHeight="32.0" prefWidth="32.0">
+                           <tooltip>
+                              <Tooltip text="Use this button to unpack the sprite archive" />
+                           </tooltip>
+                           <HBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="writeSpriteBtn" mnemonicParsing="false" onAction="#buildCache" prefHeight="32.0" prefWidth="32.0">
+                           <tooltip>
+                              <Tooltip text="Use this button to pack the sprites into a single file" />
+                           </tooltip>
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="loadSpriteBtn" mnemonicParsing="false" onAction="#openSpriteDirectory" prefHeight="32.0" prefWidth="32.0">
+                           <tooltip>
+                              <Tooltip text="Use this button to add sprites from a directory" />
+                           </tooltip>
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="dumpSpriteBtn" mnemonicParsing="false" onAction="#dumpSprites" prefHeight="32.0" prefWidth="32.0">
+                           <tooltip>
+                              <Tooltip text="Use this button to save all of the sprites in the list to a directory" />
+                           </tooltip>
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="clearBtn" mnemonicParsing="false" onAction="#clearEditor" prefHeight="32.0" prefWidth="32.0">
+                           <tooltip>
+                              <Tooltip text="Use this button to clear this editor" />
+                           </tooltip>
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <ColorPicker fx:id="colorPicker">
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                           <tooltip>
+                              <Tooltip text="This color will be the background color" />
+                           </tooltip>
+                        </ColorPicker>
+                     </children>
+                  </HBox>
+               </children>
+            </Group>
+            <Group layoutX="-242.0" AnchorPane.bottomAnchor="8.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="8.0">
+               <children>
+                  <HBox alignment="CENTER_RIGHT" layoutX="747.0" layoutY="8.0">
+                     <children>
+                        <Button fx:id="minBtn" mnemonicParsing="false" onAction="#minimizeProgram" prefHeight="20.0" prefWidth="45.0">
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="maxBtn" mnemonicParsing="false" onAction="#maximizeProgram" prefHeight="20.0" prefWidth="45.0">
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#closeProgram" prefHeight="20.0" prefWidth="45.0">
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                  </HBox>
+               </children>
+            </Group>
+         </children>
+      </AnchorPane>
+   </top>
+   <center>
+      <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+         <children>
+            <VBox fx:id="rightVBox" alignment="TOP_CENTER" minWidth="-Infinity" prefHeight="323.0" prefWidth="517.0" BorderPane.alignment="TOP_CENTER">
+               <children>
+                  <TitledPane minHeight="-Infinity" text="Information" VBox.vgrow="NEVER">
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin>
+                     <content>
+                        <HBox>
+                           <children>
+                              <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <TextField fx:id="nameTf" alignment="CENTER" onKeyPressed="#handleKeyEventPressed" promptText="Name">
+                                       <VBox.margin>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" />
+                                       </VBox.margin>
+                                       <tooltip>
+                                          <Tooltip text="The sprites name" />
+                                       </tooltip>
+                                    </TextField>
+                                    <TextField fx:id="widthTf" alignment="CENTER" editable="false" promptText="Width">
+                                       <VBox.margin>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" />
+                                       </VBox.margin>
+                                       <tooltip>
+                                          <Tooltip text="The sprites width" />
+                                       </tooltip>
+                                    </TextField>
+                                    <TextField fx:id="offsetXTf" alignment="CENTER" promptText="OffsetX">
+                                       <VBox.margin>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" />
+                                       </VBox.margin>
+                                       <tooltip>
+                                          <Tooltip text="The sprites horizontal offset" />
+                                       </tooltip>
+                                    </TextField>
+                                 </children>
+                              </VBox>
+                              <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <TextField fx:id="indexTf" alignment="CENTER" editable="false" promptText="Index">
+                                       <VBox.margin>
+                                          <Insets bottom="5.0" right="5.0" />
+                                       </VBox.margin>
+                                       <tooltip>
+                                          <Tooltip text="The sprites id" />
+                                       </tooltip>
+                                    </TextField>
+                                    <TextField fx:id="heightTf" alignment="CENTER" promptText="Height">
+                                       <VBox.margin>
+                                          <Insets bottom="5.0" right="5.0" />
+                                       </VBox.margin>
+                                       <tooltip>
+                                          <Tooltip text="The sprites height" />
+                                       </tooltip>
+                                    </TextField>
+                                    <TextField fx:id="offsetYTf" alignment="CENTER" promptText="OffsetY">
+                                       <VBox.margin>
+                                          <Insets bottom="5.0" right="5.0" />
+                                       </VBox.margin>
+                                       <tooltip>
+                                          <Tooltip text="The sprites vertical offset" />
+                                       </tooltip>
+                                    </TextField>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                     </content>
+                  </TitledPane>
+                  <TitledPane fx:id="spriteTitledPane" contentDisplay="CENTER" maxHeight="261.0" text="Sprite" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
+                     <content>
+                        <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="true" />
+                     </content>
+                     <BorderPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </BorderPane.margin>
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" />
+                     </VBox.margin>
+                  </TitledPane>
+               </children>
+            </VBox>
+            <AnchorPane>
+               <children>
+                  <ProgressBar fx:id="progressBar" layoutX="19.0" layoutY="61.0" minHeight="48.0" prefHeight="48.0" progress="0.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="61.0" />
+               </children>
+            </AnchorPane>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
