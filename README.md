@@ -15,17 +15,17 @@
 ## Testing
 Compression testing was done on 4,277 sprites, size of each sprite varies from 16x16-512x512 pixels
 
-**Packed by pixels (no compression)**
+#### Packed by pixels (no compression)
 ![alt tag](http://i.imgur.com/AuaDfMW.png)
 
-**PNG by itself is compressed**
+#### PNG by itself is compressed
 ![alt tag](http://i.imgur.com/yYX6xzt.png)
 
-**GZIP**
+#### GZIP
 ![alt tag](http://i.imgur.com/fCJWrJg.png)
 
-**BZip2**
+#### BZip2
 ![alt tag](http://i.imgur.com/aV9gWwE.png)
 
-**XZ (LZMA2)**
+#### XZ (LZMA2)
 ![alt tag](http://i.imgur.com/e3HXjSh.png)
