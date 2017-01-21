@@ -8,6 +8,7 @@
 * Can pack thousands of sprites.
 * Supports PNG, BMP, and JPEG
 * Add/Remove/Delete/Rearrange sprites
+
 ## Media
 ![alt tag](http://i.imgur.com/f3L9HxT.png)
 
