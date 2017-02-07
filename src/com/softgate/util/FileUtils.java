@@ -12,8 +12,6 @@ import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
-import java.nio.file.Files;
-
 import javax.imageio.ImageIO;
 
 import com.softgate.Configuration;
@@ -64,10 +62,6 @@ public final class FileUtils {
 		}
 	}
 
-	public static byte[] fileToByteArray(File file) throws IOException {
-		return Files.readAllBytes(file.toPath());
-	}
-
 	/**
 	 * Reads an array of bytes from a file.
 	 * 
@@ -77,18 +71,13 @@ public final class FileUtils {
 	 * @return The read bytes.
 	 */
 	public static byte[] readFile(String name) throws Exception {
-		try (RandomAccessFile e = new RandomAccessFile(name, "r")) {
-			MappedByteBuffer buf = e.getChannel().map(MapMode.READ_ONLY, 0L, e.length());
+		try (RandomAccessFile raf = new RandomAccessFile(name, "r")) {			
+			MappedByteBuffer buffer = raf.getChannel().map(MapMode.READ_ONLY, 0L, raf.length());
 
-			byte[] data;
-			if (buf.hasArray()) {
-				data = buf.array();
-				return data;
-			}
+			byte[] data = new byte[buffer.remaining()];
 
-			byte[] array = new byte[buf.remaining()];
-			buf.get(array);
-			data = array;
+			buffer.get(data);
+			
 			return data;
 		}
 	}

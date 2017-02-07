@@ -944,6 +944,8 @@ public final class Controller implements Initializable {
 			@Override
 			protected Boolean call() throws Exception {
 				byte[] dat = FileUtils.readFile(path.toString());
+				
+				long start = System.currentTimeMillis();
 
 				try (DataInputStream dataFile = new DataInputStream(
 						new XZCompressorInputStream(new ByteArrayInputStream(dat)))) {
@@ -964,6 +966,10 @@ public final class Controller implements Initializable {
 					}
 
 				}
+				
+				long end = System.currentTimeMillis();
+				
+				System.out.println("loaded in: " + (end - start) + " ms");
 
 				Platform.runLater(() -> {
 					App.getMainStage().setTitle(

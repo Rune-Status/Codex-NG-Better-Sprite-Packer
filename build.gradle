@@ -2,9 +2,6 @@ group = 'better-sprite-packer'
 version = '1.48'
 apply plugin: 'java'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
 repositories {
     mavenCentral()
 }

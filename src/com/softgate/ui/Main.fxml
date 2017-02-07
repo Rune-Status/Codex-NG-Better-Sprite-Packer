@@ -31,7 +31,7 @@
                   </ContextMenu>
                </contextMenu>
             </ListView>
-            <TextField fx:id="searchTf" alignment="CENTER" promptText="Search...">
+            <TextField fx:id="searchTf" alignment="CENTER" promptText="Search..." style="-fx-background-image: url('images/search_icon.png');; -fx-background-repeat: no-repeat; -fx-background-position: left center;">
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" top="5.0" />
                </VBox.margin>
@@ -40,89 +40,81 @@
       </VBox>
    </left>
    <top>
-      <AnchorPane VBox.vgrow="NEVER">
+      <VBox>
          <children>
-            <Group AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <HBox alignment="CENTER_RIGHT" layoutX="747.0" layoutY="8.0" VBox.vgrow="NEVER">
                <children>
-                  <HBox alignment="CENTER">
-                     <children>
-                        <Button fx:id="loadArchiveBtn" mnemonicParsing="false" onAction="#openArchiveDirectory" prefHeight="32.0" prefWidth="32.0">
-                           <tooltip>
-                              <Tooltip text="Use this button to unpack the sprite archive" />
-                           </tooltip>
-                           <HBox.margin>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="writeSpriteBtn" mnemonicParsing="false" onAction="#buildCache" prefHeight="32.0" prefWidth="32.0">
-                           <tooltip>
-                              <Tooltip text="Use this button to pack the sprites into a single file" />
-                           </tooltip>
-                           <HBox.margin>
-                              <Insets right="5.0" />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="loadSpriteBtn" mnemonicParsing="false" onAction="#openSpriteDirectory" prefHeight="32.0" prefWidth="32.0">
-                           <tooltip>
-                              <Tooltip text="Use this button to add sprites from a directory" />
-                           </tooltip>
-                           <HBox.margin>
-                              <Insets right="5.0" />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="dumpSpriteBtn" mnemonicParsing="false" onAction="#dumpSprites" prefHeight="32.0" prefWidth="32.0">
-                           <tooltip>
-                              <Tooltip text="Use this button to save all of the sprites in the list to a directory" />
-                           </tooltip>
-                           <HBox.margin>
-                              <Insets right="5.0" />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="clearBtn" mnemonicParsing="false" onAction="#clearEditor" prefHeight="32.0" prefWidth="32.0">
-                           <tooltip>
-                              <Tooltip text="Use this button to clear this editor" />
-                           </tooltip>
-                           <HBox.margin>
-                              <Insets right="5.0" />
-                           </HBox.margin>
-                        </Button>
-                        <ColorPicker fx:id="colorPicker">
-                           <HBox.margin>
-                              <Insets right="5.0" />
-                           </HBox.margin>
-                           <tooltip>
-                              <Tooltip text="This color will be the background color" />
-                           </tooltip>
-                        </ColorPicker>
-                     </children>
-                  </HBox>
+                  <Button fx:id="minBtn" mnemonicParsing="false" onAction="#minimizeProgram" prefHeight="20.0" prefWidth="45.0">
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="maxBtn" mnemonicParsing="false" onAction="#maximizeProgram" prefHeight="20.0" prefWidth="45.0">
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#closeProgram" prefHeight="20.0" prefWidth="45.0">
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                  </Button>
                </children>
-            </Group>
-            <Group layoutX="-242.0" AnchorPane.bottomAnchor="8.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="8.0">
+            </HBox>
+            <HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
                <children>
-                  <HBox alignment="CENTER_RIGHT" layoutX="747.0" layoutY="8.0">
-                     <children>
-                        <Button fx:id="minBtn" mnemonicParsing="false" onAction="#minimizeProgram" prefHeight="20.0" prefWidth="45.0">
-                           <HBox.margin>
-                              <Insets right="5.0" />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="maxBtn" mnemonicParsing="false" onAction="#maximizeProgram" prefHeight="20.0" prefWidth="45.0">
-                           <HBox.margin>
-                              <Insets right="5.0" />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#closeProgram" prefHeight="20.0" prefWidth="45.0">
-                           <HBox.margin>
-                              <Insets right="5.0" />
-                           </HBox.margin>
-                        </Button>
-                     </children>
-                  </HBox>
+                  <Button fx:id="loadArchiveBtn" mnemonicParsing="false" onAction="#openArchiveDirectory" text="Unpack">
+                     <tooltip>
+                        <Tooltip text="Use this button to unpack the sprite archive" />
+                     </tooltip>
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="writeSpriteBtn" mnemonicParsing="false" onAction="#buildCache" text="Build">
+                     <tooltip>
+                        <Tooltip text="Use this button to pack the sprites into a single file" />
+                     </tooltip>
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="loadSpriteBtn" mnemonicParsing="false" onAction="#openSpriteDirectory" text="Load">
+                     <tooltip>
+                        <Tooltip text="Use this button to add sprites from a directory" />
+                     </tooltip>
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="dumpSpriteBtn" mnemonicParsing="false" onAction="#dumpSprites" text="Dump">
+                     <tooltip>
+                        <Tooltip text="Use this button to save all of the sprites in the list to a directory" />
+                     </tooltip>
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="clearBtn" mnemonicParsing="false" onAction="#clearEditor" text="Clear">
+                     <tooltip>
+                        <Tooltip text="Use this button to clear this editor" />
+                     </tooltip>
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                  </Button>
+                  <ColorPicker fx:id="colorPicker">
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                     <tooltip>
+                        <Tooltip text="This color will be the background color" />
+                     </tooltip>
+                  </ColorPicker>
                </children>
-            </Group>
+            </HBox>
          </children>
-      </AnchorPane>
+      </VBox>
    </top>
    <center>
       <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
@@ -174,7 +166,7 @@
                                           <Tooltip text="The sprites id" />
                                        </tooltip>
                                     </TextField>
-                                    <TextField fx:id="heightTf" alignment="CENTER" promptText="Height">
+                                    <TextField fx:id="heightTf" alignment="CENTER" editable="false" promptText="Height">
                                        <VBox.margin>
                                           <Insets bottom="5.0" right="5.0" />
                                        </VBox.margin>
@@ -211,7 +203,7 @@
             </VBox>
             <AnchorPane>
                <children>
-                  <ProgressBar fx:id="progressBar" layoutX="19.0" layoutY="61.0" minHeight="48.0" prefHeight="48.0" progress="0.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="61.0" />
+                  <ProgressBar fx:id="progressBar" layoutX="19.0" layoutY="61.0" minHeight="48.0" prefHeight="48.0" progress="0.0" visible="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="61.0" />
                </children>
             </AnchorPane>
          </children>
