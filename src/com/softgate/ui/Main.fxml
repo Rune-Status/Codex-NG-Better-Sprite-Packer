@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.softgate.controller.Controller">
+<BorderPane fx:id="root" onMouseClicked="#handleMouseClicked" onMouseDragged="#handleMouseDragged" onMouseMoved="#handleMouseMoved" onMousePressed="#handleMousePressed" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.softgate.controller.Controller">
    <left>
       <VBox alignment="CENTER" BorderPane.alignment="TOP_CENTER">
          <children>
@@ -35,6 +35,9 @@
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" top="5.0" />
                </VBox.margin>
+               <tooltip>
+                  <Tooltip text="Use this to search for a sprite by its name or id" />
+               </tooltip>
             </TextField>
          </children>
       </VBox>
@@ -42,30 +45,39 @@
    <top>
       <VBox>
          <children>
-            <HBox alignment="CENTER_RIGHT" layoutX="747.0" layoutY="8.0" VBox.vgrow="NEVER">
+            <StackPane>
                <children>
-                  <Button fx:id="minBtn" mnemonicParsing="false" onAction="#minimizeProgram" prefHeight="20.0" prefWidth="45.0">
-                     <HBox.margin>
-                        <Insets right="5.0" />
-                     </HBox.margin>
-                  </Button>
-                  <Button fx:id="maxBtn" mnemonicParsing="false" onAction="#maximizeProgram" prefHeight="20.0" prefWidth="45.0">
-                     <HBox.margin>
-                        <Insets right="5.0" />
-                     </HBox.margin>
-                  </Button>
-                  <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#closeProgram" prefHeight="20.0" prefWidth="45.0">
-                     <HBox.margin>
-                        <Insets right="5.0" />
-                     </HBox.margin>
-                  </Button>
+                  <HBox alignment="CENTER">
+                     <children>
+                        <Label fx:id="titleLbl" text="Better Sprite Packer" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_RIGHT">
+                     <children>
+                        <Button fx:id="minBtn" mnemonicParsing="false" onAction="#minimizeProgram" prefHeight="20.0" prefWidth="45.0">
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="maxBtn" mnemonicParsing="false" onAction="#maximizeProgram" prefHeight="20.0" prefWidth="45.0">
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#closeProgram" prefHeight="20.0" prefWidth="45.0">
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                  </HBox>
                </children>
-            </HBox>
+            </StackPane>
             <HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
                <children>
                   <Button fx:id="loadArchiveBtn" mnemonicParsing="false" onAction="#openArchiveDirectory" text="Unpack">
                      <tooltip>
-                        <Tooltip text="Use this button to unpack the sprite archive" />
+                        <Tooltip text="Use this button to load your sprites from the sprites archive" />
                      </tooltip>
                      <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -73,7 +85,7 @@
                   </Button>
                   <Button fx:id="writeSpriteBtn" mnemonicParsing="false" onAction="#buildCache" text="Build">
                      <tooltip>
-                        <Tooltip text="Use this button to pack the sprites into a single file" />
+                        <Tooltip text="Use this button to pack the sprites" />
                      </tooltip>
                      <HBox.margin>
                         <Insets right="5.0" />
@@ -81,7 +93,7 @@
                   </Button>
                   <Button fx:id="loadSpriteBtn" mnemonicParsing="false" onAction="#openSpriteDirectory" text="Load">
                      <tooltip>
-                        <Tooltip text="Use this button to add sprites from a directory" />
+                        <Tooltip text="Use this button to load actual images" />
                      </tooltip>
                      <HBox.margin>
                         <Insets right="5.0" />
@@ -89,7 +101,7 @@
                   </Button>
                   <Button fx:id="dumpSpriteBtn" mnemonicParsing="false" onAction="#dumpSprites" text="Dump">
                      <tooltip>
-                        <Tooltip text="Use this button to save all of the sprites in the list to a directory" />
+                        <Tooltip text="Use this button to save all of your sprites to a directory" />
                      </tooltip>
                      <HBox.margin>
                         <Insets right="5.0" />
@@ -108,7 +120,7 @@
                         <Insets right="5.0" />
                      </HBox.margin>
                      <tooltip>
-                        <Tooltip text="This color will be the background color" />
+                        <Tooltip text="Use this to change the background color of your sprites" />
                      </tooltip>
                   </ColorPicker>
                </children>
@@ -135,7 +147,7 @@
                                           <Insets bottom="5.0" left="5.0" right="5.0" />
                                        </VBox.margin>
                                        <tooltip>
-                                          <Tooltip text="The sprites name" />
+                                          <Tooltip text="This is the actual sprites name, whatever you set it to be" />
                                        </tooltip>
                                     </TextField>
                                     <TextField fx:id="widthTf" alignment="CENTER" editable="false" promptText="Width">
@@ -143,7 +155,7 @@
                                           <Insets bottom="5.0" left="5.0" right="5.0" />
                                        </VBox.margin>
                                        <tooltip>
-                                          <Tooltip text="The sprites width" />
+                                          <Tooltip text="This is the sprites actual width" />
                                        </tooltip>
                                     </TextField>
                                     <TextField fx:id="offsetXTf" alignment="CENTER" promptText="OffsetX">
@@ -151,7 +163,7 @@
                                           <Insets bottom="5.0" left="5.0" right="5.0" />
                                        </VBox.margin>
                                        <tooltip>
-                                          <Tooltip text="The sprites horizontal offset" />
+                                          <Tooltip text="This is the sprites horizontal offset from the center of the image" />
                                        </tooltip>
                                     </TextField>
                                  </children>
@@ -163,7 +175,7 @@
                                           <Insets bottom="5.0" right="5.0" />
                                        </VBox.margin>
                                        <tooltip>
-                                          <Tooltip text="The sprites id" />
+                                          <Tooltip text="This is the sprites unique id, no two sprites should have the same id" />
                                        </tooltip>
                                     </TextField>
                                     <TextField fx:id="heightTf" alignment="CENTER" editable="false" promptText="Height">
@@ -171,7 +183,7 @@
                                           <Insets bottom="5.0" right="5.0" />
                                        </VBox.margin>
                                        <tooltip>
-                                          <Tooltip text="The sprites height" />
+                                          <Tooltip text="This is the sprites actual height" />
                                        </tooltip>
                                     </TextField>
                                     <TextField fx:id="offsetYTf" alignment="CENTER" promptText="OffsetY">
@@ -179,7 +191,7 @@
                                           <Insets bottom="5.0" right="5.0" />
                                        </VBox.margin>
                                        <tooltip>
-                                          <Tooltip text="The sprites vertical offset" />
+                                          <Tooltip text="This is the sprites vertical offset from the center of the image" />
                                        </tooltip>
                                     </TextField>
                                  </children>
@@ -188,7 +200,7 @@
                         </HBox>
                      </content>
                   </TitledPane>
-                  <TitledPane fx:id="spriteTitledPane" contentDisplay="CENTER" maxHeight="261.0" text="Sprite" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
+                  <TitledPane fx:id="spriteTitledPane" collapsible="false" contentDisplay="CENTER" maxHeight="261.0" text="Sprite" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
                      <content>
                         <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="true" />
                      </content>

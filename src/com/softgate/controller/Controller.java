@@ -44,7 +44,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -60,6 +59,8 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
@@ -135,11 +136,11 @@ public final class Controller implements Initializable {
 	VBox rightVBox;
 
 	private double xOffset, yOffset;
+	
+	private boolean resizing;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-
-		handleDrag();
 
 		colorPicker.setValue(Color.FUCHSIA);
 
@@ -285,40 +286,6 @@ public final class Controller implements Initializable {
 
 	}
 
-	private void handleDrag() {
-		root.setOnMousePressed(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				xOffset = event.getSceneX();
-				yOffset = event.getSceneY();
-			}
-		});
-
-		root.setOnMouseDragged(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				App.getMainStage().setX(event.getScreenX() - xOffset);
-				App.getMainStage().setY(event.getScreenY() - yOffset);
-			}
-		});
-
-		rightVBox.setOnMousePressed(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				xOffset = event.getSceneX();
-				yOffset = event.getSceneY();
-			}
-		});
-
-		rightVBox.setOnMouseDragged(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				App.getMainStage().setX(event.getScreenX() - xOffset);
-				App.getMainStage().setY(event.getScreenY() - yOffset);
-			}
-		});
-	}
-
 	@FXML
 	private void clearEditor() {
 		elements.clear();
@@ -332,8 +299,17 @@ public final class Controller implements Initializable {
 		indexTf.setText("");
 		widthTf.setText("");
 		heightTf.setText("");
+		
+		colorPicker.setValue(Color.FUCHSIA);
 
 		App.getMainStage().setTitle(String.format("%s v%.2f%n", Configuration.TITLE, Configuration.VERSION));
+	}
+	
+	@FXML
+	private void handleMouseClicked(MouseEvent event) {
+		if (event.getClickCount() == 2) {
+			maximizeProgram();
+		}
 	}
 
 	@FXML
@@ -359,6 +335,102 @@ public final class Controller implements Initializable {
 				Dialogue.showException("A problem was encountered when opening the sprites directory.", ex);
 			}
 		}
+	}
+	
+	@FXML
+	private void handleMouseMoved(MouseEvent event) {
+		double width = root.getWidth();
+		double height = root.getHeight();
+		
+		if (event.getX() <= 5 && event.getY() <= 5) {
+			((Node) event.getSource()).setCursor(Cursor.NW_RESIZE);
+			resizing = true;
+		} else if (event.getX() >= (width - 5) && event.getY() <= 5) {
+			((Node) event.getSource()).setCursor(Cursor.NE_RESIZE);
+			resizing = true;
+		} else if (event.getY() >= height - 5 && event.getX() <= 5) {
+			((Node) event.getSource()).setCursor(Cursor.SW_RESIZE);
+			resizing = true;
+		} else if (event.getX() >= (width - 5) && event.getY() >= (height - 5)) {
+			((Node) event.getSource()).setCursor(Cursor.SE_RESIZE);
+			resizing = true;
+		} else if (event.getY() <= 5 && !(event.getX() <= 5) && !(event.getX() >= (width - 5))) {
+			((Node) event.getSource()).setCursor(Cursor.N_RESIZE);
+			resizing = true;
+		} else if (event.getX() <= 5 && !(event.getX() <= 5 && event.getY() <= 5) && !(event.getY() >= height - 5 && event.getX() <= 5)) {
+			((Node) event.getSource()).setCursor(Cursor.W_RESIZE);
+			resizing = true;
+		} else if (event.getX() >= (width - 5) && !(event.getX() >= (width - 5) && event.getY() <= 5) && !(event.getX() >= (width - 5) && event.getY() >= (height - 5))) {
+			((Node) event.getSource()).setCursor(Cursor.E_RESIZE);
+			resizing = true;
+		} else if (event.getY() >= (height - 5) && !(event.getX() >= (width - 5) && event.getY() >= (height - 5)) && !(event.getY() >= height - 5 && event.getX() <= 5)) {
+			((Node) event.getSource()).setCursor(Cursor.S_RESIZE);
+			resizing = true;
+		} else {
+			((Node) event.getSource()).setCursor(Cursor.DEFAULT);
+			resizing = false;
+		}
+	}	
+	
+	
+	@FXML
+	private void handleMouseDragged(MouseEvent event) {
+		
+		if (maximized) {
+			return;
+		}
+		
+		Stage stage = App.getMainStage();	
+		
+		Cursor cursor = ((Node) event.getSource()).getCursor();
+		
+		if (!resizing) {
+			stage.setX(event.getScreenX() - xOffset);
+			stage.setY(event.getScreenY() - yOffset);
+		} else {
+			double deltaX = stage.getX()- event.getScreenX();
+			double deltaY = stage.getY()- event.getScreenY();
+			
+			if (cursor == Cursor.NW_RESIZE) {
+				stage.setWidth(deltaX+stage.getWidth());
+			    stage.setX(event.getScreenX());
+			    
+			    stage.setHeight(deltaY + stage.getHeight());
+			    stage.setY(event.getScreenY());
+			} else if (cursor == Cursor.NE_RESIZE) {
+				stage.setHeight(deltaY+stage.getHeight());
+				stage.setY(event.getScreenY());
+				
+				stage.setWidth(event.getX());
+
+			} else if (cursor == Cursor.SW_RESIZE) {
+				stage.setWidth(deltaX+stage.getWidth());
+			    stage.setX(event.getScreenX());
+			    
+			    stage.setHeight(event.getY());
+			} else if (cursor == Cursor.SE_RESIZE) {
+				stage.setWidth(event.getX());
+				stage.setHeight(event.getY());
+			} else if (cursor == Cursor.W_RESIZE) {
+				stage.setWidth(deltaX+stage.getWidth());
+			    stage.setX(event.getScreenX());
+			} else if (cursor == Cursor.E_RESIZE) {
+				stage.setWidth(event.getX());
+			} else if (cursor == Cursor.N_RESIZE) {				
+				stage.setHeight(deltaY+stage.getHeight());
+				stage.setY(event.getScreenY());
+			} else if (cursor == Cursor.S_RESIZE) {
+				stage.setHeight(event.getY());
+			}
+			
+		}
+		
+	}
+	
+	@FXML
+	private void handleMousePressed(MouseEvent event) {		
+		xOffset = event.getSceneX();
+		yOffset = event.getSceneY();
 	}
 
 	@FXML

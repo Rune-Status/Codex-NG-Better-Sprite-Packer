@@ -252,3 +252,7 @@
 	-fx-background-repeat: no-repeat;
 	-fx-background-position: left center;
 }
+
+#titleLbl {
+	-fx-text-fill: white;
+}
