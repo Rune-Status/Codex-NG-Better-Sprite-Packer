@@ -96,10 +96,6 @@
 	-fx-graphic: url('images/maximize_icon_light.png');
 }
 
-#maxBtn:hover {
-	-fx-background-color: #292929;
-}
-
 #maxBtn:pressed {
     -fx-background-color: #1F1F1F;
 }
@@ -255,4 +251,14 @@
 
 #titleLbl {
 	-fx-text-fill: white;
+}
+
+.scroll-pane > .viewport {
+   -fx-background-color: transparent;
+}
+
+.scroll-pane {
+	-fx-base :  #121212;
+	-fx-background-color:  #121212;
+	-fx-control-inner-background:  #121212;
 }

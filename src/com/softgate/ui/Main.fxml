@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="root" onMouseClicked="#handleMouseClicked" onMouseDragged="#handleMouseDragged" onMouseMoved="#handleMouseMoved" onMousePressed="#handleMousePressed" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.softgate.controller.Controller">
+<BorderPane fx:id="root" onMouseDragged="#handleMouseDragged" onMousePressed="#handleMousePressed" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.softgate.controller.Controller">
    <left>
       <VBox alignment="CENTER" BorderPane.alignment="TOP_CENTER">
          <children>
@@ -59,7 +59,7 @@
                               <Insets right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button fx:id="maxBtn" mnemonicParsing="false" onAction="#maximizeProgram" prefHeight="20.0" prefWidth="45.0">
+                        <Button fx:id="maxBtn" mnemonicParsing="false" prefHeight="20.0" prefWidth="45.0">
                            <HBox.margin>
                               <Insets right="5.0" />
                            </HBox.margin>
@@ -131,7 +131,7 @@
    <center>
       <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
          <children>
-            <VBox fx:id="rightVBox" alignment="TOP_CENTER" minWidth="-Infinity" prefHeight="323.0" prefWidth="517.0" BorderPane.alignment="TOP_CENTER">
+            <VBox fx:id="rightVBox" alignment="TOP_CENTER" minWidth="-Infinity" BorderPane.alignment="TOP_CENTER" VBox.vgrow="ALWAYS">
                <children>
                   <TitledPane minHeight="-Infinity" text="Information" VBox.vgrow="NEVER">
                      <VBox.margin>
@@ -200,24 +200,20 @@
                         </HBox>
                      </content>
                   </TitledPane>
-                  <TitledPane fx:id="spriteTitledPane" collapsible="false" contentDisplay="CENTER" maxHeight="261.0" text="Sprite" BorderPane.alignment="CENTER" VBox.vgrow="NEVER">
+                  <ScrollPane fitToHeight="true" fitToWidth="true" pannable="true" prefViewportWidth="345.0" VBox.vgrow="ALWAYS">
                      <content>
-                        <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="true" />
+                        <VBox alignment="CENTER">
+                           <children>
+                              <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </VBox>
                      </content>
-                     <BorderPane.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </BorderPane.margin>
                      <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" />
                      </VBox.margin>
-                  </TitledPane>
+                  </ScrollPane>
                </children>
             </VBox>
-            <AnchorPane>
-               <children>
-                  <ProgressBar fx:id="progressBar" layoutX="19.0" layoutY="61.0" minHeight="48.0" prefHeight="48.0" progress="0.0" visible="false" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="61.0" />
-               </children>
-            </AnchorPane>
          </children>
       </VBox>
    </center>

@@ -53,14 +53,11 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
@@ -109,9 +106,6 @@ public final class Controller implements Initializable {
 	TitledPane titledPane;
 
 	@FXML
-	ProgressBar progressBar;
-
-	@FXML
 	MenuItem dumpSpriteMI, dumpAllSpritesMI, viewDirectoryMI;
 
 	private FilteredList<Entry> filteredSprites;
@@ -136,8 +130,6 @@ public final class Controller implements Initializable {
 	VBox rightVBox;
 
 	private double xOffset, yOffset;
-	
-	private boolean resizing;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -251,8 +243,6 @@ public final class Controller implements Initializable {
 
 						displaySprite(newValue);
 
-						App.getMainStage().sizeToScene();
-
 					} catch (Exception ex) {
 						Dialogue.showException("A problem was encountered while trying to display a sprite.", ex);
 					}
@@ -299,17 +289,10 @@ public final class Controller implements Initializable {
 		indexTf.setText("");
 		widthTf.setText("");
 		heightTf.setText("");
-		
+
 		colorPicker.setValue(Color.FUCHSIA);
 
 		App.getMainStage().setTitle(String.format("%s v%.2f%n", Configuration.TITLE, Configuration.VERSION));
-	}
-	
-	@FXML
-	private void handleMouseClicked(MouseEvent event) {
-		if (event.getClickCount() == 2) {
-			maximizeProgram();
-		}
 	}
 
 	@FXML
@@ -336,99 +319,19 @@ public final class Controller implements Initializable {
 			}
 		}
 	}
-	
-	@FXML
-	private void handleMouseMoved(MouseEvent event) {
-		double width = root.getWidth();
-		double height = root.getHeight();
-		
-		if (event.getX() <= 5 && event.getY() <= 5) {
-			((Node) event.getSource()).setCursor(Cursor.NW_RESIZE);
-			resizing = true;
-		} else if (event.getX() >= (width - 5) && event.getY() <= 5) {
-			((Node) event.getSource()).setCursor(Cursor.NE_RESIZE);
-			resizing = true;
-		} else if (event.getY() >= height - 5 && event.getX() <= 5) {
-			((Node) event.getSource()).setCursor(Cursor.SW_RESIZE);
-			resizing = true;
-		} else if (event.getX() >= (width - 5) && event.getY() >= (height - 5)) {
-			((Node) event.getSource()).setCursor(Cursor.SE_RESIZE);
-			resizing = true;
-		} else if (event.getY() <= 5 && !(event.getX() <= 5) && !(event.getX() >= (width - 5))) {
-			((Node) event.getSource()).setCursor(Cursor.N_RESIZE);
-			resizing = true;
-		} else if (event.getX() <= 5 && !(event.getX() <= 5 && event.getY() <= 5) && !(event.getY() >= height - 5 && event.getX() <= 5)) {
-			((Node) event.getSource()).setCursor(Cursor.W_RESIZE);
-			resizing = true;
-		} else if (event.getX() >= (width - 5) && !(event.getX() >= (width - 5) && event.getY() <= 5) && !(event.getX() >= (width - 5) && event.getY() >= (height - 5))) {
-			((Node) event.getSource()).setCursor(Cursor.E_RESIZE);
-			resizing = true;
-		} else if (event.getY() >= (height - 5) && !(event.getX() >= (width - 5) && event.getY() >= (height - 5)) && !(event.getY() >= height - 5 && event.getX() <= 5)) {
-			((Node) event.getSource()).setCursor(Cursor.S_RESIZE);
-			resizing = true;
-		} else {
-			((Node) event.getSource()).setCursor(Cursor.DEFAULT);
-			resizing = false;
-		}
-	}	
-	
-	
+
 	@FXML
 	private void handleMouseDragged(MouseEvent event) {
-		
-		if (maximized) {
-			return;
-		}
-		
-		Stage stage = App.getMainStage();	
-		
-		Cursor cursor = ((Node) event.getSource()).getCursor();
-		
-		if (!resizing) {
-			stage.setX(event.getScreenX() - xOffset);
-			stage.setY(event.getScreenY() - yOffset);
-		} else {
-			double deltaX = stage.getX()- event.getScreenX();
-			double deltaY = stage.getY()- event.getScreenY();
-			
-			if (cursor == Cursor.NW_RESIZE) {
-				stage.setWidth(deltaX+stage.getWidth());
-			    stage.setX(event.getScreenX());
-			    
-			    stage.setHeight(deltaY + stage.getHeight());
-			    stage.setY(event.getScreenY());
-			} else if (cursor == Cursor.NE_RESIZE) {
-				stage.setHeight(deltaY+stage.getHeight());
-				stage.setY(event.getScreenY());
-				
-				stage.setWidth(event.getX());
 
-			} else if (cursor == Cursor.SW_RESIZE) {
-				stage.setWidth(deltaX+stage.getWidth());
-			    stage.setX(event.getScreenX());
-			    
-			    stage.setHeight(event.getY());
-			} else if (cursor == Cursor.SE_RESIZE) {
-				stage.setWidth(event.getX());
-				stage.setHeight(event.getY());
-			} else if (cursor == Cursor.W_RESIZE) {
-				stage.setWidth(deltaX+stage.getWidth());
-			    stage.setX(event.getScreenX());
-			} else if (cursor == Cursor.E_RESIZE) {
-				stage.setWidth(event.getX());
-			} else if (cursor == Cursor.N_RESIZE) {				
-				stage.setHeight(deltaY+stage.getHeight());
-				stage.setY(event.getScreenY());
-			} else if (cursor == Cursor.S_RESIZE) {
-				stage.setHeight(event.getY());
-			}
-			
-		}
-		
+		Stage stage = App.getMainStage();
+
+		stage.setX(event.getScreenX() - xOffset);
+		stage.setY(event.getScreenY() - yOffset);
+
 	}
-	
+
 	@FXML
-	private void handleMousePressed(MouseEvent event) {		
+	private void handleMousePressed(MouseEvent event) {
 		xOffset = event.getSceneX();
 		yOffset = event.getSceneY();
 	}
@@ -1016,7 +919,7 @@ public final class Controller implements Initializable {
 			@Override
 			protected Boolean call() throws Exception {
 				byte[] dat = FileUtils.readFile(path.toString());
-				
+
 				long start = System.currentTimeMillis();
 
 				try (DataInputStream dataFile = new DataInputStream(
@@ -1038,9 +941,9 @@ public final class Controller implements Initializable {
 					}
 
 				}
-				
+
 				long end = System.currentTimeMillis();
-				
+
 				System.out.println("loaded in: " + (end - start) + " ms");
 
 				Platform.runLater(() -> {
@@ -1127,45 +1030,44 @@ public final class Controller implements Initializable {
 			return;
 		}
 
-			createTask(new Task<Boolean>() {
+		createTask(new Task<Boolean>() {
 
-				@Override
-				protected Boolean call() throws Exception {
+			@Override
+			protected Boolean call() throws Exception {
 
-					try (DataOutputStream data = new DataOutputStream(new XZCompressorOutputStream(new FileOutputStream(
-							Paths.get(selectedFile.getPath(), tempArchiveName + ".dat").toFile())))) {
+				try (DataOutputStream data = new DataOutputStream(new XZCompressorOutputStream(
+						new FileOutputStream(Paths.get(selectedFile.getPath(), tempArchiveName + ".dat").toFile())))) {
 
-						data.writeInt(elements.size());
+					data.writeInt(elements.size());
 
-						for (int index = 0; index < elements.size(); index++) {
+					for (int index = 0; index < elements.size(); index++) {
 
-							Sprite sprite = elements.get(index).getSprite();
+						Sprite sprite = elements.get(index).getSprite();
 
-							if (sprite.getIndex() == index) {
-								SpriteEncoder.encode(data, sprite);
-							} else {
-								System.out.println("index: " + index + " does not match: " + sprite.getIndex());
-							}
-
-							updateProgress(index + 1, elements.size());
+						if (sprite.getIndex() == index) {
+							SpriteEncoder.encode(data, sprite);
+						} else {
+							System.out.println("index: " + index + " does not match: " + sprite.getIndex());
 						}
 
-					} catch (Exception ex) {
-						Platform.runLater(() -> {
-							Dialogue.showException("A problem was encountered while trying to write a sprite archive.",
-									ex);
-						});						
-						return false;
+						updateProgress(index + 1, elements.size());
 					}
-					
+
+				} catch (Exception ex) {
 					Platform.runLater(() -> {
-						Dialogue.openDirectory("Success! Would you like to view this directory?", selectedFile);
+						Dialogue.showException("A problem was encountered while trying to write a sprite archive.", ex);
 					});
-					
-					return true;
+					return false;
 				}
 
-			});
+				Platform.runLater(() -> {
+					Dialogue.openDirectory("Success! Would you like to view this directory?", selectedFile);
+				});
+
+				return true;
+			}
+
+		});
 	}
 
 	@FXML
@@ -1184,11 +1086,6 @@ public final class Controller implements Initializable {
 
 	private void createTask(Task<?> task) {
 
-		progressBar.setVisible(true);
-
-		progressBar.progressProperty().unbind();
-		progressBar.progressProperty().bind(task.progressProperty());
-
 		new Thread(task).start();
 
 		task.setOnSucceeded(e -> {
@@ -1196,7 +1093,7 @@ public final class Controller implements Initializable {
 			PauseTransition pause = new PauseTransition(Duration.seconds(1));
 
 			pause.setOnFinished(event -> {
-				progressBar.setVisible(false);
+
 			});
 
 			pause.play();
@@ -1207,7 +1104,7 @@ public final class Controller implements Initializable {
 			PauseTransition pause = new PauseTransition(Duration.seconds(1));
 
 			pause.setOnFinished(event -> {
-				progressBar.setVisible(false);
+
 			});
 
 			pause.play();
@@ -1228,23 +1125,6 @@ public final class Controller implements Initializable {
 		}
 
 		App.getMainStage().setIconified(true);
-	}
-
-	private boolean maximized;
-
-	@FXML
-	private void maximizeProgram() {
-
-		Stage stage = App.getMainStage();
-
-		if (stage == null) {
-			return;
-		}
-
-		maximized = !maximized;
-
-		stage.setMaximized(maximized);
-
 	}
 
 	@FXML
