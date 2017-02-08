@@ -12,8 +12,13 @@
 * Supports PNG, BMP, and JPEG
 * Add/Remove/Delete/Rearrange sprites
 
+### Try it out!
+[Release 1.49](https://www.mediafire.com/?s8gpy5dm7dnac2o)
+
 ## Media
-![alt tag](http://i.imgur.com/f3L9HxT.png)
+![alt tag](http://i.imgur.com/lLGj3PD.png)
+
+![alt tag](http://i.imgur.com/7Q8bC3g.gif)
 
 ## Testing
 Compression testing was done on 4,277 sprites, size of each sprite varies from 16x16-512x512 pixels
