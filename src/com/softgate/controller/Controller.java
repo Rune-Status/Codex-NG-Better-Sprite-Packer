@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -358,12 +357,6 @@ public final class Controller implements Initializable {
 
 			if (!selectedFile.isDirectory()) {
 				currentDirectory = selectedFile.getParentFile();
-
-				try {
-					FileUtils.writeCachePathResource("bsp.txt", selectedFile.getPath());
-				} catch (IOException | URISyntaxException e) {
-					Dialogue.showException("Was unable to save current directory.", e);
-				}
 			}
 
 			String archiveName = "sprites";
@@ -1005,12 +998,6 @@ public final class Controller implements Initializable {
 
 		if (selectedFile == null) {
 			return;
-		}
-
-		try {
-			FileUtils.writeCachePathResource("bsp.txt", currentDirectory.getPath());
-		} catch (IOException | URISyntaxException e) {
-			Dialogue.showException("Was unable to save current directory.", e);
 		}
 
 		InputMessage inputDialog = Dialogue.showInput("Information", "Please enter a name for this sprite pack.",

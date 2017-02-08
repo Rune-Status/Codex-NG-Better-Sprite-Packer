@@ -1,11 +1,5 @@
 package com.softgate;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import com.softgate.util.FileUtils;
-import com.softgate.util.msg.ExceptionMessage;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -25,19 +19,6 @@ public class App extends Application {
 	 * The main stage that will act as our window.
 	 */
 	private static Stage mainStage;
-
-	@Override
-	public void init() {
-		try {
-			FileUtils.readCachePathResource("bsp.txt");
-		} catch (IOException e) {
-			try {
-				FileUtils.writeCachePathResource("bsp.txt", System.getProperty("user.home"));
-			} catch (IOException | URISyntaxException e1) {
-				new ExceptionMessage("Could not create resource for current directory!", e1);
-			}
-		}
-	}
 
 	/**
 	 * The main entry way into our application.
