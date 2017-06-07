@@ -13,7 +13,7 @@ public final class InputMessage extends TextInputDialog {
 		this.setContentText(context);
 		
         Stage stage = (Stage) getDialogPane().getScene().getWindow();            
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("/info_icon.png")));
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/info_icon.png")));
 	}
 
 }
