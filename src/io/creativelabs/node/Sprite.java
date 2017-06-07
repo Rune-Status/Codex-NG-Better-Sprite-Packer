@@ -1,5 +1,8 @@
 package io.creativelabs.node;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+
 public final class Sprite {
 
 	private int index = 0;
@@ -18,6 +21,17 @@ public final class Sprite {
 
 	public Sprite() {
 
+	}
+	
+	public BufferedImage toBufferedImage() {
+		
+		BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
+		
+		final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+		
+		System.arraycopy(this.pixels, 0, pixels, 0, this.pixels.length);
+		
+		return image;
 	}
 
 	public Sprite(int index) {

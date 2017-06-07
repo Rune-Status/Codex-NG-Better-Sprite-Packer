@@ -6,7 +6,7 @@ import javafx.stage.Stage;
 
 public final class InformationMessage extends Alert {
 	
-	private final Image icon = new Image(getClass().getResourceAsStream("/info_icon.png"));
+	private final Image icon = new Image(getClass().getResourceAsStream("/icons/info_icon.png"));
 
       public InformationMessage(String title, String content) {
             this(title, null, content);

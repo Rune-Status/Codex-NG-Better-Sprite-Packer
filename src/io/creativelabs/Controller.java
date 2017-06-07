@@ -25,9 +25,7 @@ import io.creativelabs.codec.encoder.SpriteEncoder;
 import io.creativelabs.node.Entry;
 import io.creativelabs.node.Sprite;
 import io.creativelabs.util.Dialogue;
-import io.creativelabs.util.FileUtils;
-import io.creativelabs.util.GenericUtils;
-import io.creativelabs.util.ImageUtils;
+import io.creativelabs.util.Misc;
 import io.creativelabs.util.msg.InputMessage;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -169,7 +167,7 @@ public final class Controller implements Initializable {
 
 					if (value.getSprite() == null || value.getSprite().getData() == null
 							|| value.getSprite().getData().length == 0) {
-						listIconView.setImage(new Image(getClass().getResourceAsStream("/question_mark.png")));
+						listIconView.setImage(new Image(getClass().getResourceAsStream("/icons/question_mark.png")));
 						listIconView.setFitHeight(32);
 						listIconView.setFitWidth(32);
 						setText(Integer.toString(value.getIndex()));
@@ -188,8 +186,8 @@ public final class Controller implements Initializable {
 					listIconView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
 					listIconView.setPreserveRatio(true);
 
-					newImage = SwingFXUtils.toFXImage(
-							ImageUtils.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)), null);
+					newImage = SwingFXUtils
+							.toFXImage(Misc.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)), null);
 
 					listIconView.setImage(newImage);
 					setText(Integer.toString(value.getIndex()));
@@ -238,7 +236,7 @@ public final class Controller implements Initializable {
 				}
 			}
 		});
-		
+
 	}
 
 	@FXML
@@ -466,8 +464,8 @@ public final class Controller implements Initializable {
 								System.arraycopy(pixels, 0, data, 0, pixels.length);
 
 								ImageIO.write(
-										ImageUtils.createColoredBackground(image,
-												ImageUtils.fxColorToAWTColor(colorPicker.getValue())),
+										Misc.createColoredBackground(image,
+												Misc.fxColorToAWTColor(colorPicker.getValue())),
 										"png", Paths.get(selectedDirectory.toString(),
 												Integer.toString(sprite.getIndex()) + ".png").toFile());
 							} catch (IOException ex) {
@@ -607,8 +605,8 @@ public final class Controller implements Initializable {
 										System.arraycopy(pixels, 0, data, 0, pixels.length);
 
 										ImageIO.write(
-												ImageUtils.createColoredBackground(image,
-														ImageUtils.fxColorToAWTColor(colorPicker.getValue())),
+												Misc.createColoredBackground(image,
+														Misc.fxColorToAWTColor(colorPicker.getValue())),
 												"png", Paths.get(selectedDirectory.toString(),
 														Integer.toString(entry.getIndex()) + ".png").toFile());
 									} catch (IOException ex) {
@@ -660,25 +658,59 @@ public final class Controller implements Initializable {
 
 				try {
 					if (!selectedFile.isDirectory()) {
-						this.currentDirectory = selectedFile.getParentFile();
+						currentDirectory = selectedFile.getParentFile();
 					}
 
-					BufferedImage image = ImageUtils.makeColorTransparent(
-							ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB),
+					BufferedImage image = Misc.makeColorTransparent(
+							Misc.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB),
 							new java.awt.Color(0xFF00FF, true));
 
-					int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+					int[] source1Pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
+					boolean duplicate = false;
+
+					for (Entry e : elements) {
+						
+						Sprite s = e.getSprite();
+
+						BufferedImage image2 = s.toBufferedImage();
+
+						int[] source2Pixels = ((DataBufferInt) image2.getRaster().getDataBuffer()).getData();
+						
+						if (source1Pixels.length != source2Pixels.length) {
+							break;
+						}
+
+						for (int i = 0; i < source1Pixels.length; i++) {
+
+							if (source1Pixels[i] != source2Pixels[i]) {
+								duplicate = false;
+								break;
+							}
+
+							duplicate = true;
+
+						}
+
+						if (duplicate) {
+							Dialogue.showWarning("Skipped duplicate at: " + s.getIndex());
+							break;
+						}
+
+					}
+
+					if (duplicate) {
+						continue;
+					}
 
 					Sprite sprite = new Sprite(elements.size());
 
 					sprite.setName(selectedFile.getName());
 					sprite.setWidth(image.getWidth());
 					sprite.setHeight(image.getHeight());
-					sprite.setData(pixels);
-
-					Entry entry = new Entry(elements.size(), sprite);
-
-					elements.add(entry);
+					sprite.setData(source1Pixels);
+					
+					elements.add(new Entry(elements.size(), sprite));
 
 				} catch (IOException ex) {
 					Dialogue.showWarning("Could not read selected file as an image.");
@@ -720,8 +752,8 @@ public final class Controller implements Initializable {
 
 				Entry copy = entry.copy();
 
-				BufferedImage selectedImage = ImageUtils.makeColorTransparent(
-						ImageUtils.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB),
+				BufferedImage selectedImage = Misc.makeColorTransparent(
+						Misc.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB),
 						new java.awt.Color(0xFF00FF, true));
 
 				int[] pixels = ((DataBufferInt) selectedImage.getRaster().getDataBuffer()).getData();
@@ -778,7 +810,7 @@ public final class Controller implements Initializable {
 
 		final File[] files = new File(path.toString()).listFiles();
 
-		final File[] sorted = FileUtils.sortImages(files);
+		final File[] sorted = Misc.sortImages(files);
 
 		totalSprites = sorted.length;
 
@@ -817,9 +849,9 @@ public final class Controller implements Initializable {
 							continue;
 						}
 
-						BufferedImage image = ImageUtils.makeColorTransparent(
-								ImageUtils.convert(ImageIO.read(file), BufferedImage.TYPE_INT_ARGB),
-								ImageUtils.fxColorToAWTColor(colorPicker.getValue()));
+						BufferedImage image = Misc.makeColorTransparent(
+								Misc.convert(ImageIO.read(file), BufferedImage.TYPE_INT_ARGB),
+								Misc.fxColorToAWTColor(colorPicker.getValue()));
 
 						int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
@@ -876,7 +908,7 @@ public final class Controller implements Initializable {
 
 			@Override
 			protected Boolean call() throws Exception {
-				byte[] dat = FileUtils.readFile(path.toString());
+				byte[] dat = Misc.readFile(path.toString());
 
 				long start = System.currentTimeMillis();
 
@@ -905,8 +937,7 @@ public final class Controller implements Initializable {
 				System.out.println("loaded in: " + (end - start) + " ms");
 
 				Platform.runLater(() -> {
-					App.getMainStage().setTitle(
-							String.format("%s", App.properties.getProperty("title")));
+					App.getMainStage().setTitle(String.format("%s", App.properties.getProperty("title")));
 				});
 
 				return true;
@@ -926,8 +957,8 @@ public final class Controller implements Initializable {
 
 			System.arraycopy(sprite.getData(), 0, pixels, 0, sprite.getData().length);
 
-			newImage = SwingFXUtils
-					.toFXImage(ImageUtils.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)), null);
+			newImage = SwingFXUtils.toFXImage(Misc.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)),
+					null);
 
 			imageView.setFitWidth(newImage.getWidth() > 512 ? 512 : newImage.getWidth());
 			imageView.setFitHeight(newImage.getHeight() > 512 ? 512 : newImage.getHeight());
@@ -1066,7 +1097,7 @@ public final class Controller implements Initializable {
 
 	@FXML
 	private void credits() {
-		GenericUtils.launchURL("http://www.rune-server.org/members/free/");
+		Misc.launchURL("http://www.rune-server.org/members/free/");
 	}
 
 	@FXML

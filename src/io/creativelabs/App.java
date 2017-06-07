@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 
-import io.creativelabs.util.GenericUtils;
+import io.creativelabs.util.Misc;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -55,7 +55,7 @@ public class App extends Application {
 
 								Optional<ButtonType> result = alert.showAndWait();
 								if (result.get() == ButtonType.OK) {
-									GenericUtils.launchURL(App.properties.getProperty("creator_link"));									
+									Misc.launchURL(App.properties.getProperty("creator_link"));									
 									System.exit(1);
 								}
 								

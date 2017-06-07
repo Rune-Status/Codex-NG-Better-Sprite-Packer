@@ -13,7 +13,7 @@ public final class OptionMessage extends Alert {
 		setContentText("Choose your option.");
 		
         Stage stage = (Stage) getDialogPane().getScene().getWindow();            
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("/info_icon.png")));
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/info_icon.png")));
 	}
 
 }
