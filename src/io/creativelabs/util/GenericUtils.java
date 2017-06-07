@@ -4,18 +4,8 @@ import java.lang.reflect.Method;
 
 import io.creativelabs.util.msg.ExceptionMessage;
 
-/**
- * The non specific type of utility methods.
- * 
- * @author Chad Adams
- */
 public final class GenericUtils {
 
-      /**
-       * A universal method to launch a {@code url} from a users computer.
-       * 
-       * @author The url to open.
-       */
       public static void launchURL(String url) {
             String osName = System.getProperty("os.name");
             try {

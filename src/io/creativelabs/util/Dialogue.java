@@ -12,26 +12,12 @@ import io.creativelabs.util.msg.WarningMessage;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;
 
-/**
- * The class that contains methods for displaying JavaFX dialogues.
- * 
- * @author Chad Adams
- */
 public final class Dialogue {
 	
 	private Dialogue() {
 		
 	}
-	
-	/**
-	 * Displays a directory to a user.
-	 * 
-	 * @param headerText
-	 * 		The header text for this dialogue.
-	 * 
-	 * @param dir
-	 * 		The path to open.
-	 */
+
 	public static void openDirectory(String headerText, File dir) {
 
 		OptionMessage alert = new OptionMessage(headerText);
@@ -61,29 +47,11 @@ public final class Dialogue {
 	public static WarningMessage showWarning(String message) {
 		return new WarningMessage(message);
 	}
-	
-	/**
-	 * Displays an information message to the user.
-	 * 
-	 * @param title
-	 * 		The title text.
-	 * 
-	 * @param message
-	 * 		The message to tell the user.
-	 */
+
 	public static InformationMessage showInfo(String title, String message) {
 		return new InformationMessage(title, message);
 	}
-	
-	/**
-	 * Displays an exception to the user.
-	 * 
-	 * @param message
-	 * 		The message to tell the user.
-	 * 
-	 * @param ex
-	 * 		The exception to display.
-	 */
+
 	public static ExceptionMessage showException(String message, Exception ex) {
 		return new ExceptionMessage(message, ex);
 	}

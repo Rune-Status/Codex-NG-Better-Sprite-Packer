@@ -5,11 +5,6 @@ import java.io.IOException;
 
 import io.creativelabs.node.Sprite;
 
-/**
- * Decodes sprites packed into a file back into sprites.
- * 
- * @author Chad Adams
- */
 public final class SpriteDecoder {
 	
 	private SpriteDecoder() {

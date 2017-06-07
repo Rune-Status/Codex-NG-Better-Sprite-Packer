@@ -5,11 +5,6 @@ import java.io.IOException;
 
 import io.creativelabs.node.Sprite;
 
-/**
- * Packs sprites into a file by encoding them.
- * 
- * @author Chad Adams
- */
 public final class SpriteEncoder {
 	
 	private SpriteEncoder() {

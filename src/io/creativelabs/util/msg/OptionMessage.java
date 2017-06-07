@@ -4,19 +4,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-/**
- * The JavaFX confirmation dialogue.
- * 
- * @author Chad Adams
- */
 public final class OptionMessage extends Alert {
 
-	/**
-	 * Creates a new {@link OptionDialogue}.
-	 * 
-	 * @param header
-	 * 		The text to display
-	 */
 	public OptionMessage(String header) {
 		super(AlertType.CONFIRMATION);
 		setTitle("Information");

@@ -1,131 +1,68 @@
 package io.creativelabs.node;
 
-/**
- * Represents a single sprite either in a sprite archive or file directory.
- * 
- * @author Chad Adams
- */
-public final class Sprite {      
+public final class Sprite {
 
-      /**
-       * The current index of this sprite.
-       */
-      private int index = 0; 
-      
-      /**
-       * The array of pixels that make up this image.
-       */
-      private int[] pixels;      
+	private int index = 0;
 
-      /**
-       * The name of this image.
-       */
-      private String name = "None";
-      
-      /**
-       * The off set x position.
-       */
-      private int drawOffsetX = 0;
-      
-      /**
-       * The off set y position.
-       */
-      private int drawOffsetY = 0;
-      
-      private int width;
-      
-      private int height;
-      
-      public Sprite() {
-    	  
-      }
-      
-      public Sprite(int index) {
-    	  this.index = index;
-      }
+	private int[] pixels;
 
-      /**
-       * Gets the array of pixels that make up this sprite.
-       * 
-       * @return The data or pixels.
-       */
-      public int[] getData() {
-         return this.pixels;
-      }
-      
-      public void setData(int[] data) {
-    	  this.pixels = data;
-      }
-      
-      public void setIndex(int index) {
-    	  this.index = index;
-      }
+	private String name = "None";
 
-      /**
-       * The index of this sprite.
-       * 
-       * @return The index.
-       */
-      public int getIndex() {
-         return this.index;
-      }
-      
-      /**
-       * Gets the name of this sprite.
-       * 
-       * @return The name.
-       */
-      public String getName() {
-            return this.name;
-      }
+	private int drawOffsetX = 0;
 
-      /**
-       * Sets the name of this sprite.
-       * 
-       * @param name
-       *    The name to set.
-       */
-      public void setName(String name) {
-            this.name = name;
-      }
+	private int drawOffsetY = 0;
 
-      /**
-       * Gets the sprite draw offset x position.
-       * 
-       * @return The sprite x off set position.
-       */
-      public int getDrawOffsetX() {
-            return this.drawOffsetX;
-      }
+	private int width;
 
-      /**
-       * Sets the draw x offset position of this sprite.
-       * 
-       * @param drawOffsetX
-       *    The value to set.
-       */
-      public void setDrawOffsetX(int drawOffsetX) {
-            this.drawOffsetX = drawOffsetX;
-      }
+	private int height;
 
-      /**
-       * Gets the sprite draw offset y position.
-       * 
-       * @return The sprite y off set position.
-       */
-      public int getDrawOffsetY() {
-            return this.drawOffsetY;
-      }
+	public Sprite() {
 
-      /**
-       * Sets the draw y offset position of this sprite.
-       * 
-       * @param drawOffsetY
-       *    The value to set.
-       */
-      public void setDrawOffsetY(int drawOffsetY) {
-            this.drawOffsetY = drawOffsetY;
-      }
+	}
+
+	public Sprite(int index) {
+		this.index = index;
+	}
+
+	public int[] getData() {
+		return this.pixels;
+	}
+
+	public void setData(int[] data) {
+		this.pixels = data;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public int getIndex() {
+		return this.index;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getDrawOffsetX() {
+		return this.drawOffsetX;
+	}
+
+	public void setDrawOffsetX(int drawOffsetX) {
+		this.drawOffsetX = drawOffsetX;
+	}
+
+	public int getDrawOffsetY() {
+		return this.drawOffsetY;
+	}
+
+	public void setDrawOffsetY(int drawOffsetY) {
+		this.drawOffsetY = drawOffsetY;
+	}
 
 	public int getWidth() {
 		return width;
@@ -142,7 +79,5 @@ public final class Sprite {
 	public void setHeight(int height) {
 		this.height = height;
 	}
-      
-      
-      
-   }
+
+}

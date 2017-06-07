@@ -3,14 +3,12 @@ package io.creativelabs;
 import java.awt.Desktop;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,11 +68,6 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-/**
- * The class that is an association with the Main.FXML document.
- * 
- * @author Chad Adams
- */
 public final class Controller implements Initializable {
 
 	@FXML
@@ -245,31 +238,7 @@ public final class Controller implements Initializable {
 				}
 			}
 		});
-
-		if (!Configuration.DEBUG) {
-			try (BufferedReader in = new BufferedReader(
-					new InputStreamReader(new URL(Configuration.VERSION_LINK).openStream()))) {
-				String version = in.readLine().trim();
-
-				if (!Configuration.VERSION.equalsIgnoreCase(version)) {
-
-					Alert alert = new Alert(AlertType.CONFIRMATION);
-					alert.setTitle("Update");
-					alert.setHeaderText("Update " + version + " available");
-					alert.setContentText("Would you like to update to version: " + version + "?");
-
-					Optional<ButtonType> result = alert.showAndWait();
-					if (result.get() == ButtonType.OK) {
-						GenericUtils.launchURL(Configuration.CREATOR_LINK);
-						System.exit(1);
-					}
-				}
-
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-
+		
 	}
 
 	@FXML
@@ -288,7 +257,7 @@ public final class Controller implements Initializable {
 
 		colorPicker.setValue(Color.FUCHSIA);
 
-		App.getMainStage().setTitle(String.format("%s v%.2f%n", Configuration.TITLE, Configuration.VERSION));
+		App.getMainStage().setTitle(String.format("%s", App.properties.getProperty("title")));
 	}
 
 	@FXML
@@ -731,7 +700,7 @@ public final class Controller implements Initializable {
 		FileChooser fileChooser = new FileChooser();
 
 		fileChooser.setInitialDirectory(
-				this.currentDirectory == null ? new File(Configuration.CACHE_PATH) : this.currentDirectory);
+				this.currentDirectory == null ? new File(System.getProperty("user.home")) : this.currentDirectory);
 
 		fileChooser.setTitle("Open Resource File");
 		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
@@ -871,8 +840,7 @@ public final class Controller implements Initializable {
 						updateMessage("(" + (index + 1) + "/" + sorted.length + ")");
 
 						Platform.runLater(() -> {
-							App.getMainStage().setTitle(String.format("%s v%.2f%n [%d]", Configuration.TITLE,
-									Configuration.VERSION, elements.size()));
+							App.getMainStage().setTitle(String.format("%s", App.properties.getProperty("title")));
 						});
 
 					}
@@ -938,7 +906,7 @@ public final class Controller implements Initializable {
 
 				Platform.runLater(() -> {
 					App.getMainStage().setTitle(
-							String.format("%s v%.2f%n [%d]", Configuration.TITLE, Configuration.VERSION, totalSprites));
+							String.format("%s", App.properties.getProperty("title")));
 				});
 
 				return true;

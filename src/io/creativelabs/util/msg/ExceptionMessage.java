@@ -9,22 +9,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
-/**
- * The {@link Alert} implementation that creates a simplified Exception message.
- * 
- * @author Chad Adams
- */
 public final class ExceptionMessage extends Alert {
 
-      /**
-       * Creates a new {@link ExceptionMessage}.
-       * 
-       * @param message
-       *    The message to tell the user.
-       *    
-       * @param ex
-       *    The exception to display.
-       */
       public ExceptionMessage(String message, Exception ex) {
             super(AlertType.ERROR);
             setTitle("Exception");
