@@ -60,6 +60,8 @@ public class App extends Application {
 								}
 								
 								latch.countDown();
+							} else {
+								latch.countDown();
 							}
 
 						} catch (Exception ex) {
