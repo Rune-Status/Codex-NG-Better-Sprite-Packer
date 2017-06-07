@@ -15,10 +15,10 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import javax.imageio.ImageIO;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
-import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream;
+import javax.imageio.ImageIO;
 
 import io.creativelabs.codec.decoder.SpriteDecoder;
 import io.creativelabs.codec.encoder.SpriteEncoder;
@@ -913,7 +913,7 @@ public final class Controller implements Initializable {
 				long start = System.currentTimeMillis();
 
 				try (DataInputStream dataFile = new DataInputStream(
-						new XZCompressorInputStream(new ByteArrayInputStream(dat)))) {
+						new GZIPInputStream(new ByteArrayInputStream(dat)))) {
 
 					totalSprites = dataFile.readInt();
 
@@ -1018,7 +1018,7 @@ public final class Controller implements Initializable {
 			@Override
 			protected Boolean call() throws Exception {
 
-				try (DataOutputStream data = new DataOutputStream(new XZCompressorOutputStream(
+				try (DataOutputStream data = new DataOutputStream(new GZIPOutputStream(
 						new FileOutputStream(Paths.get(selectedFile.getPath(), tempArchiveName + ".dat").toFile())))) {
 
 					data.writeInt(elements.size());
