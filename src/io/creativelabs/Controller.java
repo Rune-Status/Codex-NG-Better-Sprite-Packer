@@ -327,9 +327,7 @@ public final class Controller implements Initializable {
 
 			try {
 
-				loadArchivedSprites(archiveName, selectedFile.toPath());
-
-				Dialogue.showInfo("Information", "Successfully loaded sprite archives!");
+				unpackSprites(archiveName, selectedFile.toPath());
 
 			} catch (Exception ex) {
 				Dialogue.showException("A problem was encountered while loading the sprites archive.", ex);
@@ -493,7 +491,6 @@ public final class Controller implements Initializable {
 		}
 	}
 
-	// TODO
 	@FXML
 	private void dumpSprites() {
 
@@ -670,13 +667,13 @@ public final class Controller implements Initializable {
 					boolean duplicate = false;
 
 					for (Entry e : elements) {
-						
+
 						Sprite s = e.getSprite();
 
 						BufferedImage image2 = s.toBufferedImage();
 
 						int[] source2Pixels = ((DataBufferInt) image2.getRaster().getDataBuffer()).getData();
-						
+
 						if (source1Pixels.length != source2Pixels.length) {
 							break;
 						}
@@ -709,7 +706,7 @@ public final class Controller implements Initializable {
 					sprite.setWidth(image.getWidth());
 					sprite.setHeight(image.getHeight());
 					sprite.setData(source1Pixels);
-					
+
 					elements.add(new Entry(elements.size(), sprite));
 
 				} catch (IOException ex) {
@@ -808,26 +805,27 @@ public final class Controller implements Initializable {
 	private void loadSprites(Path path) throws IOException {
 		clearEditor();
 
-		final File[] files = new File(path.toString()).listFiles();
-
-		final File[] sorted = Misc.sortImages(files);
-
-		totalSprites = sorted.length;
-
-		if (files == null || files.length <= 0) {
-			return;
-		}
-
-		if (sorted.length <= 0) {
-			Dialogue.showInfo("Information", "No sprites were found.");
-			return;
-		}
-
 		createTask(new Task<Boolean>() {
 
 			@Override
 			protected Boolean call() {
 
+				final File[] files = new File(path.toString()).listFiles();
+
+				final File[] sorted = Misc.sortImages(files);
+
+				totalSprites = sorted.length;
+
+				if (files == null || files.length <= 0) {
+					return false;
+				}
+
+				if (sorted.length <= 0) {
+					Platform.runLater(() -> {
+						Dialogue.showInfo("Information", "No sprites were found.");
+					});
+					return false;
+				}
 				try {
 					for (int index = 0; index < sorted.length; index++) {
 
@@ -871,10 +869,6 @@ public final class Controller implements Initializable {
 						updateProgress(index + 1, sorted.length);
 						updateMessage("(" + (index + 1) + "/" + sorted.length + ")");
 
-						Platform.runLater(() -> {
-							App.getMainStage().setTitle(String.format("%s", App.properties.getProperty("title")));
-						});
-
 					}
 				} catch (Exception ex) {
 					Platform.runLater(() -> {
@@ -901,7 +895,7 @@ public final class Controller implements Initializable {
 	 * @throws Exception
 	 *             The exception thrown.
 	 */
-	private void loadArchivedSprites(String name, Path path) throws Exception {
+	private void unpackSprites(String name, Path path) throws Exception {		
 		clearEditor();
 
 		createTask(new Task<Boolean>() {
@@ -917,7 +911,7 @@ public final class Controller implements Initializable {
 
 					totalSprites = dataFile.readInt();
 
-					for (int index = 0; index < totalSprites; index++) {
+					for (int index = 0; index < totalSprites; index++) {						
 
 						Sprite sprite = SpriteDecoder.decode(dataFile);
 
@@ -935,10 +929,10 @@ public final class Controller implements Initializable {
 				long end = System.currentTimeMillis();
 
 				System.out.println("loaded in: " + (end - start) + " ms");
-
+				
 				Platform.runLater(() -> {
-					App.getMainStage().setTitle(String.format("%s", App.properties.getProperty("title")));
-				});
+					Dialogue.showInfo("Information", "Successfully loaded sprite archives!");
+				});				
 
 				return true;
 			}
