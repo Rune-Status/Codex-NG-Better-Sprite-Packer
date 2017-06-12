@@ -669,14 +669,11 @@ public final class Controller implements Initializable {
 
 						int[] source2Pixels = ((DataBufferInt) image2.getRaster().getDataBuffer()).getData();
 
-						if (source1Pixels.length != source2Pixels.length) {
-							break;
-						}
-
 						for (int i = 0; i < source1Pixels.length; i++) {
 
 							if (source1Pixels[i] != source2Pixels[i]) {
 								duplicate = false;
+								System.out.println(s.getIndex() + " " + source1Pixels[i] + " is not the same as " + source2Pixels[i]);
 								break;
 							}
 
