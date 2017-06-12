@@ -1,4 +1,4 @@
-package io.creativelabs.util.msg;
+package io.creativelab.util.msg;
 
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;

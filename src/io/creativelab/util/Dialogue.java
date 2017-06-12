@@ -1,14 +1,14 @@
-package io.creativelabs.util;
+package io.creativelab.util;
 
 import java.awt.Desktop;
 import java.io.File;
 import java.util.Optional;
 
-import io.creativelabs.util.msg.ExceptionMessage;
-import io.creativelabs.util.msg.InformationMessage;
-import io.creativelabs.util.msg.InputMessage;
-import io.creativelabs.util.msg.OptionMessage;
-import io.creativelabs.util.msg.WarningMessage;
+import io.creativelab.util.msg.ExceptionMessage;
+import io.creativelab.util.msg.InformationMessage;
+import io.creativelab.util.msg.InputMessage;
+import io.creativelab.util.msg.OptionMessage;
+import io.creativelab.util.msg.WarningMessage;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ButtonBar.ButtonData;
 

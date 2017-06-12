@@ -1,4 +1,4 @@
-package io.creativelabs.util;
+package io.creativelab.util;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -18,7 +18,7 @@ import java.nio.channels.FileChannel.MapMode;
 
 import javax.imageio.ImageIO;
 
-import io.creativelabs.util.msg.ExceptionMessage;
+import io.creativelab.util.msg.ExceptionMessage;
 
 public final class Misc {
 	

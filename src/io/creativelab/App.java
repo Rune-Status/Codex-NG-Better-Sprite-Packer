@@ -1,4 +1,4 @@
-package io.creativelabs;
+package io.creativelab;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 
-import io.creativelabs.util.Misc;
+import io.creativelab.util.Misc;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;

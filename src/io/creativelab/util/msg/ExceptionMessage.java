@@ -1,4 +1,4 @@
-package io.creativelabs.util.msg;
+package io.creativelab.util.msg;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

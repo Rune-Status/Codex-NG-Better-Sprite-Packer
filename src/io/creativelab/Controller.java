@@ -1,4 +1,4 @@
-package io.creativelabs;
+package io.creativelab;
 
 import java.awt.Desktop;
 import java.awt.image.BufferedImage;
@@ -25,10 +25,9 @@ import com.creativelab.sprite.codec.SpriteDecoder;
 import com.creativelab.sprite.codec.SpriteEncoder;
 import com.creativelab.util.ColorQuantizer;
 
-import io.creativelabs.node.Entry;
-import io.creativelabs.util.Dialogue;
-import io.creativelabs.util.Misc;
-import io.creativelabs.util.msg.InputMessage;
+import io.creativelab.util.Dialogue;
+import io.creativelab.util.Misc;
+import io.creativelab.util.msg.InputMessage;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -71,7 +70,7 @@ import javafx.util.Duration;
 public final class Controller implements Initializable {
 
 	@FXML
-	ListView<Entry> list;
+	ListView<Node> list;
 
 	@FXML
 	ScrollPane scrollPane;
@@ -97,9 +96,9 @@ public final class Controller implements Initializable {
 	@FXML
 	MenuItem dumpSpriteMI, dumpAllSpritesMI, viewDirectoryMI;
 
-	private FilteredList<Entry> filteredSprites;
+	private FilteredList<Node> filteredSprites;
 
-	private ObservableList<Entry> elements = FXCollections.observableArrayList();
+	private ObservableList<Node> elements = FXCollections.observableArrayList();
 
 	private int currentSpriteIndex = 0;
 
@@ -154,12 +153,12 @@ public final class Controller implements Initializable {
 
 		list.setItems(this.filteredSprites);
 
-		list.setCellFactory(param -> new ListCell<Entry>() {
+		list.setCellFactory(param -> new ListCell<Node>() {
 
 			private final ImageView listIconView = new ImageView();
 
 			@Override
-			public void updateItem(Entry value, boolean empty) {
+			public void updateItem(Node value, boolean empty) {
 				super.updateItem(value, empty);
 
 				if (empty) {
@@ -172,7 +171,7 @@ public final class Controller implements Initializable {
 						listIconView.setImage(new Image(getClass().getResourceAsStream("/icons/question_mark.png")));
 						listIconView.setFitHeight(32);
 						listIconView.setFitWidth(32);
-						setText(Integer.toString(value.getIndex()));
+						setText(Integer.toString(value.getId()));
 						setGraphic(listIconView);
 						return;
 					}
@@ -187,7 +186,7 @@ public final class Controller implements Initializable {
 							.toFXImage(Misc.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)), null);
 
 					listIconView.setImage(newImage);
-					setText(Integer.toString(value.getIndex()));
+					setText(Integer.toString(value.getId()));
 					setGraphic(listIconView);
 
 				}
@@ -196,14 +195,14 @@ public final class Controller implements Initializable {
 		});
 
 		list.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		list.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Entry>() {
+		list.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Node>() {
 			@Override
-			public void changed(ObservableValue<? extends Entry> observable, Entry oldValue, Entry newValue) {
+			public void changed(ObservableValue<? extends Node> observable, Node oldValue, Node newValue) {
 
 				if (newValue != null) {
 
 					try {
-						currentSpriteIndex = newValue.getIndex();
+						currentSpriteIndex = newValue.getId();
 
 						final SpriteBase sprite = newValue.getSprite();
 
@@ -355,7 +354,7 @@ public final class Controller implements Initializable {
 				offsetYTf.clear();
 			}
 
-			elements.set(currentSpriteIndex, new Entry(this.currentSpriteIndex, sprite));
+			elements.set(currentSpriteIndex, new Node(this.currentSpriteIndex, sprite));
 
 		}
 	}
@@ -529,7 +528,7 @@ public final class Controller implements Initializable {
 
 					@Override
 					protected Boolean call() throws Exception {
-						for (Entry entry : elements) {
+						for (Node entry : elements) {
 							if (entry != null) {
 
 								SpriteBase sprite = entry.getSprite();
@@ -551,12 +550,12 @@ public final class Controller implements Initializable {
 										System.arraycopy(pixels, 0, data, 0, pixels.length);
 
 										ImageIO.write(image, "png", Paths.get(selectedDirectory.toString(),
-												Integer.toString(entry.getIndex()) + ".png").toFile());
+												Integer.toString(entry.getId()) + ".png").toFile());
 									} catch (IOException ex) {
 										ex.printStackTrace();
 									}
-									updateProgress(entry.getIndex() + 1, elements.size());
-									updateMessage("(" + (entry.getIndex() + 1) + "/" + elements.size() + ")");
+									updateProgress(entry.getId() + 1, elements.size());
+									updateMessage("(" + (entry.getId() + 1) + "/" + elements.size() + ")");
 								}
 							}
 						}
@@ -577,7 +576,7 @@ public final class Controller implements Initializable {
 
 					@Override
 					protected Boolean call() throws Exception {
-						for (Entry entry : elements) {
+						for (Node entry : elements) {
 							if (entry != null) {
 
 								SpriteBase sprite = entry.getSprite();
@@ -602,12 +601,12 @@ public final class Controller implements Initializable {
 												Misc.createColoredBackground(image,
 														Misc.fxColorToAWTColor(colorPicker.getValue())),
 												"png", Paths.get(selectedDirectory.toString(),
-														Integer.toString(entry.getIndex()) + ".png").toFile());
+														Integer.toString(entry.getId()) + ".png").toFile());
 									} catch (IOException ex) {
 										ex.printStackTrace();
 									}
-									updateProgress(entry.getIndex() + 1, elements.size());
-									updateMessage("(" + (entry.getIndex() + 1) + "/" + elements.size() + ")");
+									updateProgress(entry.getId() + 1, elements.size());
+									updateMessage("(" + (entry.getId() + 1) + "/" + elements.size() + ")");
 								}
 							}
 						}
@@ -662,7 +661,7 @@ public final class Controller implements Initializable {
 
 					boolean duplicate = false;
 
-					for (Entry e : elements) {
+					for (Node e : elements) {
 
 						SpriteBase s = e.getSprite();
 
@@ -700,7 +699,7 @@ public final class Controller implements Initializable {
 					sprite.setHeight(image.getHeight());
 					sprite.setPixels(source1Pixels);
 
-					elements.add(new Entry(elements.size(), sprite));
+					elements.add(new Node(elements.size(), sprite));
 
 				} catch (IOException ex) {
 					Dialogue.showWarning("Could not read selected file as an image.");
@@ -738,9 +737,9 @@ public final class Controller implements Initializable {
 					return;
 				}
 
-				Entry entry = elements.get(selectedIndex);
+				Node entry = elements.get(selectedIndex);
 
-				Entry copy = entry.copy();
+				Node copy = entry.copy();
 
 				BufferedImage selectedImage = Misc.makeColorTransparent(ImageIO.read(selectedFile),
 						new java.awt.Color(0xFF00FF, true));
@@ -774,9 +773,9 @@ public final class Controller implements Initializable {
 				return;
 			}
 
-			Entry entry = elements.get(selectedIndex);
+			Node entry = elements.get(selectedIndex);
 
-			Entry copy = entry.copy();
+			Node copy = entry.copy();
 
 			if (copy.getSprite() != null) {
 				copy.getSprite().setPixels(new int[0]);
@@ -830,7 +829,7 @@ public final class Controller implements Initializable {
 							sprite.setPixels(new int[0]);
 
 							Platform.runLater(() -> {
-								elements.add(new Entry(sprite.getId(), sprite));
+								elements.add(new Node(sprite.getId(), sprite));
 							});
 
 							updateProgress(index + 1, sorted.length);
@@ -852,7 +851,7 @@ public final class Controller implements Initializable {
 							sprite.setPixels(data);
 
 							Platform.runLater(() -> {
-								elements.add(new Entry(sprite.getId(), sprite));
+								elements.add(new Node(sprite.getId(), sprite));
 							});
 
 						}
@@ -906,7 +905,7 @@ public final class Controller implements Initializable {
 						SpriteBase sprite = SpriteDecoder.decode(dataFile);
 
 						Platform.runLater(() -> {
-							elements.add(new Entry(sprite.getId(), sprite));
+							elements.add(new Node(sprite.getId(), sprite));
 						});
 
 						updateProgress(index + 1, totalSprites);
@@ -931,9 +930,9 @@ public final class Controller implements Initializable {
 
 	}
 
-	private void displaySprite(Entry entry) throws Exception {
+	private void displaySprite(Node entry) throws Exception {
 		try {
-			final SpriteBase sprite = elements.get(entry.getIndex()).getSprite();
+			final SpriteBase sprite = elements.get(entry.getId()).getSprite();
 
 			BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
