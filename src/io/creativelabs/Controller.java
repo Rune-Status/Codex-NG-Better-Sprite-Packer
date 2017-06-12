@@ -20,11 +20,12 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.imageio.ImageIO;
 
-import io.creativelabs.codec.decoder.SpriteDecoder;
-import io.creativelabs.codec.encoder.SpriteEncoder;
+import com.creativelab.sprite.SpriteBase;
+import com.creativelab.sprite.codec.SpriteDecoder;
+import com.creativelab.sprite.codec.SpriteEncoder;
+import com.creativelab.util.ColorQuantizer;
+
 import io.creativelabs.node.Entry;
-import io.creativelabs.node.Sprite;
-import io.creativelabs.util.ColorQuantizer;
 import io.creativelabs.util.Dialogue;
 import io.creativelabs.util.Misc;
 import io.creativelabs.util.msg.InputMessage;
@@ -133,7 +134,7 @@ public final class Controller implements Initializable {
 					return false;
 				}
 
-				Sprite sprite = it.getSprite();
+				SpriteBase sprite = it.getSprite();
 
 				if (newValue.isEmpty()) {
 					return true;
@@ -143,7 +144,7 @@ public final class Controller implements Initializable {
 					return true;
 				}
 
-				if (Integer.toString(sprite.getIndex()).contains(newValue)) {
+				if (Integer.toString(sprite.getId()).contains(newValue)) {
 					return true;
 				}
 
@@ -166,8 +167,8 @@ public final class Controller implements Initializable {
 					setText("");
 				} else {
 
-					if (value.getSprite() == null || value.getSprite().getData() == null
-							|| value.getSprite().getData().length == 0) {
+					if (value.getSprite() == null || value.getSprite().getPixels() == null
+							|| value.getSprite().getPixels().length == 0) {
 						listIconView.setImage(new Image(getClass().getResourceAsStream("/icons/question_mark.png")));
 						listIconView.setFitHeight(32);
 						listIconView.setFitWidth(32);
@@ -204,7 +205,7 @@ public final class Controller implements Initializable {
 					try {
 						currentSpriteIndex = newValue.getIndex();
 
-						final Sprite sprite = newValue.getSprite();
+						final SpriteBase sprite = newValue.getSprite();
 
 						if (!sprite.getName().equalsIgnoreCase("None")) {
 							nameTf.setText(sprite.getName());
@@ -212,9 +213,9 @@ public final class Controller implements Initializable {
 							nameTf.clear();
 						}
 
-						System.out.println(sprite.getIndex() + " " + sprite.getName());
+						System.out.println(sprite.getId() + " " + sprite.getName());
 
-						indexTf.setText(Integer.toString(sprite.getIndex()));
+						indexTf.setText(Integer.toString(sprite.getId()));
 
 						if (newImage != null) {
 							widthTf.setText(Double.toString(newImage.getWidth()));
@@ -337,7 +338,7 @@ public final class Controller implements Initializable {
 	private void handleKeyEventPressed(KeyEvent event) {
 		if (event.getCode() == KeyCode.ENTER) {
 
-			Sprite sprite = elements.get(currentSpriteIndex).getSprite();
+			SpriteBase sprite = elements.get(currentSpriteIndex).getSprite();
 
 			if (!nameTf.getText().isEmpty() && nameTf.getText().length() <= 14) {
 				sprite.setName(nameTf.getText());
@@ -401,11 +402,11 @@ public final class Controller implements Initializable {
 					@Override
 					protected Boolean call() throws Exception {
 
-						Sprite sprite = elements.get(currentSpriteIndex).getSprite();
+						SpriteBase sprite = elements.get(currentSpriteIndex).getSprite();
 
 						if (sprite != null) {
 
-							int[] pixels = sprite.getData();
+							int[] pixels = sprite.getPixels();
 
 							try {
 								final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(),
@@ -416,14 +417,14 @@ public final class Controller implements Initializable {
 								System.arraycopy(pixels, 0, data, 0, pixels.length);
 
 								ImageIO.write(image, "png", Paths
-										.get(selectedDirectory.toString(), Integer.toString(sprite.getIndex()) + ".png")
+										.get(selectedDirectory.toString(), Integer.toString(sprite.getId()) + ".png")
 										.toFile());
 							} catch (IOException ex) {
 								ex.printStackTrace();
 							}
 
-							updateProgress(sprite.getIndex() + 1, elements.size());
-							updateMessage("(" + (sprite.getIndex() + 1) + "/" + elements.size() + ")");
+							updateProgress(sprite.getId() + 1, elements.size());
+							updateMessage("(" + (sprite.getId() + 1) + "/" + elements.size() + ")");
 
 							Platform.runLater(() -> {
 								Dialogue.openDirectory("Success! Would you like to view this directory?",
@@ -443,11 +444,11 @@ public final class Controller implements Initializable {
 					@Override
 					protected Boolean call() throws Exception {
 
-						Sprite sprite = elements.get(currentSpriteIndex).getSprite();
+						SpriteBase sprite = elements.get(currentSpriteIndex).getSprite();
 
 						if (sprite != null) {
 
-							int[] pixels = sprite.getData();
+							int[] pixels = sprite.getPixels();
 
 							try {
 								final BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(),
@@ -461,13 +462,13 @@ public final class Controller implements Initializable {
 										Misc.createColoredBackground(image,
 												Misc.fxColorToAWTColor(colorPicker.getValue())),
 										"png", Paths.get(selectedDirectory.toString(),
-												Integer.toString(sprite.getIndex()) + ".png").toFile());
+												Integer.toString(sprite.getId()) + ".png").toFile());
 							} catch (IOException ex) {
 								ex.printStackTrace();
 							}
 
-							updateProgress(sprite.getIndex() + 1, elements.size());
-							updateMessage("(" + (sprite.getIndex() + 1) + "/" + elements.size() + ")");
+							updateProgress(sprite.getId() + 1, elements.size());
+							updateMessage("(" + (sprite.getId() + 1) + "/" + elements.size() + ")");
 
 							Platform.runLater(() -> {
 								Dialogue.openDirectory("Success! Would you like to view this directory?",
@@ -531,11 +532,11 @@ public final class Controller implements Initializable {
 						for (Entry entry : elements) {
 							if (entry != null) {
 
-								Sprite sprite = entry.getSprite();
+								SpriteBase sprite = entry.getSprite();
 
 								if (sprite != null) {
 
-									int[] pixels = sprite.getData();
+									int[] pixels = sprite.getPixels();
 
 									if (pixels.length == 0) {
 										continue;
@@ -579,11 +580,11 @@ public final class Controller implements Initializable {
 						for (Entry entry : elements) {
 							if (entry != null) {
 
-								Sprite sprite = entry.getSprite();
+								SpriteBase sprite = entry.getSprite();
 
 								if (sprite != null) {
 
-									int[] pixels = sprite.getData();
+									int[] pixels = sprite.getPixels();
 
 									if (pixels.length == 0) {
 										continue;
@@ -663,7 +664,7 @@ public final class Controller implements Initializable {
 
 					for (Entry e : elements) {
 
-						Sprite s = e.getSprite();
+						SpriteBase s = e.getSprite();
 
 						BufferedImage image2 = s.toBufferedImage();
 
@@ -673,7 +674,7 @@ public final class Controller implements Initializable {
 
 							if (source1Pixels[i] != source2Pixels[i]) {
 								duplicate = false;
-								System.out.println(s.getIndex() + " " + source1Pixels[i] + " is not the same as " + source2Pixels[i]);
+								System.out.println(s.getId() + " " + source1Pixels[i] + " is not the same as " + source2Pixels[i]);
 								break;
 							}
 
@@ -682,7 +683,7 @@ public final class Controller implements Initializable {
 						}
 
 						if (duplicate) {
-							Dialogue.showWarning("Skipped duplicate at: " + s.getIndex());
+							Dialogue.showWarning("Skipped duplicate at: " + s.getId());
 							break;
 						}
 
@@ -692,12 +693,12 @@ public final class Controller implements Initializable {
 						continue;
 					}
 
-					Sprite sprite = new Sprite(elements.size());
+					SpriteBase sprite = new SpriteBase(elements.size());
 
 					sprite.setName(selectedFile.getName());
 					sprite.setWidth(image.getWidth());
 					sprite.setHeight(image.getHeight());
-					sprite.setData(source1Pixels);
+					sprite.setPixels(source1Pixels);
 
 					elements.add(new Entry(elements.size(), sprite));
 
@@ -749,7 +750,7 @@ public final class Controller implements Initializable {
 				if (copy.getSprite() != null) {
 					copy.getSprite().setWidth(selectedImage.getWidth());
 					copy.getSprite().setHeight(selectedImage.getHeight());
-					copy.getSprite().setData(pixels);
+					copy.getSprite().setPixels(pixels);
 				}
 
 				elements.remove(selectedIndex);
@@ -778,7 +779,7 @@ public final class Controller implements Initializable {
 			Entry copy = entry.copy();
 
 			if (copy.getSprite() != null) {
-				copy.getSprite().setData(new int[0]);
+				copy.getSprite().setPixels(new int[0]);
 			}
 
 			if (selectedIndex == elements.size() - 1) {
@@ -824,12 +825,12 @@ public final class Controller implements Initializable {
 
 						if (file == null) {
 
-							Sprite sprite = new Sprite(index);
+							SpriteBase sprite = new SpriteBase(index);
 
-							sprite.setData(new int[0]);
+							sprite.setPixels(new int[0]);
 
 							Platform.runLater(() -> {
-								elements.add(new Entry(sprite.getIndex(), sprite));
+								elements.add(new Entry(sprite.getId(), sprite));
 							});
 
 							updateProgress(index + 1, sorted.length);
@@ -843,15 +844,15 @@ public final class Controller implements Initializable {
 						int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
 						if (data != null && data.length > 0) {
-							Sprite sprite = new Sprite(index);
+							SpriteBase sprite = new SpriteBase(index);
 
 							sprite.setName(file.getName());
 							sprite.setWidth(image.getWidth());
 							sprite.setHeight(image.getHeight());
-							sprite.setData(data);
+							sprite.setPixels(data);
 
 							Platform.runLater(() -> {
-								elements.add(new Entry(sprite.getIndex(), sprite));
+								elements.add(new Entry(sprite.getId(), sprite));
 							});
 
 						}
@@ -902,10 +903,10 @@ public final class Controller implements Initializable {
 
 					for (int index = 0; index < totalSprites; index++) {						
 
-						Sprite sprite = SpriteDecoder.decode(dataFile);
+						SpriteBase sprite = SpriteDecoder.decode(dataFile);
 
 						Platform.runLater(() -> {
-							elements.add(new Entry(sprite.getIndex(), sprite));
+							elements.add(new Entry(sprite.getId(), sprite));
 						});
 
 						updateProgress(index + 1, totalSprites);
@@ -932,13 +933,13 @@ public final class Controller implements Initializable {
 
 	private void displaySprite(Entry entry) throws Exception {
 		try {
-			final Sprite sprite = elements.get(entry.getIndex()).getSprite();
+			final SpriteBase sprite = elements.get(entry.getIndex()).getSprite();
 
 			BufferedImage image = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
 			int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
-			System.arraycopy(sprite.getData(), 0, pixels, 0, sprite.getData().length);
+			System.arraycopy(sprite.getPixels(), 0, pixels, 0, sprite.getPixels().length);
 
 			newImage = SwingFXUtils.toFXImage(Misc.makeColorTransparent(image, new java.awt.Color(0xFF00FF, true)),
 					null);
@@ -1008,12 +1009,12 @@ public final class Controller implements Initializable {
 
 					for (int index = 0; index < elements.size(); index++) {
 
-						Sprite sprite = elements.get(index).getSprite();
+						SpriteBase sprite = elements.get(index).getSprite();
 
-						if (sprite.getIndex() == index) {
+						if (sprite.getId() == index) {
 							SpriteEncoder.encode(data, sprite);
 						} else {
-							System.out.println("index: " + index + " does not match: " + sprite.getIndex());
+							System.out.println("index: " + index + " does not match: " + sprite.getId());
 						}
 
 						updateProgress(index + 1, elements.size());

@@ -1,12 +1,14 @@
 package io.creativelabs.node;
 
+import com.creativelab.sprite.SpriteBase;
+
 public final class Entry implements Comparable<Entry> {
 	
 	private int index;
 	
-	private Sprite sprite;
+	private SpriteBase sprite;
 	
-	public Entry(int index, Sprite sprite) {
+	public Entry(int index, SpriteBase sprite) {
 		this.index = index;
 		this.sprite = sprite;
 	}
@@ -27,11 +29,11 @@ public final class Entry implements Comparable<Entry> {
 		return sprite.getName().equalsIgnoreCase("Unknown") || sprite.getName().equalsIgnoreCase("None") ? Integer.toString(index) : sprite.getName();
 	}
 
-	public Sprite getSprite() {
+	public SpriteBase getSprite() {
 		return sprite;
 	}
 
-	public void setSprite(Sprite sprite) {
+	public void setSprite(SpriteBase sprite) {
 		this.sprite = sprite;
 	}
 
