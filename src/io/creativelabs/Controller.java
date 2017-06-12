@@ -841,7 +841,7 @@ public final class Controller implements Initializable {
 							continue;
 						}
 
-						BufferedImage image = Misc.convert(ColorQuantizer.quantize(Misc.makeColorTransparent(ImageIO.read(file), Misc.fxColorToAWTColor(colorPicker.getValue()))), BufferedImage.TYPE_INT_ARGB);
+						BufferedImage image = Misc.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(file)), Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB);
 
 						int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
