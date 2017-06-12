@@ -25,7 +25,7 @@ public final class Sprite {
 	
 	public BufferedImage toBufferedImage() {
 		
-		BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
+		BufferedImage image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
 		
 		final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 		

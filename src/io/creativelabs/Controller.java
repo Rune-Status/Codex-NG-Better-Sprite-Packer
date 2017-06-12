@@ -24,6 +24,7 @@ import io.creativelabs.codec.decoder.SpriteDecoder;
 import io.creativelabs.codec.encoder.SpriteEncoder;
 import io.creativelabs.node.Entry;
 import io.creativelabs.node.Sprite;
+import io.creativelabs.util.ColorQuantizer;
 import io.creativelabs.util.Dialogue;
 import io.creativelabs.util.Misc;
 import io.creativelabs.util.msg.InputMessage;
@@ -175,12 +176,7 @@ public final class Controller implements Initializable {
 						return;
 					}
 
-					BufferedImage image = new BufferedImage(value.getSprite().getWidth(), value.getSprite().getHeight(),
-							BufferedImage.TYPE_INT_ARGB);
-
-					final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-
-					System.arraycopy(value.getSprite().getData(), 0, pixels, 0, value.getSprite().getData().length);
+					BufferedImage image = value.getSprite().toBufferedImage();
 
 					listIconView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
 					listIconView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
@@ -658,8 +654,7 @@ public final class Controller implements Initializable {
 						currentDirectory = selectedFile.getParentFile();
 					}
 
-					BufferedImage image = Misc.makeColorTransparent(
-							Misc.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB),
+					BufferedImage image = Misc.makeColorTransparent(Misc.convert(ColorQuantizer.quantize(ImageIO.read(selectedFile)), BufferedImage.TYPE_INT_ARGB),
 							new java.awt.Color(0xFF00FF, true));
 
 					int[] source1Pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
@@ -749,8 +744,7 @@ public final class Controller implements Initializable {
 
 				Entry copy = entry.copy();
 
-				BufferedImage selectedImage = Misc.makeColorTransparent(
-						Misc.convert(ImageIO.read(selectedFile), BufferedImage.TYPE_INT_ARGB),
+				BufferedImage selectedImage = Misc.makeColorTransparent(ImageIO.read(selectedFile),
 						new java.awt.Color(0xFF00FF, true));
 
 				int[] pixels = ((DataBufferInt) selectedImage.getRaster().getDataBuffer()).getData();
@@ -847,9 +841,7 @@ public final class Controller implements Initializable {
 							continue;
 						}
 
-						BufferedImage image = Misc.makeColorTransparent(
-								Misc.convert(ImageIO.read(file), BufferedImage.TYPE_INT_ARGB),
-								Misc.fxColorToAWTColor(colorPicker.getValue()));
+						BufferedImage image = Misc.convert(ColorQuantizer.quantize(Misc.makeColorTransparent(ImageIO.read(file), Misc.fxColorToAWTColor(colorPicker.getValue()))), BufferedImage.TYPE_INT_ARGB);
 
 						int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
