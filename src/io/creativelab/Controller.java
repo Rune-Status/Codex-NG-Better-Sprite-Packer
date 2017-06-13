@@ -355,7 +355,7 @@ public final class Controller implements Initializable {
 			return;
 		}
 
-		DirectoryChooser directoryChooser = new DirectoryChooser();		
+		DirectoryChooser directoryChooser = new DirectoryChooser();
 
 		directoryChooser.setInitialDirectory(currentDirectory);
 
@@ -367,94 +367,99 @@ public final class Controller implements Initializable {
 
 		directoryChooser.setInitialDirectory(currentDirectory);
 
-		File selectedDir = directoryChooser.showDialog(App.getMainStage());		
+		File selectedDir = directoryChooser.showDialog(App.getMainStage());
 
 		if (selectedDir == null) {
 			return;
 		}
-		
+
 		if (!selectedDir.isDirectory()) {
 			Dialogue.showInfo("Information", "Please select a valid directory.");
 			return;
 		}
-		
+
 		createTask(new Task<Boolean>() {
 
 			@Override
 			protected Boolean call() throws Exception {
 
 				List<TreeItem<Node>> selectedItems = treeView.getSelectionModel().getSelectedItems();
-				
+
 				for (TreeItem<Node> selectedItem : selectedItems) {
-					
+
 					if (!selectedItem.isLeaf()) {
-						
-						File parentDir = new File(selectedDir, selectedItem.getValue().getName());				
-						
+
+						File parentDir = new File(selectedDir, selectedItem.getValue().getName());
+
 						if (!parentDir.exists()) {
 							parentDir.mkdirs();
-						}						
-						
+						}
+
 						for (TreeItem<Node> nodeTI : selectedItem.getChildren()) {
 
 							// root
 							if (!nodeTI.isLeaf()) {
-								
+
 								File childDir = new File(parentDir, nodeTI.getValue().getName());
-								
+
 								if (!childDir.exists()) {
 									childDir.mkdirs();
 								}
-								
+
 								for (TreeItem<Node> spriteTI : nodeTI.getChildren()) {
-									
-									BufferedImage bimage = SwingFXUtils.fromFXImage(((ImageView) spriteTI.getGraphic()).getImage(), null);
-									
+
+									BufferedImage bimage = SwingFXUtils
+											.fromFXImage(((ImageView) spriteTI.getGraphic()).getImage(), null);
+
 									try {
-										ImageIO.write(bimage, "png", new File(childDir, spriteTI.getValue().getName() + ".png"));
+										ImageIO.write(bimage, "png",
+												new File(childDir, spriteTI.getValue().getName() + ".png"));
 									} catch (IOException e) {
 										e.printStackTrace();
 										continue;
 									}
-									
-								}							
-								
-							} else {							
-								
-								BufferedImage bimage = SwingFXUtils.fromFXImage(((ImageView) nodeTI.getGraphic()).getImage(), null);
-								
+
+								}
+
+							} else {
+
+								BufferedImage bimage = SwingFXUtils
+										.fromFXImage(((ImageView) nodeTI.getGraphic()).getImage(), null);
+
 								try {
-									ImageIO.write(bimage, "png", new File(parentDir, nodeTI.getValue().getName() + ".png"));
+									ImageIO.write(bimage, "png",
+											new File(parentDir, nodeTI.getValue().getName() + ".png"));
 								} catch (IOException e) {
 									e.printStackTrace();
 									continue;
 								}
-								
+
 							}
 
 						}
 					} else {
-						
-						BufferedImage bimage = SwingFXUtils.fromFXImage(((ImageView) selectedItem.getGraphic()).getImage(), null);
-						
+
+						BufferedImage bimage = SwingFXUtils
+								.fromFXImage(((ImageView) selectedItem.getGraphic()).getImage(), null);
+
 						try {
-							ImageIO.write(bimage, "png", new File(selectedDir, selectedItem.getValue().getName() + ".png"));
+							ImageIO.write(bimage, "png",
+									new File(selectedDir, selectedItem.getValue().getName() + ".png"));
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-						
-						
+
 					}
-					
+
 				}
-				
+
 				Platform.runLater(() -> {
 					Dialogue.openDirectory("Would you like to view these sprites?", selectedDir);
 				});
-				
+
 				return true;
 			}
-			
+
 		});
 
 	}
@@ -506,30 +511,29 @@ public final class Controller implements Initializable {
 
 				for (TreeItem<Node> imageArchiveTI : treeView.getRoot().getChildren()) {
 
-					if (!imageArchiveTI.isLeaf()) {
+					ImageArchive archive = ImageArchive.create(Integer.parseInt(imageArchiveTI.getValue().getName()));
 
-						ImageArchive archive = ImageArchive
-								.create(Integer.parseInt(imageArchiveTI.getValue().getName()));
+					for (TreeItem<Node> spriteTI : imageArchiveTI.getChildren()) {
 
-						for (TreeItem<Node> spriteTI : imageArchiveTI.getChildren()) {
+						ImageView imageView = (ImageView) spriteTI.getGraphic();
 
-							ImageView imageView = (ImageView) spriteTI.getGraphic();
-
-							if (imageView == null) {
-								continue;
-							}
-
-							Image image = imageView.getImage();
-
-							archive.add(SpriteBase.convert(SwingFXUtils.fromFXImage(image, null)));
-
-							System.out.println("\t" + spriteTI.getValue());
-
+						if (imageView == null) {
+							continue;
 						}
 
-						cache.add(archive);
+						Image image = imageView.getImage();
+						
+						SpriteBase sprite = SpriteBase.convert(SwingFXUtils.fromFXImage(image, null));
+						
+						sprite.setId(Integer.parseInt(spriteTI.getValue().getName()));						
+
+						archive.add(sprite);
+
+						System.out.println(imageArchiveTI.getValue().getName() + " " + spriteTI.getValue().getName());						
 
 					}
+
+					cache.add(archive);
 
 				}
 
