@@ -530,9 +530,7 @@ public final class Controller implements Initializable {
 						sprite.setDrawOffsetX(spriteTI.getValue().getDrawOffsetX());
 						sprite.setDrawOffsetY(spriteTI.getValue().getDrawOffsetY());
 
-						archive.add(sprite);
-
-						System.out.println(imageArchiveTI.getValue().getName() + " " + spriteTI.getValue().getName());						
+						archive.add(sprite);				
 
 					}
 
