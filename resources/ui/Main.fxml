@@ -14,10 +14,7 @@
    <left>
       <VBox alignment="CENTER" BorderPane.alignment="TOP_CENTER">
          <children>
-            <ListView fx:id="list" minHeight="274.0" minWidth="198.0" BorderPane.alignment="CENTER" VBox.vgrow="SOMETIMES">
-               <VBox.margin>
-                  <Insets left="5.0" top="5.0" />
-               </VBox.margin>
+            <TreeView fx:id="treeView">
                <contextMenu>
                   <ContextMenu>
                     <items>
@@ -30,7 +27,7 @@
                     </items>
                   </ContextMenu>
                </contextMenu>
-            </ListView>
+            </TreeView>
             <TextField fx:id="searchTf" alignment="CENTER" promptText="Search..." style="-fx-background-image: url('images/search_icon.png');; -fx-background-repeat: no-repeat; -fx-background-position: left center;">
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" top="5.0" />
@@ -75,7 +72,7 @@
             </StackPane>
             <HBox alignment="CENTER_LEFT" VBox.vgrow="NEVER">
                <children>
-                  <Button fx:id="loadArchiveBtn" mnemonicParsing="false" onAction="#openArchiveDirectory" text="Unpack">
+                  <Button fx:id="loadArchiveBtn" mnemonicParsing="false" onAction="#unpackArchive" text="Unpack">
                      <tooltip>
                         <Tooltip text="Use this button to load your sprites from the sprites archive" />
                      </tooltip>
@@ -91,7 +88,7 @@
                         <Insets right="5.0" />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="loadSpriteBtn" mnemonicParsing="false" onAction="#openSpriteDirectory" text="Load">
+                  <Button fx:id="loadSpriteBtn" mnemonicParsing="false" onAction="#loadFromDirectory" text="Load">
                      <tooltip>
                         <Tooltip text="Use this button to load actual images" />
                      </tooltip>
@@ -150,7 +147,7 @@
                                           <Tooltip text="This is the actual sprites name, whatever you set it to be" />
                                        </tooltip>
                                     </TextField>
-                                    <TextField fx:id="widthTf" alignment="CENTER" editable="false" promptText="Width">
+                                    <TextField fx:id="widthTf" alignment="CENTER" editable="false" onKeyPressed="#handleKeyEventPressed" promptText="Width">
                                        <VBox.margin>
                                           <Insets bottom="5.0" left="5.0" right="5.0" />
                                        </VBox.margin>
@@ -158,7 +155,7 @@
                                           <Tooltip text="This is the sprites actual width" />
                                        </tooltip>
                                     </TextField>
-                                    <TextField fx:id="offsetXTf" alignment="CENTER" promptText="OffsetX">
+                                    <TextField fx:id="offsetXTf" alignment="CENTER" onKeyPressed="#handleKeyEventPressed" promptText="OffsetX">
                                        <VBox.margin>
                                           <Insets bottom="5.0" left="5.0" right="5.0" />
                                        </VBox.margin>
@@ -170,7 +167,7 @@
                               </VBox>
                               <VBox alignment="CENTER" HBox.hgrow="ALWAYS">
                                  <children>
-                                    <TextField fx:id="indexTf" alignment="CENTER" editable="false" promptText="Index">
+                                    <TextField fx:id="indexTf" alignment="CENTER" editable="false" onKeyPressed="#handleKeyEventPressed" promptText="Index">
                                        <VBox.margin>
                                           <Insets bottom="5.0" right="5.0" />
                                        </VBox.margin>
@@ -178,7 +175,7 @@
                                           <Tooltip text="This is the sprites unique id, no two sprites should have the same id" />
                                        </tooltip>
                                     </TextField>
-                                    <TextField fx:id="heightTf" alignment="CENTER" editable="false" promptText="Height">
+                                    <TextField fx:id="heightTf" alignment="CENTER" editable="false" onKeyPressed="#handleKeyEventPressed" promptText="Height">
                                        <VBox.margin>
                                           <Insets bottom="5.0" right="5.0" />
                                        </VBox.margin>
@@ -186,7 +183,7 @@
                                           <Tooltip text="This is the sprites actual height" />
                                        </tooltip>
                                     </TextField>
-                                    <TextField fx:id="offsetYTf" alignment="CENTER" promptText="OffsetY">
+                                    <TextField fx:id="offsetYTf" alignment="CENTER" onKeyPressed="#handleKeyEventPressed" promptText="OffsetY">
                                        <VBox.margin>
                                           <Insets bottom="5.0" right="5.0" />
                                        </VBox.margin>
