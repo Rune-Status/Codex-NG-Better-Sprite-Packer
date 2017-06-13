@@ -525,7 +525,10 @@ public final class Controller implements Initializable {
 						
 						SpriteBase sprite = SpriteBase.convert(SwingFXUtils.fromFXImage(image, null));
 						
-						sprite.setId(Integer.parseInt(spriteTI.getValue().getName()));						
+						sprite.setId(Integer.parseInt(spriteTI.getValue().getName()));	
+						sprite.setName(spriteTI.getValue().getSpriteName());
+						sprite.setDrawOffsetX(spriteTI.getValue().getDrawOffsetX());
+						sprite.setDrawOffsetY(spriteTI.getValue().getDrawOffsetY());
 
 						archive.add(sprite);
 
