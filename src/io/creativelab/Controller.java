@@ -32,6 +32,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
@@ -120,7 +121,51 @@ public final class Controller implements Initializable {
 				return;
 			}
 			
-			if (newValue.getValue().isSpriteNode()) {
+			if (newValue.getValue().isArchiveNode()) {
+				
+				MenuItem addMI = new MenuItem("Add");				
+				addMI.setOnAction(e -> addSprite());
+				
+				MenuItem removeMI = new MenuItem("Remove");
+				removeMI.setOnAction(e -> remove());
+				
+				MenuItem clearMI = new MenuItem("Clear");
+				
+				
+				MenuItem dumpMI = new MenuItem("Dump");
+				dumpMI.setOnAction(e -> dumpSprite());
+				
+				MenuItem viewMI = new MenuItem("View Directory");
+				viewMI.setOnAction(e -> viewCurrentDirectory());
+				
+				ContextMenu menu = new ContextMenu();
+				
+				menu.getItems().addAll(addMI, removeMI, clearMI, dumpMI, viewMI);
+				
+				treeView.setContextMenu(menu);
+				
+			} else if (newValue.getValue().isSpriteNode()) {
+				
+				MenuItem addMI = new MenuItem("Add");				
+				addMI.setOnAction(e -> addSprite());
+				
+				MenuItem replaceMI = new MenuItem("Replace");
+				replaceMI.setOnAction(e -> replaceSprite());
+				
+				MenuItem removeMI = new MenuItem("Remove");
+				removeMI.setOnAction(e -> remove());
+				
+				MenuItem dumpMI = new MenuItem("Dump");
+				dumpMI.setOnAction(e -> dumpSprite());
+				
+				MenuItem viewMI = new MenuItem("View Directory");
+				viewMI.setOnAction(e -> viewCurrentDirectory());
+				
+				ContextMenu menu = new ContextMenu();
+				
+				menu.getItems().addAll(addMI, replaceMI, removeMI, dumpMI, viewMI);
+				
+				treeView.setContextMenu(menu);				
 				
 				SpriteNode spriteNode = (SpriteNode) newValue.getValue();
 				
@@ -146,6 +191,23 @@ public final class Controller implements Initializable {
 				} catch (Exception ex) {
 
 				}
+			} else {
+				MenuItem addMI = new MenuItem("Add");				
+				addMI.setOnAction(e -> addSprite());
+				
+				MenuItem clearMI = new MenuItem("Clear");				
+				
+				MenuItem dumpMI = new MenuItem("Dump");
+				dumpMI.setOnAction(e -> dumpSprite());
+				
+				MenuItem viewMI = new MenuItem("View Directory");
+				viewMI.setOnAction(e -> viewCurrentDirectory());
+				
+				ContextMenu menu = new ContextMenu();
+				
+				menu.getItems().addAll(addMI, clearMI, dumpMI, viewMI);
+				
+				treeView.setContextMenu(menu);
 			}
 
 		});
