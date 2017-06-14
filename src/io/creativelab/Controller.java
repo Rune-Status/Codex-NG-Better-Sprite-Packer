@@ -77,8 +77,6 @@ public final class Controller implements Initializable {
 	@FXML
 	MenuItem dumpSpriteMI, dumpAllSpritesMI, viewDirectoryMI;
 
-	Image newImage;
-
 	File currentDirectory = new File(System.getProperty("user.home"));
 
 	@FXML
@@ -90,12 +88,16 @@ public final class Controller implements Initializable {
 	@FXML
 	VBox rightVBox;
 
+	Image emptyIcon;
+
 	private double xOffset, yOffset;
 
 	SpriteCache cache = SpriteCache.create();
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+
+		emptyIcon = new Image(App.class.getResourceAsStream("/icons/question_mark.png"));
 
 		TreeItem<Node> rootTI = new TreeItem<Node>(new Node("Cache"));
 
@@ -475,7 +477,48 @@ public final class Controller implements Initializable {
 	}
 
 	@FXML
-	private void removeSprite() {
+	private void remove() {
+
+		List<TreeItem<Node>> selectedItems = treeView.getSelectionModel().getSelectedItems();
+
+		for (TreeItem<Node> selected : selectedItems) {
+			
+			TreeItem<Node> parent = selected.getParent();
+
+			// selected the root
+			if (parent == null) {
+				treeView.getRoot().getChildren().clear();
+				break;
+			}
+
+			// selected a directory
+			if (selected.getGraphic() == null) {
+				parent.getChildren().remove(selected);
+				continue;
+			}
+			
+			// selected an image
+			final int id = Integer.parseInt(selected.getValue().getName());
+
+			if (id == parent.getChildren().size() - 1) {
+
+				parent.getChildren().remove(id);
+
+			} else {
+
+				ImageView imageView = new ImageView(emptyIcon);
+
+				imageView.setFitWidth(32);
+				imageView.setFitHeight(32);
+				imageView.setPreserveRatio(true);
+
+				parent.getChildren().add(id, new TreeItem<Node>(new Node(Integer.toString(id)), imageView));
+
+				parent.getChildren().remove(id + 1);
+
+			}
+
+		}
 
 	}
 
@@ -522,15 +565,15 @@ public final class Controller implements Initializable {
 						}
 
 						Image image = imageView.getImage();
-						
+
 						SpriteBase sprite = SpriteBase.convert(SwingFXUtils.fromFXImage(image, null));
-						
-						sprite.setId(Integer.parseInt(spriteTI.getValue().getName()));	
+
+						sprite.setId(Integer.parseInt(spriteTI.getValue().getName()));
 						sprite.setName(spriteTI.getValue().getSpriteName());
 						sprite.setDrawOffsetX(spriteTI.getValue().getDrawOffsetX());
 						sprite.setDrawOffsetY(spriteTI.getValue().getDrawOffsetY());
 
-						archive.add(sprite);				
+						archive.add(sprite);
 
 					}
 
