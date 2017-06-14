@@ -196,13 +196,19 @@ public final class Controller implements Initializable {
 					for (ImageArchive imageArchive : cache.getImageArchives()) {
 
 						TreeItem<Node> imageArchiveTI = new TreeItem<>(new Node(archiveIndex, Integer.toString(imageArchive.getHash())));
+						
+						final List<SpriteNode> spriteNodes = new ArrayList<>();						
 
-						for (SpriteBase sprite : imageArchive.getSprites()) {
-
-							BufferedImage bimage = sprite.toBufferedImage();
-
+						for (SpriteBase sprite : imageArchive.getSprites()) {							
+							spriteNodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId())).setbImage(sprite.toBufferedImage()));
+						}
+						
+						Collections.sort(spriteNodes);						
+						
+						for (SpriteNode spriteNode : spriteNodes) {
+							
 							Image image = SwingFXUtils
-									.toFXImage(Misc.makeColorTransparent(ColorQuantizer.quantize(bimage),
+									.toFXImage(Misc.makeColorTransparent(ColorQuantizer.quantize(spriteNode.getbImage()),
 											Misc.fxColorToAWTColor(colorPicker.getValue())), null);
 
 							ImageView imageView = new ImageView(image);
@@ -210,11 +216,9 @@ public final class Controller implements Initializable {
 							imageView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
 							imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
 							imageView.setPreserveRatio(true);
-
-							TreeItem<Node> spriteTI = new TreeItem<>(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId())), imageView);
-
-							imageArchiveTI.getChildren().add(spriteTI);
-
+							
+							imageArchiveTI.getChildren().add(new TreeItem<Node>(spriteNode, imageView));
+							
 						}
 
 						Platform.runLater(() -> {
@@ -297,7 +301,7 @@ public final class Controller implements Initializable {
 
 						for (SpriteBase sprite : archive.getSprites()) {
 							nodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId())).setName(sprite.getName()).setOffsetX(sprite.getDrawOffsetX()).setOffsetY(sprite.getDrawOffsetY()).setbImage(sprite.toBufferedImage()));
-						}						
+						}	
 						
 						Collections.sort(nodes);
 						
