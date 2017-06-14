@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -99,7 +101,7 @@ public final class Controller implements Initializable {
 
 		emptyIcon = new Image(App.class.getResourceAsStream("/icons/question_mark.png"));
 
-		TreeItem<Node> rootTI = new TreeItem<Node>(new Node("Cache"));
+		TreeItem<Node> rootTI = new TreeItem<Node>(new Node(-1, "Cache"));
 
 		rootTI.setExpanded(true);
 
@@ -110,8 +112,11 @@ public final class Controller implements Initializable {
 		treeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
-			if (newValue.isLeaf()) {
-
+			
+			if (newValue.getValue().isSpriteNode()) {
+				
+				SpriteNode spriteNode = (SpriteNode) newValue.getValue();
+				
 				try {
 
 					ImageView view = (ImageView) newValue.getGraphic();
@@ -124,18 +129,18 @@ public final class Controller implements Initializable {
 
 					imageView.setImage(view.getImage());
 
-					indexTf.setText(newValue.getValue().getName());
+					indexTf.setText(Integer.toString(spriteNode.getId()));
 					widthTf.setText(Double.toString(image.getWidth()));
 					heightTf.setText(Double.toString(image.getHeight()));
-					nameTf.setText(newValue.getValue().getSpriteName());
-					offsetXTf.setText("" + newValue.getValue().getDrawOffsetX());
-					offsetYTf.setText("" + newValue.getValue().getDrawOffsetY());
+					nameTf.setText(spriteNode.getName());
+					offsetXTf.setText(Integer.toString(spriteNode.getOffsetX()));
+					offsetYTf.setText(Integer.toString(spriteNode.getOffsetY()));
 
 				} catch (Exception ex) {
 
 				}
-
 			}
+
 		});
 	}
 
@@ -186,9 +191,11 @@ public final class Controller implements Initializable {
 				protected Boolean call() throws Exception {
 					SpriteCache cache = SpriteCache.load(selectedDirectory);
 
+					int archiveIndex = 0;
+					
 					for (ImageArchive imageArchive : cache.getImageArchives()) {
 
-						TreeItem<Node> imageArchiveTI = new TreeItem<>(new Node("" + imageArchive.getHash()));
+						TreeItem<Node> imageArchiveTI = new TreeItem<>(new Node(archiveIndex, Integer.toString(imageArchive.getHash())));
 
 						for (SpriteBase sprite : imageArchive.getSprites()) {
 
@@ -204,7 +211,7 @@ public final class Controller implements Initializable {
 							imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
 							imageView.setPreserveRatio(true);
 
-							TreeItem<Node> spriteTI = new TreeItem<>(new Node("" + sprite.getId()), imageView);
+							TreeItem<Node> spriteTI = new TreeItem<>(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId())), imageView);
 
 							imageArchiveTI.getChildren().add(spriteTI);
 
@@ -213,6 +220,8 @@ public final class Controller implements Initializable {
 						Platform.runLater(() -> {
 							treeView.getRoot().getChildren().add(imageArchiveTI);
 						});
+						
+						archiveIndex++;
 
 					}
 					return true;
@@ -277,31 +286,38 @@ public final class Controller implements Initializable {
 				protected Boolean call() throws Exception {
 
 					SpriteCache cache = SpriteCache.decode(Files.readAllBytes(selectedFile.toPath()));
+					
+					int archiveIndex = 0;
 
 					for (ImageArchive archive : cache.getImageArchives()) {
 
-						TreeItem<Node> archiveTI = new TreeItem<>(new Node("" + archive.getHash()));
+						TreeItem<Node> archiveTI = new TreeItem<>(new Node(archiveIndex, Integer.toString(archive.getHash())));
+						
+						List<SpriteNode> nodes = new ArrayList<>();
 
 						for (SpriteBase sprite : archive.getSprites()) {
-
-							BufferedImage bimage = sprite.toBufferedImage();
+							nodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId())).setName(sprite.getName()).setOffsetX(sprite.getDrawOffsetX()).setOffsetY(sprite.getDrawOffsetY()).setbImage(sprite.toBufferedImage()));
+						}						
+						
+						Collections.sort(nodes);
+						
+						for (SpriteNode node : nodes) {
+							
+							BufferedImage bimage = node.getbImage();
 
 							ImageView imageView = new ImageView(SwingFXUtils.toFXImage(bimage, null));
 
 							imageView.setFitWidth(bimage.getWidth() > 128 ? 128 : bimage.getWidth());
 							imageView.setFitHeight(bimage.getHeight() > 128 ? 128 : bimage.getHeight());
 							imageView.setPreserveRatio(true);
-
-							archiveTI.getChildren()
-									.add(new TreeItem<Node>(new Node("" + sprite.getId())
-											.setSpriteName(sprite.getName()).setDrawOffsetX(sprite.getDrawOffsetX())
-											.setDrawOffsetY(sprite.getDrawOffsetY()), imageView));
-
+							
 						}
 
 						Platform.runLater(() -> {
 							treeView.getRoot().getChildren().add(archiveTI);
 						});
+						
+						archiveIndex++;
 
 					}
 
@@ -323,20 +339,22 @@ public final class Controller implements Initializable {
 
 			TreeItem<Node> selectedTI = treeView.getSelectionModel().getSelectedItem();
 
-			if (!selectedTI.isLeaf()) {
+			if (!selectedTI.getValue().isSpriteNode()) {
 				return;
 			}
+			
+			SpriteNode spriteNode = (SpriteNode) selectedTI.getValue();
 
 			if (!nameTf.getText().isEmpty() && nameTf.getText().length() <= 23) {
-				selectedTI.getValue().setSpriteName(nameTf.getText());
+				spriteNode.setName(nameTf.getText());
 			}
 
 			if (!offsetXTf.getText().isEmpty() && offsetXTf.getText().length() < 3) {
-				selectedTI.getValue().setDrawOffsetX(Integer.parseInt(offsetXTf.getText()));
+				spriteNode.setOffsetX(Integer.parseInt(offsetXTf.getText()));
 			}
 
 			if (!offsetYTf.getText().isEmpty() && offsetYTf.getText().length() < 3) {
-				selectedTI.getValue().setDrawOffsetY(Integer.parseInt(offsetYTf.getText()));
+				spriteNode.setOffsetY(Integer.parseInt(offsetYTf.getText()));
 			}
 
 			selectedTI.setValue(selectedTI.getValue().copy());
@@ -391,7 +409,7 @@ public final class Controller implements Initializable {
 
 					if (!selectedItem.isLeaf()) {
 
-						File parentDir = new File(selectedDir, selectedItem.getValue().getName());
+						File parentDir = new File(selectedDir, selectedItem.getValue().getDisplayName());
 
 						if (!parentDir.exists()) {
 							parentDir.mkdirs();
@@ -402,7 +420,7 @@ public final class Controller implements Initializable {
 							// root
 							if (!nodeTI.isLeaf()) {
 
-								File childDir = new File(parentDir, nodeTI.getValue().getName());
+								File childDir = new File(parentDir, nodeTI.getValue().getDisplayName());
 
 								if (!childDir.exists()) {
 									childDir.mkdirs();
@@ -415,7 +433,7 @@ public final class Controller implements Initializable {
 
 									try {
 										ImageIO.write(bimage, "png",
-												new File(childDir, spriteTI.getValue().getName() + ".png"));
+												new File(childDir, spriteTI.getValue().getId() + ".png"));
 									} catch (IOException e) {
 										e.printStackTrace();
 										continue;
@@ -430,7 +448,7 @@ public final class Controller implements Initializable {
 
 								try {
 									ImageIO.write(bimage, "png",
-											new File(parentDir, nodeTI.getValue().getName() + ".png"));
+											new File(parentDir, nodeTI.getValue().getId() + ".png"));
 								} catch (IOException e) {
 									e.printStackTrace();
 									continue;
@@ -446,7 +464,7 @@ public final class Controller implements Initializable {
 
 						try {
 							ImageIO.write(bimage, "png",
-									new File(selectedDir, selectedItem.getValue().getName() + ".png"));
+									new File(selectedDir, selectedItem.getValue().getId() + ".png"));
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -498,7 +516,7 @@ public final class Controller implements Initializable {
 			}
 			
 			// selected an image
-			final int id = Integer.parseInt(selected.getValue().getName());
+			final int id = selected.getValue().getId();
 
 			if (id == parent.getChildren().size() - 1) {
 
@@ -512,7 +530,7 @@ public final class Controller implements Initializable {
 				imageView.setFitHeight(32);
 				imageView.setPreserveRatio(true);
 
-				parent.getChildren().add(id, new TreeItem<Node>(new Node(Integer.toString(id)), imageView));
+				parent.getChildren().add(id, new TreeItem<Node>(new SpriteNode(id, Integer.toString(id)), imageView));
 
 				parent.getChildren().remove(id + 1);
 
@@ -554,7 +572,7 @@ public final class Controller implements Initializable {
 
 				for (TreeItem<Node> imageArchiveTI : treeView.getRoot().getChildren()) {
 
-					ImageArchive archive = ImageArchive.create(Integer.parseInt(imageArchiveTI.getValue().getName()));
+					ImageArchive archive = ImageArchive.create(imageArchiveTI.getValue().getId());
 
 					for (TreeItem<Node> spriteTI : imageArchiveTI.getChildren()) {
 
@@ -567,11 +585,13 @@ public final class Controller implements Initializable {
 						Image image = imageView.getImage();
 
 						SpriteBase sprite = SpriteBase.convert(SwingFXUtils.fromFXImage(image, null));
+						
+						SpriteNode spriteNode = (SpriteNode) spriteTI.getValue();
 
-						sprite.setId(Integer.parseInt(spriteTI.getValue().getName()));
-						sprite.setName(spriteTI.getValue().getSpriteName());
-						sprite.setDrawOffsetX(spriteTI.getValue().getDrawOffsetX());
-						sprite.setDrawOffsetY(spriteTI.getValue().getDrawOffsetY());
+						sprite.setId(spriteTI.getValue().getId());
+						sprite.setName(spriteNode.getName());
+						sprite.setDrawOffsetX(spriteNode.getOffsetX());
+						sprite.setDrawOffsetY(spriteNode.getOffsetY());
 
 						archive.add(sprite);
 

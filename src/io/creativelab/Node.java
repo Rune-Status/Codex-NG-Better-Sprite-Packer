@@ -1,66 +1,49 @@
 package io.creativelab;
 
-public final class Node {
+public class Node implements Comparable<Node> {
 	
-	private String name;
+	protected int id;
 	
-	private String spriteName;
+	protected String displayName;
 	
-	private int drawOffsetX;
-	
-	private int drawOffsetY;
-	
-	public Node(String name) {
-		this.name = name;
+	public Node(int id, String dispayName) {
+		this.id = id;
+		this.displayName = dispayName;
 	}
 
 	public Node copy() {
-		Node node = new Node(name);
-		node.spriteName = spriteName;
-		node.drawOffsetX = drawOffsetX;
-		node.drawOffsetY = drawOffsetY;
+		Node node = new Node(id, displayName);
 		return node;
 	}
 	
-	public String getName() {
-		return name;
+	public boolean isSpriteNode() {
+		return this instanceof SpriteNode;
 	}
 
-	public Node setName(String name) {
-		this.name = name;
-		return this;
-	}
-	
-	public int getDrawOffsetX() {
-		return drawOffsetX;
+	public int getId() {
+		return id;
 	}
 
-	public Node setDrawOffsetX(int drawOffsetX) {
-		this.drawOffsetX = drawOffsetX;
-		return this;
+	public void setId(int id) {
+		this.id = id;
 	}
 
-	public int getDrawOffsetY() {
-		return drawOffsetY;
+	public String getDisplayName() {
+		return displayName;
 	}
 
-	public Node setDrawOffsetY(int drawOffsetY) {
-		this.drawOffsetY = drawOffsetY;
-		return this;
-	}	
-
-	public String getSpriteName() {
-		return spriteName;
-	}
-
-	public Node setSpriteName(String spriteName) {
-		this.spriteName = spriteName;
-		return this;
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return displayName;
+	}
+
+	@Override
+	public int compareTo(Node o) {
+		return id > o.getId() ? 1 : id < o.getId() ? -1 : 0;
 	}
 
 }
