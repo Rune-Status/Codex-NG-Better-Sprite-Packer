@@ -1,4 +1,4 @@
-package io.creativelab;
+package io.creativelab.node;
 
 import java.awt.image.BufferedImage;
 

@@ -1,4 +1,4 @@
-package io.creativelab;
+package io.creativelab.node;
 
 public class Node implements Comparable<Node> {
 	
@@ -14,6 +14,10 @@ public class Node implements Comparable<Node> {
 	public Node copy() {
 		Node node = new Node(id, displayName);
 		return node;
+	}
+	
+	public boolean isArchiveNode() {
+		return this instanceof ArchiveNode;
 	}
 	
 	public boolean isSpriteNode() {

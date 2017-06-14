@@ -19,6 +19,9 @@ import com.creativelab.sprite.SpriteBase;
 import com.creativelab.sprite.SpriteCache;
 import com.creativelab.util.ColorQuantizer;
 
+import io.creativelab.node.ArchiveNode;
+import io.creativelab.node.Node;
+import io.creativelab.node.SpriteNode;
 import io.creativelab.util.Dialogue;
 import io.creativelab.util.Misc;
 import javafx.animation.PauseTransition;
@@ -113,6 +116,10 @@ public final class Controller implements Initializable {
 
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
 			
+			if (newValue == null || newValue.getValue() == null) {
+				return;
+			}
+			
 			if (newValue.getValue().isSpriteNode()) {
 				
 				SpriteNode spriteNode = (SpriteNode) newValue.getValue();
@@ -195,7 +202,7 @@ public final class Controller implements Initializable {
 					
 					for (ImageArchive imageArchive : cache.getImageArchives()) {
 
-						TreeItem<Node> imageArchiveTI = new TreeItem<>(new Node(archiveIndex, Integer.toString(imageArchive.getHash())));
+						TreeItem<Node> imageArchiveTI = new TreeItem<>(new ArchiveNode(archiveIndex, Integer.toString(imageArchive.getHash())));
 						
 						final List<SpriteNode> spriteNodes = new ArrayList<>();						
 
@@ -295,25 +302,27 @@ public final class Controller implements Initializable {
 
 					for (ImageArchive archive : cache.getImageArchives()) {
 
-						TreeItem<Node> archiveTI = new TreeItem<>(new Node(archiveIndex, Integer.toString(archive.getHash())));
+						TreeItem<Node> archiveTI = new TreeItem<>(new ArchiveNode(archiveIndex, Integer.toString(archive.getHash())));
 						
-						List<SpriteNode> nodes = new ArrayList<>();
+						List<SpriteNode> spriteNodes = new ArrayList<>();
 
 						for (SpriteBase sprite : archive.getSprites()) {
-							nodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId())).setName(sprite.getName()).setOffsetX(sprite.getDrawOffsetX()).setOffsetY(sprite.getDrawOffsetY()).setbImage(sprite.toBufferedImage()));
+							spriteNodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId())).setName(sprite.getName()).setOffsetX(sprite.getDrawOffsetX()).setOffsetY(sprite.getDrawOffsetY()).setbImage(sprite.toBufferedImage()));
 						}	
 						
-						Collections.sort(nodes);
+						Collections.sort(spriteNodes);						
 						
-						for (SpriteNode node : nodes) {
+						for (SpriteNode spriteNode : spriteNodes) {							
 							
-							BufferedImage bimage = node.getbImage();
+							BufferedImage bimage = spriteNode.getbImage();
 
 							ImageView imageView = new ImageView(SwingFXUtils.toFXImage(bimage, null));
 
 							imageView.setFitWidth(bimage.getWidth() > 128 ? 128 : bimage.getWidth());
 							imageView.setFitHeight(bimage.getHeight() > 128 ? 128 : bimage.getHeight());
 							imageView.setPreserveRatio(true);
+							
+							archiveTI.getChildren().add(new TreeItem<Node>(new SpriteNode(spriteNode.getId(), Integer.toString(spriteNode.getId())), imageView));
 							
 						}
 
@@ -575,8 +584,14 @@ public final class Controller implements Initializable {
 				final SpriteCache cache = SpriteCache.create();
 
 				for (TreeItem<Node> imageArchiveTI : treeView.getRoot().getChildren()) {
+					
+					if (!imageArchiveTI.getValue().isArchiveNode()) {
+						continue;
+					}
+					
+					final ArchiveNode archiveNode = (ArchiveNode) imageArchiveTI.getValue();
 
-					ImageArchive archive = ImageArchive.create(imageArchiveTI.getValue().getId());
+					final ImageArchive archive = ImageArchive.create(archiveNode.getHash());
 
 					for (TreeItem<Node> spriteTI : imageArchiveTI.getChildren()) {
 
