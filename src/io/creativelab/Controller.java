@@ -130,7 +130,7 @@ public final class Controller implements Initializable {
 				removeMI.setOnAction(e -> remove());
 				
 				MenuItem clearMI = new MenuItem("Clear");
-				
+				clearMI.setOnAction(e -> clearDirectory());				
 				
 				MenuItem dumpMI = new MenuItem("Dump");
 				dumpMI.setOnAction(e -> dumpSprite());
@@ -195,7 +195,8 @@ public final class Controller implements Initializable {
 				MenuItem addMI = new MenuItem("Add");				
 				addMI.setOnAction(e -> addSprite());
 				
-				MenuItem clearMI = new MenuItem("Clear");				
+				MenuItem clearMI = new MenuItem("Clear");	
+				clearMI.setOnAction(e -> clearDirectory());
 				
 				MenuItem dumpMI = new MenuItem("Dump");
 				dumpMI.setOnAction(e -> dumpSprite());
@@ -695,6 +696,18 @@ public final class Controller implements Initializable {
 
 		});
 
+	}
+	
+	private void clearDirectory() {
+		
+		final List<TreeItem<Node>> selectedNodes = treeView.getSelectionModel().getSelectedItems();
+		
+		for (TreeItem<Node> selectedNode : selectedNodes) {
+			
+			selectedNode.getChildren().clear();
+			
+		}
+		
 	}
 
 	@FXML
