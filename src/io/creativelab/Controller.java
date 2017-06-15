@@ -320,7 +320,8 @@ public final class Controller implements Initializable {
 							continue;
 						}
 
-						if (childNodes.getValue().getId() == id) {
+						if (childNodes.getValue().getId() == id) {							
+							
 							SpriteNode spriteNode = (SpriteNode) childNodes.getValue();
 
 							if (!spriteNode.isEmpty()) {
@@ -335,16 +336,14 @@ public final class Controller implements Initializable {
 								Optional<ButtonType> result = alert.showAndWait();
 
 								if (!result.isPresent()) {
-									return;
+									break;
 								}
 
 								if (result.get() == ButtonType.YES) {
 
-									Image image = SwingFXUtils.toFXImage(Misc.convert(
-											Misc.makeColorTransparent(
-													ColorQuantizer.quantize(ImageIO.read(selectedFile)),
-													Misc.fxColorToAWTColor(colorPicker.getValue())),
-											BufferedImage.TYPE_INT_ARGB), null);
+									Image image = SwingFXUtils.toFXImage(Misc
+											.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)),
+													Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB), null);
 
 									ImageView imageView = new ImageView();
 
@@ -750,12 +749,12 @@ public final class Controller implements Initializable {
 
 	@FXML
 	private void replaceSprite() {
-		
+
 		if (treeView.getSelectionModel().getSelectedItems().size() > 1) {
 			Dialogue.showWarning("Please select only one sprite to replace.");
 			return;
 		}
-		
+
 		TreeItem<Node> selectedNode = treeView.getSelectionModel().getSelectedItem();
 
 		TreeItem<Node> parentNode = selectedNode.getParent();
@@ -774,51 +773,67 @@ public final class Controller implements Initializable {
 		fileChooser.setInitialDirectory(currentDirectory);
 
 		File selectedFile = fileChooser.showOpenDialog(App.getMainStage());
-		
+
 		if (selectedFile == null) {
 			return;
 		}
-		
+
 		if (!Misc.isValidImage(selectedFile.getName())) {
 			Dialogue.showWarning("Selected file is not a valid image.");
 			return;
 		}
-		
-		Alert alert = new Alert(AlertType.WARNING);
-		alert.setTitle("Warning");
-		alert.setContentText("Are you sure you would like to replace this sprite?");
-		alert.getButtonTypes().clear();
-		alert.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
-		
-		Optional<ButtonType> result = alert.showAndWait();
-		
-		if (!result.isPresent()) {
+
+		if (!selectedNode.getValue().isSpriteNode()) {
 			return;
 		}
-		
-		if (result.get() != ButtonType.YES) {
-			return;
-		}		
 
 		try {
-			Image image = SwingFXUtils.toFXImage(Misc.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)), Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB), null);
-		
+			BufferedImage bimage2 = ((SpriteNode) selectedNode.getValue()).getbImage();
+
+			BufferedImage bimage1 = Misc
+					.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)),
+							Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB);
+
+			if (Misc.isDuplicateImage(bimage1, bimage2)) {
+				Dialogue.showWarning("Detected a duplicate image.");
+				return;
+			}
+
+			Alert alert = new Alert(AlertType.WARNING);
+			alert.setTitle("Warning");
+			alert.setContentText("Are you sure you would like to replace this sprite?");
+			alert.getButtonTypes().clear();
+			alert.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+
+			Optional<ButtonType> result = alert.showAndWait();
+
+			if (!result.isPresent()) {
+				return;
+			}
+
+			if (result.get() != ButtonType.YES) {
+				return;
+			}
+
+			Image image = SwingFXUtils.toFXImage(bimage1, null);
+
 			ImageView imageView = new ImageView();
 			imageView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
 			imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
 			imageView.setPreserveRatio(true);
 			imageView.setImage(image);
-			
+
 			final int id = selectedNode.getValue().getId();
-			
+
 			parentNode.getChildren().remove(id);
-			
-			parentNode.getChildren().add(id, new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), false), imageView));
-			
-		} catch (IOException e) {
-			e.printStackTrace();
+
+			parentNode.getChildren().add(id,
+					new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), false), imageView));
+
+		} catch (Exception ex) {
+
 		}
-		
+
 	}
 
 	@FXML

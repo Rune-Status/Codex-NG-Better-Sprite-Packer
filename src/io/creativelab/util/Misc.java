@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageFilter;
 import java.awt.image.RGBImageFilter;
+import java.awt.image.DataBufferInt;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
+import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
@@ -24,6 +26,27 @@ public final class Misc {
 	
 	private Misc() {
 		
+	}
+	
+	public static boolean isDuplicateImage(BufferedImage image1, BufferedImage image2) {
+		Objects.requireNonNull(image1);
+		Objects.requireNonNull(image2);
+		
+		int[] pixels1 = ((DataBufferInt)image1.getRaster().getDataBuffer()).getData();
+		
+		int[] pixels2 = ((DataBufferInt)image2.getRaster().getDataBuffer()).getData();
+		
+		if (pixels1.length != pixels2.length) {
+			return false;
+		}
+		
+		for (int i = 0; i < pixels1.length; i++) {
+			if (pixels1[i] != pixels2[i]) {
+				return false;
+			}
+		}
+		
+		return true;		
 	}
 	
 	public static BufferedImage convert(BufferedImage src, int bufImgType) {
