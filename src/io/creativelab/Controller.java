@@ -24,8 +24,6 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 public final class Controller implements Initializable {
-
-	final SpriteCache cache = SpriteCache.create();
 	
 	private double xOffset, yOffset;
 
