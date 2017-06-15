@@ -22,6 +22,16 @@ public final class Controller implements Initializable {
 	}
 	
 	@FXML
+	private void pack() {
+		
+	}
+	
+	@FXML
+	private void unpack() {
+		
+	}
+	
+	@FXML
 	private void handleMouseDragged(MouseEvent event) {
 
 		Stage stage = App.getMainStage();

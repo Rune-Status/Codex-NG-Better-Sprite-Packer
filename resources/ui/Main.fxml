@@ -52,12 +52,12 @@
    <center>
       <HBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="unpackBtn" minWidth="120.0" mnemonicParsing="false" text="Unpack">
+            <Button fx:id="unpackBtn" minWidth="120.0" mnemonicParsing="false" onAction="#unpack" text="Unpack">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Button>
-            <Button fx:id="packBtn" minWidth="120.0" mnemonicParsing="false" text="Pack">
+            <Button fx:id="packBtn" minWidth="120.0" mnemonicParsing="false" onAction="#pack" text="Pack">
                <HBox.margin>
                   <Insets bottom="5.0" right="5.0" top="5.0" />
                </HBox.margin>
