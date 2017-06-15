@@ -4,8 +4,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ResourceBundle;
 
+import javax.imageio.ImageIO;
+
+import com.creativelab.sprite.ImageArchive;
+import com.creativelab.sprite.SpriteBase;
 import com.creativelab.sprite.SpriteCache;
 import io.creativelab.util.Dialogue;
 import javafx.application.Platform;
@@ -14,6 +19,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 public final class Controller implements Initializable {
@@ -66,7 +73,61 @@ public final class Controller implements Initializable {
 	
 	@FXML
 	private void unpack() {
+		FileChooser chooser = new FileChooser();
+		chooser.setInitialDirectory(new File(System.getProperty("user.home")));
+		chooser.setTitle("Open Resource File");
+		chooser.getExtensionFilters().addAll(new ExtensionFilter("Data files", "*.dat"));
+
+		File selectedFile = chooser.showOpenDialog(App.getMainStage());
 		
+		if (selectedFile == null) {
+			return;
+		}
+		
+		new Thread(new Task<Boolean>() {
+
+			@Override
+			protected Boolean call() throws Exception {
+				try {
+					byte[] bytes = Files.readAllBytes(selectedFile.toPath());
+					
+					if (bytes.length < 3) {
+						Platform.runLater(() -> Dialogue.showWarning("Detected wrong file type or corrupt data.").showAndWait());
+					}
+					
+					if (bytes[0] != 'b' && bytes[1] != 's' && bytes[2] != 'p') {
+						Platform.runLater(() -> Dialogue.showWarning("Detected wrong file type.").showAndWait());
+					}
+					
+					final SpriteCache cache = SpriteCache.decode(bytes);
+					
+					File root = new File("./SpriteCache/");
+					
+					if (!root.exists()) {
+						root.mkdirs();
+					}
+					
+					for (ImageArchive archive : cache.getImageArchives()) {
+						File archiveDir = new File(root, Integer.toString(archive.getHash()));
+						
+						if (!archiveDir.exists()) {
+							archiveDir.mkdirs();
+						}
+						
+						for (SpriteBase sprite : archive.getSprites()) {					
+							ImageIO.write(sprite.toBufferedImage(), "png", new File(archiveDir, sprite.getId() + ".png"));					
+						}
+					}
+					
+					Platform.runLater(() -> Dialogue.openDirectory("Would you like to view this directory?", root));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return true;
+			}
+			
+		}).start();		
+
 	}
 	
 	@FXML
