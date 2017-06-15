@@ -20,8 +20,6 @@ import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
-import io.creativelab.util.msg.ExceptionMessage;
-
 public final class Misc {
 	
 	private Misc() {
@@ -137,7 +135,7 @@ public final class Misc {
                               Runtime.getRuntime().exec(new String[] {browser, url});
                   }
             } catch (Exception ex) {
-                  new ExceptionMessage("Failed to open URL.", ex);
+                  Dialogue.showException("Failed to open URL.", ex).showAndWait();
             }
       }
       
