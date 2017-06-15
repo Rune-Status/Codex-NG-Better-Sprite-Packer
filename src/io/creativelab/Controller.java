@@ -232,6 +232,15 @@ public final class Controller implements Initializable {
 				return;
 			}
 			
+			for (TreeItem<Node> childNodes : selectedNode.getChildren()) {
+				
+				if (childNodes.getValue().getDisplayName().equalsIgnoreCase(name)) {
+					Dialogue.showWarning(String.format("Archive=%s already exists.", name));
+					return;
+				}
+				
+			}
+			
 			selectedNode.getChildren().add(new TreeItem<Node>(new ArchiveNode(selectedNode.getChildren().size(), name)));
 			
 		}
