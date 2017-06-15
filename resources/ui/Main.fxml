@@ -11,9 +11,6 @@
 <?import javafx.scene.layout.BorderPane?>
 
 <BorderPane fx:id="root" minHeight="325.0" minWidth="575.0" onMouseDragged="#handleMouseDragged" onMousePressed="#handleMousePressed" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.creativelab.Controller">
-   <left>
-      <VBox alignment="CENTER" BorderPane.alignment="TOP_CENTER" />
-   </left>
    <top>
       <VBox>
          <children>
@@ -57,9 +54,14 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Button>
+            <ColorPicker fx:id="colorPicker" minWidth="120.0">
+               <HBox.margin>
+                  <Insets bottom="5.0" top="5.0" />
+               </HBox.margin>
+            </ColorPicker>
             <Button fx:id="packBtn" minWidth="120.0" mnemonicParsing="false" onAction="#pack" text="Pack">
                <HBox.margin>
-                  <Insets bottom="5.0" right="5.0" top="5.0" />
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Button>
          </children>
