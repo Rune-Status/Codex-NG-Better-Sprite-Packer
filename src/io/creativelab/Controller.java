@@ -195,8 +195,8 @@ public final class Controller implements Initializable {
 
 				}
 			} else {
-				MenuItem addMI = new MenuItem("Add");				
-				addMI.setOnAction(e -> addArchive());
+				MenuItem createMI = new MenuItem("Create");	
+				createMI.setOnAction(e -> createArchive());
 				
 				MenuItem clearMI = new MenuItem("Clear");	
 				clearMI.setOnAction(e -> clearDirectory());
@@ -209,7 +209,7 @@ public final class Controller implements Initializable {
 				
 				ContextMenu menu = new ContextMenu();
 				
-				menu.getItems().addAll(addMI, clearMI, dumpMI, viewMI);
+				menu.getItems().addAll(createMI, clearMI, dumpMI, viewMI);
 				
 				treeView.setContextMenu(menu);
 			}
@@ -217,7 +217,7 @@ public final class Controller implements Initializable {
 		});
 	}
 	
-	private void addArchive() {
+	private void createArchive() {		
 		
 		TreeItem<Node> selectedNode = treeView.getSelectionModel().getSelectedItem();
 		
