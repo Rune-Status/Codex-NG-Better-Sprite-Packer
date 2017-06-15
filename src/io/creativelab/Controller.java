@@ -32,6 +32,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
@@ -119,59 +120,56 @@ public final class Controller implements Initializable {
 		treeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
-			
+
 			if (newValue == null || newValue.getValue() == null) {
 				return;
 			}
-			
+
 			if (newValue.getValue().isArchiveNode()) {
-				
-				MenuItem addMI = new MenuItem("Add");				
+
+				MenuItem addMI = new MenuItem("Add");
 				addMI.setOnAction(e -> addSprite());
-				
+
 				MenuItem removeMI = new MenuItem("Remove");
 				removeMI.setOnAction(e -> remove());
-				
+
 				MenuItem clearMI = new MenuItem("Clear");
-				clearMI.setOnAction(e -> clearDirectory());				
-				
+				clearMI.setOnAction(e -> clearDirectory());
+
 				MenuItem dumpMI = new MenuItem("Dump");
 				dumpMI.setOnAction(e -> dumpSprite());
-				
+
 				MenuItem viewMI = new MenuItem("View Directory");
 				viewMI.setOnAction(e -> viewCurrentDirectory());
-				
+
 				ContextMenu menu = new ContextMenu();
-				
+
 				menu.getItems().addAll(addMI, removeMI, clearMI, dumpMI, viewMI);
-				
+
 				treeView.setContextMenu(menu);
-				
+
 			} else if (newValue.getValue().isSpriteNode()) {
-				
-				MenuItem addMI = new MenuItem("Add");				
-				addMI.setOnAction(e -> addSprite());
-				
+
 				MenuItem replaceMI = new MenuItem("Replace");
 				replaceMI.setOnAction(e -> replaceSprite());
-				
+
 				MenuItem removeMI = new MenuItem("Remove");
 				removeMI.setOnAction(e -> remove());
-				
+
 				MenuItem dumpMI = new MenuItem("Dump");
 				dumpMI.setOnAction(e -> dumpSprite());
-				
+
 				MenuItem viewMI = new MenuItem("View Directory");
 				viewMI.setOnAction(e -> viewCurrentDirectory());
-				
+
 				ContextMenu menu = new ContextMenu();
-				
-				menu.getItems().addAll(addMI, replaceMI, removeMI, dumpMI, viewMI);
-				
-				treeView.setContextMenu(menu);				
-				
+
+				menu.getItems().addAll(replaceMI, removeMI, dumpMI, viewMI);
+
+				treeView.setContextMenu(menu);
+
 				SpriteNode spriteNode = (SpriteNode) newValue.getValue();
-				
+
 				try {
 
 					ImageView view = (ImageView) newValue.getGraphic();
@@ -195,62 +193,63 @@ public final class Controller implements Initializable {
 
 				}
 			} else {
-				MenuItem createMI = new MenuItem("Create");	
+				MenuItem createMI = new MenuItem("Create");
 				createMI.setOnAction(e -> createArchive());
-				
-				MenuItem clearMI = new MenuItem("Clear");	
+
+				MenuItem clearMI = new MenuItem("Clear");
 				clearMI.setOnAction(e -> clearDirectory());
-				
+
 				MenuItem dumpMI = new MenuItem("Dump");
 				dumpMI.setOnAction(e -> dumpSprite());
-				
+
 				MenuItem viewMI = new MenuItem("View Directory");
 				viewMI.setOnAction(e -> viewCurrentDirectory());
-				
+
 				ContextMenu menu = new ContextMenu();
-				
+
 				menu.getItems().addAll(createMI, clearMI, dumpMI, viewMI);
-				
+
 				treeView.setContextMenu(menu);
 			}
 
 		});
 	}
-	
-	private void createArchive() {		
-		
+
+	private void createArchive() {
+
 		TreeItem<Node> selectedNode = treeView.getSelectionModel().getSelectedItem();
-		
+
 		Optional<String> result = Dialogue.showInput("Name this archive").showAndWait();
-		
+
 		if (result.isPresent()) {
-			
+
 			String name = result.get();
-			
+
 			if (name.length() > 16) {
 				Dialogue.showWarning("Name is too long, please use a name between 1 and 16 characters long.");
 				return;
 			}
-			
+
 			for (TreeItem<Node> childNodes : selectedNode.getChildren()) {
-				
+
 				if (childNodes.getValue().getDisplayName().equalsIgnoreCase(name)) {
 					Dialogue.showWarning(String.format("Archive=%s already exists.", name));
 					return;
 				}
-				
+
 			}
-			
-			selectedNode.getChildren().add(new TreeItem<Node>(new ArchiveNode(selectedNode.getChildren().size(), name)));
-			
+
+			selectedNode.getChildren()
+					.add(new TreeItem<Node>(new ArchiveNode(selectedNode.getChildren().size(), name)));
+
 		}
-		
+
 	}
-	
+
 	private void addSprite() {
-		
+
 		TreeItem<Node> selectedNode = treeView.getSelectionModel().getSelectedItem();
-		
+
 		FileChooser fileChooser = new FileChooser();
 
 		fileChooser.setInitialDirectory(currentDirectory);
@@ -265,118 +264,134 @@ public final class Controller implements Initializable {
 		fileChooser.setInitialDirectory(currentDirectory);
 
 		List<File> selectedFiles = fileChooser.showOpenMultipleDialog(App.getMainStage());
-		
+
 		if (selectedFiles == null) {
 			return;
 		}
-		
+
 		for (File selectedFile : selectedFiles) {
-			
+
 			if (!Misc.isValidImage(selectedFile.getName())) {
 				continue;
 			}
-			
+
 			try {
 				int id = Integer.parseInt(selectedFile.getName().substring(0, selectedFile.getName().indexOf(".")));
-				
+
 				if (id > selectedNode.getChildren().size() - 1) {
-					
+
 					for (int i = selectedNode.getChildren().size(); i < id; i++) {
-						
+
 						if (i == id) {
 							break;
 						}
-						
+
 						ImageView imageView = new ImageView();
-						
+
 						imageView.setFitWidth(emptyIcon.getWidth() > 32 ? 32 : emptyIcon.getWidth());
 						imageView.setFitHeight(emptyIcon.getHeight() > 32 ? 32 : emptyIcon.getHeight());
 						imageView.setImage(emptyIcon);
 
-						selectedNode.getChildren().add(new TreeItem<Node>(new SpriteNode(i, Integer.toString(i), true), imageView));
-					
+						selectedNode.getChildren()
+								.add(new TreeItem<Node>(new SpriteNode(i, Integer.toString(i), true), imageView));
+
 					}
-					
-					Image image = SwingFXUtils.toFXImage(Misc.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)), Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB), null);
-					
+
+					Image image = SwingFXUtils
+							.toFXImage(Misc.convert(
+									Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)),
+											Misc.fxColorToAWTColor(colorPicker.getValue())),
+									BufferedImage.TYPE_INT_ARGB), null);
+
 					ImageView imageView = new ImageView();
-					
+
 					imageView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
 					imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
 					imageView.setImage(image);
-					
-					selectedNode.getChildren().add(new TreeItem<Node>(new SpriteNode(selectedNode.getChildren().size(), Integer.toString(selectedNode.getChildren().size()), false), imageView));
-					
+
+					selectedNode.getChildren().add(new TreeItem<Node>(new SpriteNode(selectedNode.getChildren().size(),
+							Integer.toString(selectedNode.getChildren().size()), false), imageView));
+
 				} else {
-					
+
 					for (TreeItem<Node> childNodes : selectedNode.getChildren()) {
-						
+
 						if (!childNodes.getValue().isSpriteNode()) {
 							continue;
-						}						
-						
+						}
+
 						if (childNodes.getValue().getId() == id) {
 							SpriteNode spriteNode = (SpriteNode) childNodes.getValue();
-							
+
 							if (!spriteNode.isEmpty()) {
-								
+
 								Alert alert = new Alert(Alert.AlertType.WARNING);
 								alert.setTitle("Warning");
-								alert.setContentText(String.format("A sprite with id=%d already exists would you still like to replace it?", id));
+								alert.setContentText(String.format(
+										"A sprite with id=%d already exists would you still like to replace it?", id));
 								alert.getButtonTypes().clear();
 								alert.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
-								
+
 								Optional<ButtonType> result = alert.showAndWait();
-								
+
 								if (!result.isPresent()) {
 									return;
 								}
-								
+
 								if (result.get() == ButtonType.YES) {
-									
-									Image image = SwingFXUtils.toFXImage(Misc.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)), Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB), null);
-									
+
+									Image image = SwingFXUtils.toFXImage(Misc.convert(
+											Misc.makeColorTransparent(
+													ColorQuantizer.quantize(ImageIO.read(selectedFile)),
+													Misc.fxColorToAWTColor(colorPicker.getValue())),
+											BufferedImage.TYPE_INT_ARGB), null);
+
 									ImageView imageView = new ImageView();
-									
+
 									imageView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
 									imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
-									imageView.setImage(image);						
-									
+									imageView.setImage(image);
+
 									selectedNode.getChildren().remove(id);
-									
-									selectedNode.getChildren().add(id, new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), false), imageView));
-									
+
+									selectedNode.getChildren().add(id, new TreeItem<Node>(
+											new SpriteNode(id, Integer.toString(id), false), imageView));
+
 									break;
 								}
-								
+
 							} else {
-								Image image = SwingFXUtils.toFXImage(Misc.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)), Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB), null);
-								
+								Image image = SwingFXUtils.toFXImage(Misc.convert(
+										Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)),
+												Misc.fxColorToAWTColor(colorPicker.getValue())),
+										BufferedImage.TYPE_INT_ARGB), null);
+
 								ImageView imageView = new ImageView();
-								
+
 								imageView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
 								imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
-								imageView.setImage(image);						
-								
+								imageView.setImage(image);
+
 								selectedNode.getChildren().remove(id);
-								
-								selectedNode.getChildren().add(id, new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), false), imageView));
-								
+
+								selectedNode.getChildren().add(id,
+										new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), false), imageView));
+
 								break;
 							}
-							
+
 						}
-						
+
 					}
-					
-				}				
-				
+
+				}
+
 			} catch (Exception ex) {
-				
+
 			}
-			
+
 		}
-		
+
 	}
 
 	@FXML
@@ -427,39 +442,42 @@ public final class Controller implements Initializable {
 					SpriteCache cache = SpriteCache.load(selectedDirectory);
 
 					int archiveIndex = 0;
-					
+
 					for (ImageArchive imageArchive : cache.getImageArchives()) {
 
-						TreeItem<Node> imageArchiveTI = new TreeItem<>(new ArchiveNode(archiveIndex, Integer.toString(imageArchive.getHash())));
-						
-						final List<SpriteNode> spriteNodes = new ArrayList<>();						
+						TreeItem<Node> imageArchiveTI = new TreeItem<>(
+								new ArchiveNode(archiveIndex, Integer.toString(imageArchive.getHash())));
 
-						for (SpriteBase sprite : imageArchive.getSprites()) {							
-							spriteNodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId()), false).setbImage(sprite.toBufferedImage()));
+						final List<SpriteNode> spriteNodes = new ArrayList<>();
+
+						for (SpriteBase sprite : imageArchive.getSprites()) {
+							spriteNodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId()), false)
+									.setbImage(sprite.toBufferedImage()));
 						}
-						
-						Collections.sort(spriteNodes);						
-						
+
+						Collections.sort(spriteNodes);
+
 						for (SpriteNode spriteNode : spriteNodes) {
-							
-							Image image = SwingFXUtils
-									.toFXImage(Misc.makeColorTransparent(ColorQuantizer.quantize(spriteNode.getbImage()),
-											Misc.fxColorToAWTColor(colorPicker.getValue())), null);
+
+							Image image = SwingFXUtils.toFXImage(
+									Misc.makeColorTransparent(ColorQuantizer.quantize(spriteNode.getbImage()),
+											Misc.fxColorToAWTColor(colorPicker.getValue())),
+									null);
 
 							ImageView imageView = new ImageView(image);
 
 							imageView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
 							imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
 							imageView.setPreserveRatio(true);
-							
+
 							imageArchiveTI.getChildren().add(new TreeItem<Node>(spriteNode, imageView));
-							
+
 						}
 
 						Platform.runLater(() -> {
 							treeView.getRoot().getChildren().add(imageArchiveTI);
 						});
-						
+
 						archiveIndex++;
 
 					}
@@ -525,23 +543,26 @@ public final class Controller implements Initializable {
 				protected Boolean call() throws Exception {
 
 					SpriteCache cache = SpriteCache.decode(Files.readAllBytes(selectedFile.toPath()));
-					
+
 					int archiveIndex = 0;
 
 					for (ImageArchive archive : cache.getImageArchives()) {
 
-						TreeItem<Node> archiveTI = new TreeItem<>(new ArchiveNode(archiveIndex, Integer.toString(archive.getHash())));
-						
+						TreeItem<Node> archiveTI = new TreeItem<>(
+								new ArchiveNode(archiveIndex, Integer.toString(archive.getHash())));
+
 						List<SpriteNode> spriteNodes = new ArrayList<>();
 
 						for (SpriteBase sprite : archive.getSprites()) {
-							spriteNodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId()), false).setName(sprite.getName()).setOffsetX(sprite.getDrawOffsetX()).setOffsetY(sprite.getDrawOffsetY()).setbImage(sprite.toBufferedImage()));
-						}	
-						
-						Collections.sort(spriteNodes);						
-						
-						for (SpriteNode spriteNode : spriteNodes) {							
-							
+							spriteNodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId()), false)
+									.setName(sprite.getName()).setOffsetX(sprite.getDrawOffsetX())
+									.setOffsetY(sprite.getDrawOffsetY()).setbImage(sprite.toBufferedImage()));
+						}
+
+						Collections.sort(spriteNodes);
+
+						for (SpriteNode spriteNode : spriteNodes) {
+
 							BufferedImage bimage = spriteNode.getbImage();
 
 							ImageView imageView = new ImageView(SwingFXUtils.toFXImage(bimage, null));
@@ -549,15 +570,17 @@ public final class Controller implements Initializable {
 							imageView.setFitWidth(bimage.getWidth() > 128 ? 128 : bimage.getWidth());
 							imageView.setFitHeight(bimage.getHeight() > 128 ? 128 : bimage.getHeight());
 							imageView.setPreserveRatio(true);
-							
-							archiveTI.getChildren().add(new TreeItem<Node>(new SpriteNode(spriteNode.getId(), Integer.toString(spriteNode.getId()), false), imageView));
-							
+
+							archiveTI.getChildren().add(new TreeItem<Node>(
+									new SpriteNode(spriteNode.getId(), Integer.toString(spriteNode.getId()), false),
+									imageView));
+
 						}
 
 						Platform.runLater(() -> {
 							treeView.getRoot().getChildren().add(archiveTI);
 						});
-						
+
 						archiveIndex++;
 
 					}
@@ -583,7 +606,7 @@ public final class Controller implements Initializable {
 			if (!selectedTI.getValue().isSpriteNode()) {
 				return;
 			}
-			
+
 			SpriteNode spriteNode = (SpriteNode) selectedTI.getValue();
 
 			if (!nameTf.getText().isEmpty() && nameTf.getText().length() <= 23) {
@@ -727,7 +750,75 @@ public final class Controller implements Initializable {
 
 	@FXML
 	private void replaceSprite() {
+		
+		if (treeView.getSelectionModel().getSelectedItems().size() > 1) {
+			Dialogue.showWarning("Please select only one sprite to replace.");
+			return;
+		}
+		
+		TreeItem<Node> selectedNode = treeView.getSelectionModel().getSelectedItem();
 
+		TreeItem<Node> parentNode = selectedNode.getParent();
+
+		FileChooser fileChooser = new FileChooser();
+
+		fileChooser.setInitialDirectory(currentDirectory);
+
+		fileChooser.setTitle("Open Resource File");
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Image files", "*.png", "*.jpg"));
+
+		if (!currentDirectory.isDirectory()) {
+			currentDirectory = new File(System.getProperty("user.home"));
+		}
+
+		fileChooser.setInitialDirectory(currentDirectory);
+
+		File selectedFile = fileChooser.showOpenDialog(App.getMainStage());
+		
+		if (selectedFile == null) {
+			return;
+		}
+		
+		if (!Misc.isValidImage(selectedFile.getName())) {
+			Dialogue.showWarning("Selected file is not a valid image.");
+			return;
+		}
+		
+		Alert alert = new Alert(AlertType.WARNING);
+		alert.setTitle("Warning");
+		alert.setContentText("Are you sure you would like to replace this sprite?");
+		alert.getButtonTypes().clear();
+		alert.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+		
+		Optional<ButtonType> result = alert.showAndWait();
+		
+		if (!result.isPresent()) {
+			return;
+		}
+		
+		if (result.get() != ButtonType.YES) {
+			return;
+		}		
+
+		try {
+			Image image = SwingFXUtils.toFXImage(Misc.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)), Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB), null);
+		
+			ImageView imageView = new ImageView();
+			imageView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
+			imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
+			imageView.setPreserveRatio(true);
+			imageView.setImage(image);
+			
+			final int id = selectedNode.getValue().getId();
+			
+			parentNode.getChildren().remove(id);
+			
+			parentNode.getChildren().add(id, new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), false), imageView));
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	@FXML
@@ -736,7 +827,7 @@ public final class Controller implements Initializable {
 		List<TreeItem<Node>> selectedItems = treeView.getSelectionModel().getSelectedItems();
 
 		for (TreeItem<Node> selected : selectedItems) {
-			
+
 			TreeItem<Node> parent = selected.getParent();
 
 			// selected the root
@@ -750,7 +841,7 @@ public final class Controller implements Initializable {
 				parent.getChildren().remove(selected);
 				continue;
 			}
-			
+
 			// selected an image
 			final int id = selected.getValue().getId();
 
@@ -766,7 +857,8 @@ public final class Controller implements Initializable {
 				imageView.setFitHeight(32);
 				imageView.setPreserveRatio(true);
 
-				parent.getChildren().add(id, new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), true), imageView));
+				parent.getChildren().add(id,
+						new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), true), imageView));
 
 				parent.getChildren().remove(id + 1);
 
@@ -807,11 +899,11 @@ public final class Controller implements Initializable {
 				final SpriteCache cache = SpriteCache.create();
 
 				for (TreeItem<Node> imageArchiveTI : treeView.getRoot().getChildren()) {
-					
+
 					if (!imageArchiveTI.getValue().isArchiveNode()) {
 						continue;
 					}
-					
+
 					final ArchiveNode archiveNode = (ArchiveNode) imageArchiveTI.getValue();
 
 					final ImageArchive archive = ImageArchive.create(archiveNode.getHash());
@@ -827,7 +919,7 @@ public final class Controller implements Initializable {
 						Image image = imageView.getImage();
 
 						SpriteBase sprite = SpriteBase.convert(SwingFXUtils.fromFXImage(image, null));
-						
+
 						SpriteNode spriteNode = (SpriteNode) spriteTI.getValue();
 
 						sprite.setId(spriteTI.getValue().getId());
@@ -857,17 +949,17 @@ public final class Controller implements Initializable {
 		});
 
 	}
-	
+
 	private void clearDirectory() {
-		
+
 		final List<TreeItem<Node>> selectedNodes = treeView.getSelectionModel().getSelectedItems();
-		
+
 		for (TreeItem<Node> selectedNode : selectedNodes) {
-			
+
 			selectedNode.getChildren().clear();
-			
+
 		}
-		
+
 	}
 
 	@FXML
