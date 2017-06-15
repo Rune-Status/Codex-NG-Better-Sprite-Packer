@@ -56,7 +56,7 @@ public final class Controller implements Initializable {
 				try {
 					SpriteCache cache = SpriteCache.load(selectedDirectory);
 					
-					try(FileOutputStream fos = new FileOutputStream("./main_file_sprites.dat")) {
+					try(FileOutputStream fos = new FileOutputStream("./" + selectedDirectory.getName() + ".dat")) {
 						fos.write(cache.encode());
 					}
 					
@@ -111,7 +111,7 @@ public final class Controller implements Initializable {
 					
 					final SpriteCache cache = SpriteCache.decode(bytes);
 					
-					File root = new File("./SpriteCache/");
+					File root = new File("./", selectedFile.getName().substring(0, selectedFile.getName().indexOf(".")));
 					
 					if (!root.exists()) {
 						root.mkdirs();
