@@ -2,9 +2,12 @@ package io.creativelab;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
@@ -12,6 +15,8 @@ import javax.imageio.ImageIO;
 import com.creativelab.sprite.ImageArchive;
 import com.creativelab.sprite.SpriteBase;
 import com.creativelab.sprite.SpriteCache;
+import com.creativelab.util.SpritePackerUtils;
+
 import io.creativelab.util.Dialogue;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -23,7 +28,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
-public final class Controller implements Initializable {
+public final class Controller implements Initializable {	
 	
 	private double xOffset, yOffset;
 
@@ -57,7 +62,14 @@ public final class Controller implements Initializable {
 					
 					Platform.runLater(() -> {
 						Dialogue.openDirectory("Would you like to view this file?", new File("./"));
-					});					
+					});
+					
+						Arrays.stream(selectedDirectory.listFiles()).filter(it -> it.isDirectory()).forEach(it -> App.names.put(SpritePackerUtils.nameToHash(it.getName()), it.getName()));
+
+						try(PrintWriter writer = new PrintWriter(new FileWriter(new File("./names.txt")))) {
+							App.names.values().forEach(it -> writer.println(it));
+						}
+					
 				} catch (IOException e) {
 					Platform.runLater(() -> {
 						Dialogue.showException("An error occurred", e).showAndWait();
@@ -106,7 +118,8 @@ public final class Controller implements Initializable {
 					}
 					
 					for (ImageArchive archive : cache.getImageArchives()) {
-						File archiveDir = new File(root, Integer.toString(archive.getHash()));
+						
+						File archiveDir = new File(root, App.names.get(archive.getHash()) == null ? Integer.toString(archive.getHash()) : App.names.get(archive.getHash()));
 						
 						if (!archiveDir.exists()) {
 							archiveDir.mkdirs();

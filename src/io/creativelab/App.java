@@ -1,14 +1,21 @@
 package io.creativelab;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
+
+import com.creativelab.util.SpritePackerUtils;
 
 import io.creativelab.util.Misc;
 import javafx.application.Application;
@@ -28,6 +35,31 @@ public class App extends Application {
 	private static Stage mainStage;
 	
 	public static final Properties properties = new Properties();
+	
+	public static final Map<Integer, String> names = new HashMap<>();
+	
+	static {
+		
+		names.put(SpritePackerUtils.nameToHash("default"), "default");
+		
+		File resource = new File("./names.txt");
+		
+		if (resource.exists() && !resource.isDirectory()) {
+			try(BufferedReader reader = new BufferedReader(new FileReader(resource))) {
+				
+				String line = null;
+				
+				while((line = reader.readLine()) != null) {
+					names.put(SpritePackerUtils.nameToHash(line.trim()), line.trim());
+				}			
+				
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 	
 	@Override
 	public void init() {
