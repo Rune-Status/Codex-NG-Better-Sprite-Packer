@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
@@ -30,7 +31,9 @@ import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -193,7 +196,7 @@ public final class Controller implements Initializable {
 				}
 			} else {
 				MenuItem addMI = new MenuItem("Add");				
-				addMI.setOnAction(e -> addSprite());
+				addMI.setOnAction(e -> addArchive());
 				
 				MenuItem clearMI = new MenuItem("Clear");	
 				clearMI.setOnAction(e -> clearDirectory());
@@ -212,6 +215,159 @@ public final class Controller implements Initializable {
 			}
 
 		});
+	}
+	
+	private void addArchive() {
+		
+		TreeItem<Node> selectedNode = treeView.getSelectionModel().getSelectedItem();
+		
+		Optional<String> result = Dialogue.showInput("Name this archive").showAndWait();
+		
+		if (result.isPresent()) {
+			
+			String name = result.get();
+			
+			if (name.length() > 16) {
+				Dialogue.showWarning("Name is too long, please use a name between 1 and 16 characters long.");
+				return;
+			}
+			
+			selectedNode.getChildren().add(new TreeItem<Node>(new ArchiveNode(selectedNode.getChildren().size(), name)));
+			
+		}
+		
+	}
+	
+	private void addSprite() {
+		
+		TreeItem<Node> selectedNode = treeView.getSelectionModel().getSelectedItem();
+		
+		FileChooser fileChooser = new FileChooser();
+
+		fileChooser.setInitialDirectory(currentDirectory);
+
+		fileChooser.setTitle("Open Resource File");
+		fileChooser.getExtensionFilters().addAll(new ExtensionFilter("Image files", "*.png", "*.jpg"));
+
+		if (!currentDirectory.isDirectory()) {
+			currentDirectory = new File(System.getProperty("user.home"));
+		}
+
+		fileChooser.setInitialDirectory(currentDirectory);
+
+		List<File> selectedFiles = fileChooser.showOpenMultipleDialog(App.getMainStage());
+		
+		if (selectedFiles == null) {
+			return;
+		}
+		
+		for (File selectedFile : selectedFiles) {
+			
+			if (!Misc.isValidImage(selectedFile.getName())) {
+				continue;
+			}
+			
+			try {
+				int id = Integer.parseInt(selectedFile.getName().substring(0, selectedFile.getName().indexOf(".")));
+				
+				if (id > selectedNode.getChildren().size() - 1) {
+					
+					for (int i = selectedNode.getChildren().size(); i < id; i++) {
+						
+						if (i == id) {
+							break;
+						}
+						
+						ImageView imageView = new ImageView();
+						
+						imageView.setFitWidth(emptyIcon.getWidth() > 32 ? 32 : emptyIcon.getWidth());
+						imageView.setFitHeight(emptyIcon.getHeight() > 32 ? 32 : emptyIcon.getHeight());
+						imageView.setImage(emptyIcon);
+
+						selectedNode.getChildren().add(new TreeItem<Node>(new SpriteNode(i, Integer.toString(i), true), imageView));
+					
+					}
+					
+					Image image = SwingFXUtils.toFXImage(Misc.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)), Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB), null);
+					
+					ImageView imageView = new ImageView();
+					
+					imageView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
+					imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
+					imageView.setImage(image);
+					
+					selectedNode.getChildren().add(new TreeItem<Node>(new SpriteNode(selectedNode.getChildren().size(), Integer.toString(selectedNode.getChildren().size()), false), imageView));
+					
+				} else {
+					
+					for (TreeItem<Node> childNodes : selectedNode.getChildren()) {
+						
+						if (!childNodes.getValue().isSpriteNode()) {
+							continue;
+						}						
+						
+						if (childNodes.getValue().getId() == id) {
+							SpriteNode spriteNode = (SpriteNode) childNodes.getValue();
+							
+							if (!spriteNode.isEmpty()) {
+								
+								Alert alert = new Alert(Alert.AlertType.WARNING);
+								alert.setTitle("Warning");
+								alert.setContentText(String.format("A sprite with id=%d already exists would you still like to replace it?", id));
+								alert.getButtonTypes().clear();
+								alert.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+								
+								Optional<ButtonType> result = alert.showAndWait();
+								
+								if (!result.isPresent()) {
+									return;
+								}
+								
+								if (result.get() == ButtonType.YES) {
+									
+									Image image = SwingFXUtils.toFXImage(Misc.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)), Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB), null);
+									
+									ImageView imageView = new ImageView();
+									
+									imageView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
+									imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
+									imageView.setImage(image);						
+									
+									selectedNode.getChildren().remove(id);
+									
+									selectedNode.getChildren().add(id, new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), false), imageView));
+									
+									break;
+								}
+								
+							} else {
+								Image image = SwingFXUtils.toFXImage(Misc.convert(Misc.makeColorTransparent(ColorQuantizer.quantize(ImageIO.read(selectedFile)), Misc.fxColorToAWTColor(colorPicker.getValue())), BufferedImage.TYPE_INT_ARGB), null);
+								
+								ImageView imageView = new ImageView();
+								
+								imageView.setFitWidth(image.getWidth() > 128 ? 128 : image.getWidth());
+								imageView.setFitHeight(image.getHeight() > 128 ? 128 : image.getHeight());
+								imageView.setImage(image);						
+								
+								selectedNode.getChildren().remove(id);
+								
+								selectedNode.getChildren().add(id, new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), false), imageView));
+								
+								break;
+							}
+							
+						}
+						
+					}
+					
+				}				
+				
+			} catch (Exception ex) {
+				
+			}
+			
+		}
+		
 	}
 
 	@FXML
@@ -270,7 +426,7 @@ public final class Controller implements Initializable {
 						final List<SpriteNode> spriteNodes = new ArrayList<>();						
 
 						for (SpriteBase sprite : imageArchive.getSprites()) {							
-							spriteNodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId())).setbImage(sprite.toBufferedImage()));
+							spriteNodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId()), false).setbImage(sprite.toBufferedImage()));
 						}
 						
 						Collections.sort(spriteNodes);						
@@ -370,7 +526,7 @@ public final class Controller implements Initializable {
 						List<SpriteNode> spriteNodes = new ArrayList<>();
 
 						for (SpriteBase sprite : archive.getSprites()) {
-							spriteNodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId())).setName(sprite.getName()).setOffsetX(sprite.getDrawOffsetX()).setOffsetY(sprite.getDrawOffsetY()).setbImage(sprite.toBufferedImage()));
+							spriteNodes.add(new SpriteNode(sprite.getId(), Integer.toString(sprite.getId()), false).setName(sprite.getName()).setOffsetX(sprite.getDrawOffsetX()).setOffsetY(sprite.getDrawOffsetY()).setbImage(sprite.toBufferedImage()));
 						}	
 						
 						Collections.sort(spriteNodes);						
@@ -385,7 +541,7 @@ public final class Controller implements Initializable {
 							imageView.setFitHeight(bimage.getHeight() > 128 ? 128 : bimage.getHeight());
 							imageView.setPreserveRatio(true);
 							
-							archiveTI.getChildren().add(new TreeItem<Node>(new SpriteNode(spriteNode.getId(), Integer.toString(spriteNode.getId())), imageView));
+							archiveTI.getChildren().add(new TreeItem<Node>(new SpriteNode(spriteNode.getId(), Integer.toString(spriteNode.getId()), false), imageView));
 							
 						}
 
@@ -561,11 +717,6 @@ public final class Controller implements Initializable {
 	}
 
 	@FXML
-	private void addSprite() {
-
-	}
-
-	@FXML
 	private void replaceSprite() {
 
 	}
@@ -606,7 +757,7 @@ public final class Controller implements Initializable {
 				imageView.setFitHeight(32);
 				imageView.setPreserveRatio(true);
 
-				parent.getChildren().add(id, new TreeItem<Node>(new SpriteNode(id, Integer.toString(id)), imageView));
+				parent.getChildren().add(id, new TreeItem<Node>(new SpriteNode(id, Integer.toString(id), true), imageView));
 
 				parent.getChildren().remove(id + 1);
 

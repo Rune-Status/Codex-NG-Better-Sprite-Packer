@@ -59,5 +59,9 @@ public final class Dialogue {
 	public static InputMessage showInput(String title, String context, String text) {
 		return new InputMessage(title, context, text);
 	}
+	
+	public static InputMessage showInput(String context) {
+		return new InputMessage("Input", context, "");
+	}
 
 }

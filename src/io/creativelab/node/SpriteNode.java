@@ -12,8 +12,11 @@ public final class SpriteNode extends Node {
 	
 	private BufferedImage bImage;
 
-	public SpriteNode(int id, String dispayName) {
-		super(id, dispayName);
+	private final boolean empty;
+
+	public SpriteNode(int id, String displayName, boolean empty) {
+		super(id, displayName);
+		this.empty = empty;
 	}
 
 	public String getName() {
@@ -52,4 +55,8 @@ public final class SpriteNode extends Node {
 		return this;
 	}
 
+	public boolean isEmpty() {
+		return empty;
+	}
+	
 }
