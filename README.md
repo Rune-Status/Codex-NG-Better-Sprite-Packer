@@ -10,6 +10,7 @@ in binary form instead of the entire image data.
 * Supports only png, and jpg. jpeg results in too much distortion due to many colors.
 * Can arrange sprites into binary folders called image archives.
 * Can add/remove/delete spries using your native operating system.
+* Archives names in binary is stored as a hashed value.
 * Supports transparency, currently the color magenta is marked transparent by default.
 
 ### Version 2.0 coming soon
