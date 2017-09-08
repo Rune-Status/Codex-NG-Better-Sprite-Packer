@@ -83,11 +83,24 @@ public final class Controller implements Initializable {
 									imageArchiveName = imageArchiveName + ".dat";
 								}
 
-								System.out.println(imageArchiveDir.getName() + " " + imageArchiveName);
 							}
 
-							if (!App.hashMap.containsValue(imageArchiveName)) {
-								set.add(imageArchiveName);
+							int imageArchiveHash = -1;
+
+							try {
+								imageArchiveHash = imageArchiveName.lastIndexOf(".") == -1 ? Integer.parseInt(imageArchiveName) : HashUtils.nameToHash(imageArchiveName);
+							} catch (Exception ex) {
+
+							}
+
+							if (imageArchiveHash == -1) {
+								System.out.println("hash is -1 for: " + imageArchiveName);
+								continue;
+							}
+
+							if (!App.hashMap.containsKey(imageArchiveHash)) {
+								System.out.println("map does not contain: " + imageArchiveHash + " adding: " + imageArchiveName);
+								App.hashMap.put(imageArchiveHash, imageArchiveName);
 							}
 
 							ByteArrayOutputStream dbos = new ByteArrayOutputStream();
@@ -225,27 +238,9 @@ public final class Controller implements Initializable {
 
 							final byte[] uncompresedData = dbos.toByteArray();
 
-							String fileName = imageArchiveName;
-
-							if (fileName.lastIndexOf(".") != -1) {
-								fileName = fileName.substring(0, fileName.lastIndexOf("."));
-							}
-
-							int hash = -1;
-
-							try {
-								hash = Integer.parseInt(imageArchiveName);
-							} catch (NumberFormatException ex) {
-
-							}
-
-							if (hash == -1) {
-								hash = HashUtils.nameToHash(fileName + ".dat");
-							}
-
 							final byte[] compressedData = CompressionUtil.bzip2(uncompresedData);
 
-							archive.getEntries().add(new Archive.ArchiveEntry(hash, uncompresedData.length, compressedData.length, compressedData));
+							archive.getEntries().add(new Archive.ArchiveEntry(imageArchiveHash, uncompresedData.length, compressedData.length, compressedData));
 
 						}
 
@@ -271,19 +266,13 @@ public final class Controller implements Initializable {
 						rsam.mkdirs();
 					}
 
-					try(PrintWriter writer = new PrintWriter(new FileWriter(new File(rsam, "hashes.txt")), true)) {
+					try(PrintWriter writer = new PrintWriter(new FileWriter(new File(rsam, "hashes.txt")))) {
+						for (Map.Entry<Integer, String> entry : App.hashMap.entrySet()) {
+							int hash = entry.getKey();
+							String value = entry.getValue();
 
-						for (String imageArchiveName : set) {
-
-							final int hash = HashUtils.nameToHash(imageArchiveName);
-
-							if (!App.hashMap.containsKey(hash)) {
-								writer.println(imageArchiveName + ":" + hash);
-								App.hashMap.put(hash, imageArchiveName);
-							}
-
+							writer.println(value + ":" + hash);
 						}
-
 					}
 
 				} catch (Exception ex) {
