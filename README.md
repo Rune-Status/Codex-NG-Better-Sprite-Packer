@@ -14,8 +14,13 @@ Version 2.0 allows you to use your own operating system's file explorer to modif
 Compatiable with Linux and Windows 10 (I don't have a mac so I can't say it works on there. If you have a mac and this program works for you let me know)
 
 ### Notes
+
 * Because the sprites in the RS2 format only have 256 colors it's best not to use image formats such as jpeg that are known to have a lot of distinct colors.
 * For more information regarding the format visit [RS2 Sprite Format](https://www.rune-server.ee/runescape-development/rs2-server/informative-threads/661911-rs2-sprite-format-depth.html)
+
+### Issues
+
+* If the program isn't working for you, feel free to submit an issue request. [Issues](https://github.com/nshusa/better-sprite-packer-gui/issues)
 
 ## Media
 ![alt tag](http://i.imgur.com/ccimVaW.png)
