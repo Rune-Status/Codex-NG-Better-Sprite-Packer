@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.*?>
-<?import javafx.scene.effect.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="root" minHeight="325.0" minWidth="575.0" onMouseDragged="#handleMouseDragged" onMousePressed="#handleMousePressed" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.creativelab.Controller">
+<BorderPane fx:id="root" minHeight="325.0" minWidth="575.0" onMouseDragged="#handleMouseDragged" onMousePressed="#handleMousePressed" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.nshusa.bsp.Controller">
    <top>
       <VBox>
          <children>
@@ -54,11 +52,6 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </HBox.margin>
             </Button>
-            <ColorPicker fx:id="colorPicker" minWidth="120.0">
-               <HBox.margin>
-                  <Insets bottom="5.0" top="5.0" />
-               </HBox.margin>
-            </ColorPicker>
             <Button fx:id="packBtn" minWidth="120.0" mnemonicParsing="false" onAction="#pack" text="Pack">
                <HBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
