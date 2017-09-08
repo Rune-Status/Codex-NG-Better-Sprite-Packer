@@ -54,13 +54,11 @@ public final class Controller implements Initializable {
 			protected Boolean call() throws Exception {
 				try {
 
-					Set<String> set = new LinkedHashSet<>();
+					final Archive archive = Archive.create();
 
-					Archive archive = Archive.create();
+					final int encodingType = 0;
 
-					int encodingType = 0;
-
-					ByteArrayOutputStream ibos = new ByteArrayOutputStream();
+					final ByteArrayOutputStream ibos = new ByteArrayOutputStream();
 
 					// marks the position of the first sprite within each image archive.
 					int idxOffset = 0;
@@ -99,11 +97,11 @@ public final class Controller implements Initializable {
 							}
 
 							if (!App.hashMap.containsKey(imageArchiveHash)) {
-								System.out.println("map does not contain: " + imageArchiveHash + " adding: " + imageArchiveName);
+								System.out.println(String.format("Found a new image archive hash=%d name=%s", imageArchiveHash, imageArchiveName));
 								App.hashMap.put(imageArchiveHash, imageArchiveName);
 							}
 
-							ByteArrayOutputStream dbos = new ByteArrayOutputStream();
+							final ByteArrayOutputStream dbos = new ByteArrayOutputStream();
 
 							try(DataOutputStream datOut = new DataOutputStream(dbos)) {
 
@@ -268,9 +266,8 @@ public final class Controller implements Initializable {
 
 					try(PrintWriter writer = new PrintWriter(new FileWriter(new File(rsam, "hashes.txt")))) {
 						for (Map.Entry<Integer, String> entry : App.hashMap.entrySet()) {
-							int hash = entry.getKey();
-							String value = entry.getValue();
-
+							final int hash = entry.getKey();
+							final String value = entry.getValue();
 							writer.println(value + ":" + hash);
 						}
 					}
@@ -295,7 +292,7 @@ public final class Controller implements Initializable {
 
 	@FXML
 	private void unpack() {
-		FileChooser chooser = new FileChooser();
+		final FileChooser chooser = new FileChooser();
 		chooser.setInitialDirectory(new File(System.getProperty("user.home")));
 		chooser.setTitle("Select a sprite archive file");
 
@@ -306,12 +303,12 @@ public final class Controller implements Initializable {
 		}
 
 		if (!selectedFile.getName().endsWith(".jag")) {
-
 			File newFile = new File(selectedFile.getParentFile(), selectedFile.getName().lastIndexOf(".") != -1 ? selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf(".")) + ".jag" : selectedFile.getName() + ".jag");
 
 			if (selectedFile.renameTo(newFile)) {
 				selectedFile = newFile;
 			}
+
 			Dialogue.showWarning("Added .jag file extension to avoid issues on Linux machines").showAndWait();
 		}
 
@@ -328,13 +325,13 @@ public final class Controller implements Initializable {
 			return;
 		}
 
-		File outputDir = new File(selectedFile.getParentFile(), selectedFile.getName().lastIndexOf(".") != -1 ? selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf(".")) : selectedFile.getName());
+		final File outputDir = new File(selectedFile.getParentFile(), selectedFile.getName().lastIndexOf(".") != -1 ? selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf(".")) : selectedFile.getName());
 
 		if (!outputDir.exists()) {
 			outputDir.mkdirs();
 		}
 
-		Archive archive = result.get();
+		final Archive archive = result.get();
 
 		if (!archive.contains("index.dat")) {
 			Dialogue.showWarning(String.format("archive=%s does not contain an index.dat", selectedFile.getName())).showAndWait();
@@ -360,8 +357,6 @@ public final class Controller implements Initializable {
 
 					String imageArchiveName = App.hashMap.get(entry.getHash());
 
-					System.out.println(entry.getHash());
-
 					if (imageArchiveName == null) {
 						imageArchiveName = Integer.toString(entry.getHash());
 					}
@@ -370,14 +365,14 @@ public final class Controller implements Initializable {
 						imageArchiveName = imageArchiveName.substring(0, imageArchiveName.lastIndexOf("."));
 					}
 
-					List<Sprite> sprites = ImageArchiveDecoder.decode(ByteBuffer.wrap(archive.readFile(entry.getHash())), ByteBuffer.wrap(archive.readFile("index.dat")));
+					final List<Sprite> sprites = ImageArchiveDecoder.decode(ByteBuffer.wrap(archive.readFile(entry.getHash())), ByteBuffer.wrap(archive.readFile("index.dat")));
 
 					if (sprites == null) {
 						System.out.println("sprite is null");
 						continue;
 					}
 
-					File imageArchiveDir = new File(outputDir, imageArchiveName);
+					final File imageArchiveDir = new File(outputDir, imageArchiveName);
 
 					if (!imageArchiveDir.exists()) {
 						imageArchiveDir.mkdirs();
@@ -385,7 +380,7 @@ public final class Controller implements Initializable {
 
 					for (int i = 0; i < sprites.size(); i++) {
 
-						Sprite sprite = sprites.get(i);
+						final Sprite sprite = sprites.get(i);
 
 						if (sprite == null) {
 							continue;
