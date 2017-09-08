@@ -5,17 +5,12 @@ import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import io.nshusa.bsp.util.Dialogue;
 import io.nshusa.rsam.binary.Archive;
 import io.nshusa.rsam.binary.sprite.Sprite;
 import io.nshusa.rsam.codec.ImageArchiveDecoder;
-import io.nshusa.rsam.codec.SpriteEncoder;
 import io.nshusa.rsam.util.ByteBufferUtils;
 import io.nshusa.rsam.util.ColorQuantizer;
 import io.nshusa.rsam.util.CompressionUtil;
@@ -58,6 +53,8 @@ public final class Controller implements Initializable {
 			protected Boolean call() throws Exception {
 				try {
 
+					Set<String> set = new LinkedHashSet<>();
+
 					Archive archive = Archive.create();
 
 					int encodingType = 0;
@@ -75,6 +72,10 @@ public final class Controller implements Initializable {
 							// its not an image archive so skip it
 							if (!imageArchiveDir.isDirectory()) {
 								continue;
+							}
+
+							if (!App.hashMap.containsValue(imageArchiveDir.getName())) {
+								set.add(imageArchiveDir.getName());
 							}
 
 							ByteArrayOutputStream dbos = new ByteArrayOutputStream();
@@ -212,12 +213,6 @@ public final class Controller implements Initializable {
 
 							final byte[] uncompresedData = dbos.toByteArray();
 
-							try {
-								int hash = Integer.parseInt(imageArchiveDir.getName());
-							} catch (Exception ex) {
-
-							}
-
 							String fileName = imageArchiveDir.getName();
 
 							if (fileName.lastIndexOf(".") != -1) {
@@ -250,12 +245,28 @@ public final class Controller implements Initializable {
 
 						final byte[] encoded = archive.encode();
 
-						try(FileOutputStream fos = new FileOutputStream(new File(selectedDirectory.getParentFile(), "sprites.jag"))) {
+						try(FileOutputStream fos = new FileOutputStream(new File(selectedDirectory.getParentFile(), selectedDirectory.getName() + ".jag"))) {
 							fos.write(encoded);
 						}
 
 					} catch (IOException e) {
 						e.printStackTrace();
+					}
+
+					final File rsam = new File(System.getProperty("user.home") + File.separator + ".rsam");
+
+					if (!rsam.exists()) {
+						rsam.mkdirs();
+					}
+
+					try(PrintWriter writer = new PrintWriter(new FileWriter(new File(rsam, "hashes.txt")), true)) {
+
+						for (String imageArchiveName : set) {
+							final int hash = HashUtils.nameToHash(imageArchiveName);
+							writer.println(imageArchiveName + ":" + hash);
+							App.hashMap.put(hash, imageArchiveName);
+						}
+
 					}
 
 				} catch (Exception ex) {
