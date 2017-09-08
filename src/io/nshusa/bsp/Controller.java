@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.util.*;
 
 import io.nshusa.bsp.util.Dialogue;
+import io.nshusa.bsp.util.Misc;
 import io.nshusa.rsam.binary.Archive;
 import io.nshusa.rsam.binary.sprite.Sprite;
 import io.nshusa.rsam.codec.ImageArchiveDecoder;
@@ -74,8 +75,19 @@ public final class Controller implements Initializable {
 								continue;
 							}
 
-							if (!App.hashMap.containsValue(imageArchiveDir.getName())) {
-								set.add(imageArchiveDir.getName());
+							String imageArchiveName = imageArchiveDir.getName();
+
+							if (imageArchiveName.lastIndexOf(".") == -1) {
+
+								if (!Misc.isNumeric(imageArchiveName.substring(1, imageArchiveName.length()))) {
+									imageArchiveName = imageArchiveName + ".dat";
+								}
+
+								System.out.println(imageArchiveDir.getName() + " " + imageArchiveName);
+							}
+
+							if (!App.hashMap.containsValue(imageArchiveName)) {
+								set.add(imageArchiveName);
 							}
 
 							ByteArrayOutputStream dbos = new ByteArrayOutputStream();
@@ -213,7 +225,7 @@ public final class Controller implements Initializable {
 
 							final byte[] uncompresedData = dbos.toByteArray();
 
-							String fileName = imageArchiveDir.getName();
+							String fileName = imageArchiveName;
 
 							if (fileName.lastIndexOf(".") != -1) {
 								fileName = fileName.substring(0, fileName.lastIndexOf("."));
@@ -222,7 +234,7 @@ public final class Controller implements Initializable {
 							int hash = -1;
 
 							try {
-								hash = Integer.parseInt(imageArchiveDir.getName());
+								hash = Integer.parseInt(imageArchiveName);
 							} catch (NumberFormatException ex) {
 
 							}
@@ -262,9 +274,14 @@ public final class Controller implements Initializable {
 					try(PrintWriter writer = new PrintWriter(new FileWriter(new File(rsam, "hashes.txt")), true)) {
 
 						for (String imageArchiveName : set) {
+
 							final int hash = HashUtils.nameToHash(imageArchiveName);
-							writer.println(imageArchiveName + ":" + hash);
-							App.hashMap.put(hash, imageArchiveName);
+
+							if (!App.hashMap.containsKey(hash)) {
+								writer.println(imageArchiveName + ":" + hash);
+								App.hashMap.put(hash, imageArchiveName);
+							}
+
 						}
 
 					}
@@ -354,8 +371,14 @@ public final class Controller implements Initializable {
 
 					String imageArchiveName = App.hashMap.get(entry.getHash());
 
+					System.out.println(entry.getHash());
+
 					if (imageArchiveName == null) {
 						imageArchiveName = Integer.toString(entry.getHash());
+					}
+
+					if (imageArchiveName.lastIndexOf(".") != -1) {
+						imageArchiveName = imageArchiveName.substring(0, imageArchiveName.lastIndexOf("."));
 					}
 
 					List<Sprite> sprites = ImageArchiveDecoder.decode(ByteBuffer.wrap(archive.readFile(entry.getHash())), ByteBuffer.wrap(archive.readFile("index.dat")));
