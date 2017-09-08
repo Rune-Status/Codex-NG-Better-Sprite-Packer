@@ -74,7 +74,13 @@ public final class Controller implements Initializable {
 		}
 
 		if (!selectedFile.getName().endsWith(".jag")) {
-			selectedFile.renameTo(new File(selectedFile.getParentFile(), selectedFile.getName() + ".jag"));
+
+			File newFile = new File(selectedFile.getParentFile(), selectedFile.getName().lastIndexOf(".") != -1 ? selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf(".")) + ".jag" : selectedFile.getName() + ".jag");
+
+			if (selectedFile.renameTo(newFile)) {
+				selectedFile = newFile;
+			}
+			Dialogue.showWarning("Added .jag file extension to avoid issues on Linux machines").showAndWait();
 		}
 
 		Optional<Archive> result = Optional.empty();
@@ -152,6 +158,10 @@ public final class Controller implements Initializable {
 					}
 
 				}
+
+				Platform.runLater(() -> {
+					Dialogue.showInfo("Information!", "Success!").showAndWait();
+				});
 
 				return true;
 			}
