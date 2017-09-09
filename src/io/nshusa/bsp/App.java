@@ -2,10 +2,7 @@ package io.nshusa.bsp;
 
 import java.io.*;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
@@ -31,6 +28,8 @@ public class App extends Application {
 	public static final Properties properties = new Properties();
 
 	public static final Map<Integer, String> hashMap = new HashMap<>();
+
+	public static final Map<String, SpriteMeta> offsetMap = new LinkedHashMap<>();
 
 	@Override
 	public void init() {

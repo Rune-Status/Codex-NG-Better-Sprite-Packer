@@ -54,6 +54,75 @@ public final class Controller implements Initializable {
 			protected Boolean call() throws Exception {
 				try {
 
+					File offsetFile = new File(selectedDirectory, "meta.txt");
+
+					if (offsetFile.exists()) {
+
+						List<String> lines = Files.readAllLines(offsetFile.toPath());
+
+						for (String line : lines) {
+
+							String split[] = line.split(":");
+
+							int x = 0;
+							int y = 0;
+							int format = 0;
+
+							if (split.length == 5) {
+								try {
+									x = Integer.parseInt(split[2]);
+								} catch (NumberFormatException ex) {
+
+								}
+
+								try {
+									y = Integer.parseInt(split[3]);
+								} catch (NumberFormatException ex) {
+
+								}
+
+								try {
+									format = Integer.parseInt(split[4]);
+								} catch (NumberFormatException ex) {
+
+								}
+
+							} else if (split.length == 4) {
+								try {
+									x = Integer.parseInt(split[2]);
+								} catch (NumberFormatException ex) {
+
+								}
+
+								try {
+									y = Integer.parseInt(split[3]);
+								} catch (NumberFormatException ex) {
+
+								}
+							}
+
+							if ((x == 0 || y == 0) && format != 1) {
+								final String part0 = split[0];
+								final String part1 = split[1];
+								final int tempX = x;
+								final int tempY = y;
+
+								Platform.runLater(() -> Dialogue.showWarning(String.format("Either couldn't parse offsets or you specified 0, 0 for: %s x=%d y=%d", part0 + part1, tempX ,tempY)).showAndWait());
+								return false;
+							}
+
+							if (!(format == 0 || format == 1)) {
+								final int tempFormat = format;
+								Platform.runLater(() -> Dialogue.showWarning(String.format("Format must be either 0 (horizontal) or 1 (vertical) detected format=%d", tempFormat)).showAndWait());
+								return false;
+							}
+
+							App.offsetMap.put(split[0] + ":" +  split[1], new SpriteMeta(x, y, format));
+
+						}
+
+					}
+
 					final Archive archive = Archive.create();
 
 					final int encodingType = 0;
@@ -177,12 +246,27 @@ public final class Controller implements Initializable {
 									ByteBufferUtils.writeU24Int(colorSet.get(i), idxOut);
 								}
 
-								for (BufferedImage bimage : images) {
+								for (int i = 0; i < images.size(); i++) {
+
+									BufferedImage bimage = images.get(i);
+
+									final String key = imageArchiveName.substring(0, imageArchiveName.lastIndexOf(".") != -1 ? imageArchiveName.lastIndexOf(".") : imageArchiveName.length()) + ":" + i;
+
+									SpriteMeta offsets = App.offsetMap.get(key);
+
+									final int offsetX = offsets == null ? 0 : offsets.getX();
+
+									final int offsetY = offsets == null ? 0 : offsets.getY();
+
+									if (offsetX != 0 && offsetY != 0) {
+										System.out.println("found offsets: " + offsetX + " " + offsetY);
+									}
+
 									// offsetX
-									idxOut.writeByte(0);
+									idxOut.writeByte(offsetX);
 
 									// offsetY
-									idxOut.writeByte(0);
+									idxOut.writeByte(offsetY);
 
 									// image width
 									idxOut.writeShort(bimage.getWidth());
@@ -192,7 +276,6 @@ public final class Controller implements Initializable {
 
 									// encoding type (0 horizontal | 1 vertical)
 									idxOut.writeByte(encodingType);
-
 								}
 
 								datOut.writeShort(idxOffset);
@@ -345,6 +428,8 @@ public final class Controller implements Initializable {
 
 				final int indexHash = HashUtils.nameToHash("index.dat");
 
+				Map<String, SpriteMeta> offsetMap = new LinkedHashMap<>();
+
 				for (Archive.ArchiveEntry entry : archive.getEntries()) {
 
 					if (entry == null) {
@@ -386,10 +471,26 @@ public final class Controller implements Initializable {
 							continue;
 						}
 
+						String key = imageArchiveName + ":" + i;
+
+						SpriteMeta value = new SpriteMeta(sprite.getOffsetX(), sprite.getOffsetY(), sprite.getFormat());
+
+						offsetMap.put(key, value);
+
 						ImageIO.write(sprite.toBufferedImage(), "png", new File(imageArchiveDir, Integer.toString(i) + ".png"));
 
 					}
 
+				}
+
+				try(PrintWriter writer = new PrintWriter(new FileWriter(new File(outputDir, "meta.txt")))) {
+					for (Map.Entry<String, SpriteMeta> entry : offsetMap.entrySet()) {
+
+						if ((entry.getValue().getX() != 0 && entry.getValue().getY() != 0) || entry.getValue().getFormat() != 0) {
+							writer.println(entry.getKey() + ":" + entry.getValue());
+							System.out.println(entry.getKey() + ":" + entry.getValue());
+						}
+					}
 				}
 
 				Platform.runLater(() -> {
