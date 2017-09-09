@@ -199,7 +199,7 @@ public final class Controller implements Initializable {
 									}
 
 									try {
-										BufferedImage bimage = ColorQuantizer.quantize(ImageIO.read(imageFile));
+										BufferedImage bimage = ColorQuantizer.reduce(ImageIO.read(imageFile));
 
 										if (largestWidth < bimage.getWidth()) {
 											largestWidth = bimage.getWidth();
