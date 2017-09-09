@@ -40,7 +40,7 @@ public class SpriteMeta {
 
     @Override
     public String toString() {
-        return format == 0 ? x + ":" + y : x + ":" + y + ":" + format;
+        return x + ":" + y + ":" + format;
     }
 
 }

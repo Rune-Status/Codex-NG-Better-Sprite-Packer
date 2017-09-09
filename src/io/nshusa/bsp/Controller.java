@@ -101,13 +101,16 @@ public final class Controller implements Initializable {
 								}
 							}
 
-							if ((x == 0 || y == 0) && format != 1) {
-								final String part0 = split[0];
-								final String part1 = split[1];
+							if ((x == 0 && y == 0) && format != 1) {
+
+								System.out.println(String.format("imageArchiveName=%s spritePos=%s x=%s y=%s length=%s", split[0], split[1], split[2], split[3], split.length));
+
+								final String imageArchiveName = split[0];
+								final String spritePos = split[1];
 								final int tempX = x;
 								final int tempY = y;
 
-								Platform.runLater(() -> Dialogue.showWarning(String.format("Either couldn't parse offsets or you specified 0, 0 for: %s x=%d y=%d", part0 + part1, tempX ,tempY)).showAndWait());
+								Platform.runLater(() -> Dialogue.showWarning(String.format("Either couldn't parse offsets or you specified 0, 0 for: %s x=%d y=%d", imageArchiveName + ":" + spritePos, tempX ,tempY)).showAndWait());
 								return false;
 							}
 
@@ -124,8 +127,6 @@ public final class Controller implements Initializable {
 					}
 
 					final Archive archive = Archive.create();
-
-					final int encodingType = 0;
 
 					final ByteArrayOutputStream ibos = new ByteArrayOutputStream();
 
@@ -246,20 +247,24 @@ public final class Controller implements Initializable {
 									ByteBufferUtils.writeU24Int(colorSet.get(i), idxOut);
 								}
 
+								List<BufferedImageWrapper> wImages = new ArrayList<>();
+
 								for (int i = 0; i < images.size(); i++) {
 
-									BufferedImage bimage = images.get(i);
+									final BufferedImage bimage = images.get(i);
 
 									final String key = imageArchiveName.substring(0, imageArchiveName.lastIndexOf(".") != -1 ? imageArchiveName.lastIndexOf(".") : imageArchiveName.length()) + ":" + i;
 
-									SpriteMeta offsets = App.offsetMap.get(key);
+									final SpriteMeta meta = App.offsetMap.get(key);
 
-									final int offsetX = offsets == null ? 0 : offsets.getX();
+									final int offsetX = meta == null ? 0 : meta.getX();
 
-									final int offsetY = offsets == null ? 0 : offsets.getY();
+									final int offsetY = meta == null ? 0 : meta.getY();
+
+									final int format = meta == null ? 0 : meta.getFormat();
 
 									if (offsetX != 0 && offsetY != 0) {
-										System.out.println("found offsets: " + offsetX + " " + offsetY);
+										System.out.println(String.format("Found meta for key=%s offsetX=%d offsetY=%d format=%d", key, offsetX, offsetY, format));
 									}
 
 									// offsetX
@@ -275,16 +280,20 @@ public final class Controller implements Initializable {
 									idxOut.writeShort(bimage.getHeight());
 
 									// encoding type (0 horizontal | 1 vertical)
-									idxOut.writeByte(encodingType);
+									idxOut.writeByte(format);
+
+									wImages.add(new BufferedImageWrapper(bimage, format));
 								}
 
 								datOut.writeShort(idxOffset);
 
 								idxOffset = idxOut.size();
 
-								for (BufferedImage bimage : images) {
+								for (BufferedImageWrapper wrapper : wImages) {
 
-									if (encodingType == 0) { // horizontal encoding
+									final BufferedImage bimage = wrapper.getBimage();
+
+									if (wrapper.getFormat() == 0) { // horizontal encoding
 										for (int y = 0; y < bimage.getHeight(); y++) {
 											for (int x = 0; x < bimage.getWidth(); x++) {
 												final int argb = bimage.getRGB(x, y);
@@ -486,7 +495,7 @@ public final class Controller implements Initializable {
 				try(PrintWriter writer = new PrintWriter(new FileWriter(new File(outputDir, "meta.txt")))) {
 					for (Map.Entry<String, SpriteMeta> entry : offsetMap.entrySet()) {
 
-						if ((entry.getValue().getX() != 0 && entry.getValue().getY() != 0) || entry.getValue().getFormat() != 0) {
+						if (entry.getValue().getX() != 0 || entry.getValue().getY() != 0 || entry.getValue().getFormat() != 0) {
 							writer.println(entry.getKey() + ":" + entry.getValue());
 							System.out.println(entry.getKey() + ":" + entry.getValue());
 						}
