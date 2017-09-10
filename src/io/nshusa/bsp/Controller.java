@@ -147,6 +147,8 @@ public final class Controller implements Initializable {
 												largestHeight = bimage.getHeight();
 											}
 
+											int colorCount = 0;
+
 											for (int x = 0; x < bimage.getWidth(); x++) {
 												for (int y = 0; y < bimage.getHeight(); y++) {
 													final int argb = bimage.getRGB(x,y);
@@ -158,20 +160,26 @@ public final class Controller implements Initializable {
 														continue;
 													}
 
+													colorCount++;
+
 													colorSet.add(rgb);
 
 												}
 											}
 
-											images.add(bimage);
+										if ((colorCount + colorSet.size()) > 256 && imageIndex < imageFiles.length - 1) {
+											final int tempCount = colorCount;
+											Platform.runLater(() -> Dialogue.showWarning(String.format("Archive exceeds 256 colors on= %s colors current=%d predicted=%d", imageFile.getParentFile().getName() + "/" + imageFile.getName(), colorSet.size(), (tempCount + colorSet.size()))).showAndWait());
+											return false;
+										}
+
+										images.add(bimage);
 
 								}
 
 								if (colorSet.size() > 256) {
 									final String tempName = imageArchiveName;
-
 									Platform.runLater(() -> Dialogue.showWarning(String.format("imageArchive=%s exeeded color limit of 256 colors=%d", tempName, colorSet.size())).showAndWait());
-
 									return false;
 								}
 
