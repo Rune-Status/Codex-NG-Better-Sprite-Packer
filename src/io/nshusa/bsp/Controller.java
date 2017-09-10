@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.util.*;
 
 import io.nshusa.bsp.util.Dialogue;
-import io.nshusa.bsp.util.Misc;
+import io.nshusa.bsp.util.SpritePackerUtils;
 import io.nshusa.rsam.binary.Archive;
 import io.nshusa.rsam.binary.sprite.Sprite;
 import io.nshusa.rsam.codec.ImageArchiveDecoder;
@@ -76,7 +76,7 @@ public final class Controller implements Initializable {
 
 							if (imageArchiveName.lastIndexOf(".") == -1) {
 
-								if (!Misc.isNumeric(imageArchiveName.substring(1, imageArchiveName.length()))) {
+								if (!SpritePackerUtils.isNumeric(imageArchiveName.substring(1, imageArchiveName.length()))) {
 									imageArchiveName = imageArchiveName + ".dat";
 								}
 
@@ -120,7 +120,7 @@ public final class Controller implements Initializable {
 								final File[] imageFiles = imageArchiveDir.listFiles();
 
 								// make sure the images are sorted, order is really important
-								Misc.sortImages(imageFiles);
+								SpritePackerUtils.sortImages(imageFiles);
 
 								// iterator over the actual images
 								for (int imageIndex = 0; imageIndex < imageFiles.length; imageIndex++) {
@@ -132,12 +132,12 @@ public final class Controller implements Initializable {
 									}
 
 									// an image can't be a directory so skip it
-									if (!imageFile.exists() || imageFile.isDirectory() || !Misc.isValidImage(imageFile)) {
-										System.out.println("skipping: " + imageArchiveName + " " + imageIndex + " " + !Misc.isValidImage(imageFile));
+									if (!imageFile.exists() || imageFile.isDirectory() || !SpritePackerUtils.isValidImage(imageFile)) {
+										System.out.println("skipping: " + imageArchiveName + " " + imageIndex + " " + !SpritePackerUtils.isValidImage(imageFile));
 										continue;
 									}
 
-											final BufferedImage bimage = Misc.convertToGIF(imageFile);
+											final BufferedImage bimage = SpritePackerUtils.convertToGIF(imageFile);
 
 											if (largestWidth < bimage.getWidth()) {
 												largestWidth = bimage.getWidth();
@@ -166,6 +166,8 @@ public final class Controller implements Initializable {
 
 												}
 											}
+
+									//TODO create a new archive
 
 										if ((colorCount + colorSet.size()) > 256 && imageIndex < imageFiles.length - 1) {
 											final int tempCount = colorCount;

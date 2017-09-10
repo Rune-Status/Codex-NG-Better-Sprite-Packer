@@ -7,7 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 
-import io.nshusa.bsp.util.Misc;
+import io.nshusa.bsp.util.SpritePackerUtils;
 import io.nshusa.rsam.util.HashUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -55,7 +55,7 @@ public class App extends Application {
 
 							if (line.lastIndexOf(".") != -1) { // non-hash with a file extension e.g	 '30.dat'
 								App.hashMap.put(HashUtils.nameToHash(line), line);
-							} else if(!line.isEmpty() && Misc.isNumeric(line.substring(1, line.length())) && line.length() < 12) { // hash e.g '-1548429542' or '4583276415'
+							} else if(!line.isEmpty() && SpritePackerUtils.isNumeric(line.substring(1, line.length())) && line.length() < 12) { // hash e.g '-1548429542' or '4583276415'
 								App.hashMap.put(Integer.parseInt(line), line);
 							} else { // non-hash without a file extension 'midi_index'
 								App.hashMap.put(HashUtils.nameToHash(line), line);
@@ -123,7 +123,7 @@ public class App extends Application {
 
 								Optional<ButtonType> result = alert.showAndWait();
 								if (result.get() == ButtonType.OK) {
-									Misc.launchURL(App.properties.getProperty("creator_link"));									
+									SpritePackerUtils.launchURL(App.properties.getProperty("creator_link"));
 									System.exit(1);
 								}
 								

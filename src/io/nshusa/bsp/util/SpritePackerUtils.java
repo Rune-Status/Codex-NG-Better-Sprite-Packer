@@ -5,12 +5,10 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
-public final class Misc {
+public final class SpritePackerUtils {
 	
-	private Misc() {
+	private SpritePackerUtils() {
 		
 	}
 
@@ -22,18 +20,6 @@ public final class Misc {
 		}
 		return true;
 	}
-
-	public static int getDistinctColorCount(BufferedImage bimage) {
-	    final Set<Integer> set = new HashSet<>();
-
-	    for (int y = 0; y < bimage.getHeight(); y++) {
-	        for (int x = 0; x < bimage.getWidth(); x++) {
-	            set.add(bimage.getRGB(x, y));
-            }
-        }
-
-	    return set.size();
-    }
 
 	public static BufferedImage convertToGIF(File imageFile) throws IOException {
 	    if (imageFile.getName().endsWith(".gif")) {
@@ -78,27 +64,6 @@ public final class Misc {
 
             return Integer.compare(fid, sid);
         });
-    }
-
-    public static File search(File dir, int id) throws IOException {
-	    final File[] files = dir.listFiles();
-
-	    final String sid = Integer.toString(id);
-
-	    for (File file : files) {
-	        String extension = file.getName().substring(file.getName().lastIndexOf(".") != -1 ? file.getName().lastIndexOf(".") : 0, file.getName().length());
-
-	        String fileId = dir.getName().substring(0, file.getName().lastIndexOf(".") != -1 ? file.getName().lastIndexOf(".") : file.getName().length());
-
-	        System.out.println(fileId + " " + extension);
-
-	        if (sid.equals(fileId)) {
-	            return file;
-            }
-
-        }
-
-        throw new IOException(String.format("File not found for dir=%s id=%d", dir.getName(), id));
     }
 
       public static void launchURL(String url) {
