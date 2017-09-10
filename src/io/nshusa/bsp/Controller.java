@@ -13,7 +13,6 @@ import io.nshusa.rsam.binary.Archive;
 import io.nshusa.rsam.binary.sprite.Sprite;
 import io.nshusa.rsam.codec.ImageArchiveDecoder;
 import io.nshusa.rsam.util.ByteBufferUtils;
-import io.nshusa.rsam.util.ColorQuantizer;
 import io.nshusa.rsam.util.CompressionUtil;
 import io.nshusa.rsam.util.HashUtils;
 import javafx.application.Platform;
@@ -54,77 +53,7 @@ public final class Controller implements Initializable {
 			protected Boolean call() throws Exception {
 				try {
 
-					File offsetFile = new File(selectedDirectory, "meta.txt");
-
-					if (offsetFile.exists()) {
-
-						List<String> lines = Files.readAllLines(offsetFile.toPath());
-
-						for (String line : lines) {
-
-							String split[] = line.split(":");
-
-							int x = 0;
-							int y = 0;
-							int format = 0;
-
-							if (split.length == 5) {
-								try {
-									x = Integer.parseInt(split[2]);
-								} catch (NumberFormatException ex) {
-
-								}
-
-								try {
-									y = Integer.parseInt(split[3]);
-								} catch (NumberFormatException ex) {
-
-								}
-
-								try {
-									format = Integer.parseInt(split[4]);
-								} catch (NumberFormatException ex) {
-
-								}
-
-							} else if (split.length == 4) {
-								try {
-									x = Integer.parseInt(split[2]);
-								} catch (NumberFormatException ex) {
-
-								}
-
-								try {
-									y = Integer.parseInt(split[3]);
-								} catch (NumberFormatException ex) {
-
-								}
-							}
-
-							if ((x == 0 && y == 0) && format != 1) {
-
-								System.out.println(String.format("imageArchiveName=%s spritePos=%s x=%s y=%s length=%s", split[0], split[1], split[2], split[3], split.length));
-
-								final String imageArchiveName = split[0];
-								final String spritePos = split[1];
-								final int tempX = x;
-								final int tempY = y;
-
-								Platform.runLater(() -> Dialogue.showWarning(String.format("Either couldn't parse offsets or you specified 0, 0 for: %s x=%d y=%d", imageArchiveName + ":" + spritePos, tempX ,tempY)).showAndWait());
-								return false;
-							}
-
-							if (!(format == 0 || format == 1)) {
-								final int tempFormat = format;
-								Platform.runLater(() -> Dialogue.showWarning(String.format("Format must be either 0 (horizontal) or 1 (vertical) detected format=%d", tempFormat)).showAndWait());
-								return false;
-							}
-
-							App.offsetMap.put(split[0] + ":" +  split[1], new SpriteMeta(x, y, format));
-
-						}
-
-					}
+					readMetaFile(selectedDirectory);
 
 					final Archive archive = Archive.create();
 
@@ -188,49 +117,66 @@ public final class Controller implements Initializable {
 
 								colorSet.add(0);
 
-								// iterator over the actual images
-								for (int imageIndex = 0; imageIndex < imageArchiveDir.listFiles().length; imageIndex++) {
+								final File[] imageFiles = imageArchiveDir.listFiles();
 
-									// order is really important, so make sure we grab the right image (File#listFiles isn't sorted)
-									final File imageFile = new File(imageArchiveDir,imageIndex + ".png");
+								// make sure the images are sorted, order is really important
+								Misc.sortImages(imageFiles);
+
+								// iterator over the actual images
+								for (int imageIndex = 0; imageIndex < imageFiles.length; imageIndex++) {
+
+									final File imageFile = imageFiles[imageIndex];
+
+									if (imageArchiveName.contains("orbs")) {
+										System.out.println(imageArchiveName + " " + imageFile.getName());
+									}
 
 									// an image can't be a directory so skip it
-									if (imageFile.isDirectory()) {
+									if (!imageFile.exists() || imageFile.isDirectory() || !Misc.isValidImage(imageFile)) {
+										System.out.println("skipping: " + imageArchiveName + " " + imageIndex + " " + !Misc.isValidImage(imageFile));
 										continue;
 									}
 
-									try {
-										BufferedImage bimage = ColorQuantizer.reduce(ImageIO.read(imageFile));
+											final BufferedImage bimage = Misc.convertToGIF(imageFile);
 
-										if (largestWidth < bimage.getWidth()) {
-											largestWidth = bimage.getWidth();
-										}
-
-										if (largestHeight < bimage.getHeight()) {
-											largestHeight = bimage.getHeight();
-										}
-
-										for (int x = 0; x < bimage.getWidth(); x++) {
-											for (int y = 0; y < bimage.getHeight(); y++) {
-												final int argb = bimage.getRGB(x,y);
-
-												final int rgb = argb & 0xFFFFFF;
-
-												// make sure there's no duplicate rgb values
-												if (colorSet.contains(rgb)) {
-													continue;
-												}
-
-												colorSet.add(rgb);
-
+											if (largestWidth < bimage.getWidth()) {
+												largestWidth = bimage.getWidth();
 											}
-										}
 
-										images.add(bimage);
-									} catch (IOException ex) {
-										ex.printStackTrace();
-									}
+											if (largestHeight < bimage.getHeight()) {
+												largestHeight = bimage.getHeight();
+											}
 
+											for (int x = 0; x < bimage.getWidth(); x++) {
+												for (int y = 0; y < bimage.getHeight(); y++) {
+													final int argb = bimage.getRGB(x,y);
+
+													final int rgb = argb & 0xFFFFFF;
+
+													// make sure there's no duplicate rgb values
+													if (colorSet.contains(rgb)) {
+														continue;
+													}
+
+													colorSet.add(rgb);
+
+												}
+											}
+
+											images.add(bimage);
+
+								}
+
+								if (colorSet.size() > 256) {
+									final String tempName = imageArchiveName;
+
+									Platform.runLater(() -> Dialogue.showWarning(String.format("imageArchive=%s exeeded color limit of 256 colors=%d", tempName, colorSet.size())).showAndWait());
+
+									return false;
+								}
+
+								if (imageArchiveName.contains("orbs")) {
+									System.out.println(imageArchiveName + " " + images.size());
 								}
 
 								// the largest width found in this image archive
@@ -247,7 +193,7 @@ public final class Controller implements Initializable {
 									ByteBufferUtils.writeU24Int(colorSet.get(i), idxOut);
 								}
 
-								List<BufferedImageWrapper> wImages = new ArrayList<>();
+								final List<BufferedImageWrapper> wImages = new ArrayList<>();
 
 								for (int i = 0; i < images.size(); i++) {
 
@@ -263,10 +209,6 @@ public final class Controller implements Initializable {
 
 									final int format = meta == null ? 0 : meta.getFormat();
 
-									if (offsetX != 0 && offsetY != 0) {
-										System.out.println(String.format("Found meta for key=%s offsetX=%d offsetY=%d format=%d", key, offsetX, offsetY, format));
-									}
-
 									// offsetX
 									idxOut.writeByte(offsetX);
 
@@ -281,6 +223,10 @@ public final class Controller implements Initializable {
 
 									// encoding type (0 horizontal | 1 vertical)
 									idxOut.writeByte(format);
+
+//									if (imageArchiveHash == HashUtils.nameToHash("orbs.dat")) {
+//										System.out.println(String.format("id=%d offsetX=%d offsetY=%d width=%d height=%d format=%d colors=%d", i, offsetX, offsetY, bimage.getWidth(), bimage.getHeight(), format, colorSet.size()));
+//									}
 
 									wImages.add(new BufferedImageWrapper(bimage, format));
 								}
@@ -322,7 +268,10 @@ public final class Controller implements Initializable {
 											}
 										}
 									}
+
 								}
+
+								//System.out.println(imageArchiveName + " " + colorSet.size());
 
 							}
 
@@ -435,71 +384,84 @@ public final class Controller implements Initializable {
 			@Override
 			protected Boolean call() throws Exception {
 
-				final int indexHash = HashUtils.nameToHash("index.dat");
+				try {
+					final int indexHash = HashUtils.nameToHash("index.dat");
 
-				Map<String, SpriteMeta> offsetMap = new LinkedHashMap<>();
+					final Map<String, SpriteMeta> offsetMap = new LinkedHashMap<>();
 
-				for (Archive.ArchiveEntry entry : archive.getEntries()) {
+					for (Archive.ArchiveEntry entry : archive.getEntries()) {
 
-					if (entry == null) {
-						continue;
-					}
-
-					if (entry.getHash() == indexHash) {
-						continue;
-					}
-
-					String imageArchiveName = App.hashMap.get(entry.getHash());
-
-					if (imageArchiveName == null) {
-						imageArchiveName = Integer.toString(entry.getHash());
-					}
-
-					if (imageArchiveName.lastIndexOf(".") != -1) {
-						imageArchiveName = imageArchiveName.substring(0, imageArchiveName.lastIndexOf("."));
-					}
-
-					final List<Sprite> sprites = ImageArchiveDecoder.decode(ByteBuffer.wrap(archive.readFile(entry.getHash())), ByteBuffer.wrap(archive.readFile("index.dat")));
-
-					if (sprites == null) {
-						System.out.println("sprite is null");
-						continue;
-					}
-
-					final File imageArchiveDir = new File(outputDir, imageArchiveName);
-
-					if (!imageArchiveDir.exists()) {
-						imageArchiveDir.mkdirs();
-					}
-
-					for (int i = 0; i < sprites.size(); i++) {
-
-						final Sprite sprite = sprites.get(i);
-
-						if (sprite == null) {
+						if (entry == null) {
 							continue;
 						}
 
-						String key = imageArchiveName + ":" + i;
+						if (entry.getHash() == indexHash) {
+							continue;
+						}
 
-						SpriteMeta value = new SpriteMeta(sprite.getOffsetX(), sprite.getOffsetY(), sprite.getFormat());
+						String imageArchiveName = App.hashMap.get(entry.getHash());
 
-						offsetMap.put(key, value);
+						if (imageArchiveName == null) {
+							imageArchiveName = Integer.toString(entry.getHash());
+						}
 
-						ImageIO.write(sprite.toBufferedImage(), "png", new File(imageArchiveDir, Integer.toString(i) + ".png"));
+						if (imageArchiveName.lastIndexOf(".") != -1) {
+							imageArchiveName = imageArchiveName.substring(0, imageArchiveName.lastIndexOf("."));
+						}
+
+						List<Sprite> sprites = null;
+
+						try {
+							sprites = ImageArchiveDecoder.decode(ByteBuffer.wrap(archive.readFile(entry.getHash())), ByteBuffer.wrap(archive.readFile("index.dat")));
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+
+						if (sprites == null) {
+							System.out.println("sprite is null");
+							continue;
+						}
+
+						final File imageArchiveDir = new File(outputDir, imageArchiveName);
+
+						if (!imageArchiveDir.exists()) {
+							imageArchiveDir.mkdirs();
+						}
+
+						if (HashUtils.nameToHash("orbs.dat") == entry.getHash()) {
+							System.out.println(sprites.size());
+						}
+
+						for (int i = 0; i < sprites.size(); i++) {
+
+							final Sprite sprite = sprites.get(i);
+
+							if (sprite == null) {
+								continue;
+							}
+
+							String key = imageArchiveName + ":" + i;
+
+							SpriteMeta value = new SpriteMeta(sprite.getOffsetX(), sprite.getOffsetY(), sprite.getFormat());
+
+							offsetMap.put(key, value);
+
+							ImageIO.write(sprite.toBufferedImage(), "gif", new File(imageArchiveDir, Integer.toString(i) + ".gif"));
+
+						}
 
 					}
 
-				}
+					try(PrintWriter writer = new PrintWriter(new FileWriter(new File(outputDir, "meta.txt")))) {
+						for (Map.Entry<String, SpriteMeta> entry : offsetMap.entrySet()) {
 
-				try(PrintWriter writer = new PrintWriter(new FileWriter(new File(outputDir, "meta.txt")))) {
-					for (Map.Entry<String, SpriteMeta> entry : offsetMap.entrySet()) {
-
-						if (entry.getValue().getX() != 0 || entry.getValue().getY() != 0 || entry.getValue().getFormat() != 0) {
-							writer.println(entry.getKey() + ":" + entry.getValue());
-							System.out.println(entry.getKey() + ":" + entry.getValue());
+							if (entry.getValue().getX() != 0 || entry.getValue().getY() != 0 || entry.getValue().getFormat() != 0) {
+								writer.println(entry.getKey() + ":" + entry.getValue());
+							}
 						}
 					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				}
 
 				Platform.runLater(() -> {
@@ -507,10 +469,72 @@ public final class Controller implements Initializable {
 				});
 
 				return true;
+
 			}
 
 		}).start();
 
+	}
+
+	private void readMetaFile(File selectedDirectory) throws IOException {
+		final File offsetFile = new File(selectedDirectory, "meta.txt");
+
+		if (offsetFile.exists()) {
+
+			final List<String> lines = Files.readAllLines(offsetFile.toPath());
+
+			for (String line : lines) {
+
+				final String split[] = line.split(":");
+
+				int x = 0;
+				int y = 0;
+				int format = 0;
+
+				if (split.length == 5) {
+					try {
+						x = Integer.parseInt(split[2]);
+					} catch (NumberFormatException ex) {
+
+					}
+
+					try {
+						y = Integer.parseInt(split[3]);
+					} catch (NumberFormatException ex) {
+
+					}
+
+					try {
+						format = Integer.parseInt(split[4]);
+					} catch (NumberFormatException ex) {
+
+					}
+
+				} else if (split.length == 4) {
+					try {
+						x = Integer.parseInt(split[2]);
+					} catch (NumberFormatException ex) {
+
+					}
+
+					try {
+						y = Integer.parseInt(split[3]);
+					} catch (NumberFormatException ex) {
+
+					}
+				}
+
+				if (!(format == 0 || format == 1)) {
+					final int tempFormat = format;
+					Platform.runLater(() -> Dialogue.showWarning(String.format("Format must be either 0 (horizontal) or 1 (vertical) detected format=%d", tempFormat)).showAndWait());
+					return;
+				}
+
+				App.offsetMap.put(split[0] + ":" +  split[1], new SpriteMeta(x, y, format));
+
+			}
+
+		}
 	}
 
 	@FXML

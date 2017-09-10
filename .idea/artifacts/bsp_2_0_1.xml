@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="bsp-2.0.1">
+    <output-path>$PROJECT_DIR$/bin/artifacts/bsp_2_0_1</output-path>
+    <root id="archive" name="better-sprite-packer-gui.jar">
+      <element id="module-output" name="better-sprite-packer-gui" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jfxrt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/rsam.-1.02.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
