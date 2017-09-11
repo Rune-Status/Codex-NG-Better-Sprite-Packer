@@ -8,18 +8,18 @@ public class Meta {
 
     private int offsetY;
 
-    private int resizeX;
+    private int resizeWidth;
 
-    private int resizeY;
+    private int resizeHeight;
 
     private int format;
 
-    public Meta(int id, int offsetX, int offsetY, int resizeX, int resizeY, int format) {
+    public Meta(int id, int offsetX, int offsetY, int resizeWidth, int resizeHeight, int format) {
         this.id = id;
         this.offsetX = offsetX;
         this.offsetY = offsetY;
-        this.resizeX = resizeX;
-        this.resizeY = resizeY;
+        this.resizeWidth = resizeWidth;
+        this.resizeHeight = resizeHeight;
         this.format = format;
     }
 
@@ -47,20 +47,20 @@ public class Meta {
         this.offsetY = offsetY;
     }
 
-    public int getResizeX() {
-        return resizeX;
+    public int getResizeWidth() {
+        return resizeWidth;
     }
 
-    public void setResizeX(int resizeX) {
-        this.resizeX = resizeX;
+    public void setResizeWidth(int resizeWidth) {
+        this.resizeWidth = resizeWidth;
     }
 
-    public int getResizeY() {
-        return resizeY;
+    public int getResizeHeight() {
+        return resizeHeight;
     }
 
-    public void setResizeY(int resizeY) {
-        this.resizeY = resizeY;
+    public void setResizeHeight(int resizeHeight) {
+        this.resizeHeight = resizeHeight;
     }
 
     public int getFormat() {
@@ -73,7 +73,7 @@ public class Meta {
 
     @Override
     public String toString() {
-        return String.format("id=%d offsetX=%d offsetY=%d resizeX=%d resizeY=%d format=%d", id, offsetX, offsetY, resizeX, resizeY, format);
+        return String.format("id=%d offsetX=%d offsetY=%d resizeX=%d resizeY=%d format=%d", id, offsetX, offsetY, resizeWidth, resizeHeight, format);
     }
 
 }

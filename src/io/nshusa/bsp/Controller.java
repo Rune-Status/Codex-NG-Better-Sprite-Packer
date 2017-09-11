@@ -128,10 +128,9 @@ public final class Controller implements Initializable {
 
 							try(DataOutputStream datOut = new DataOutputStream(dbos)) {
 
-								// first we have to calculate the largest width and largest height of the image found in this image archive.
-								int largestWidth = 0;
+								int resizeWidth = 0;
 
-								int largestHeight = 0;
+								int resizeHeight = 0;
 
 								// cache all of the images so we don't have to perform redundant I/O operations again
 								final List<BufferedImage> images = new ArrayList<>();
@@ -158,12 +157,28 @@ public final class Controller implements Initializable {
 
 									final BufferedImage bimage = SpritePackerUtils.convertToGIF(imageFile);
 
-									if (largestWidth < bimage.getWidth()) {
-										largestWidth = bimage.getWidth();
+									if (resizeWidth < bimage.getWidth()) {
+										resizeWidth = bimage.getWidth();
 									}
 
-									if (largestHeight < bimage.getHeight()) {
-										largestHeight = bimage.getHeight();
+									if (resizeHeight < bimage.getHeight()) {
+										resizeHeight = bimage.getHeight();
+									}
+
+									final String key = imageArchiveName.substring(0, imageArchiveName.lastIndexOf(".") != -1 ? imageArchiveName.lastIndexOf(".") : imageArchiveName.length()) + ":" + imageIndex;
+
+									final Meta meta = metaMap.get(key);
+
+									if (meta != null) {
+
+										if (meta.getResizeWidth() != 0) {
+											resizeWidth = meta.getResizeWidth();
+										}
+
+										if (meta.getResizeHeight() != 0) {
+											resizeHeight = meta.getResizeHeight();
+										}
+
 									}
 
 									for (int x = 0; x < bimage.getWidth(); x++) {
@@ -192,15 +207,11 @@ public final class Controller implements Initializable {
 									return false;
 								}
 
-								if (imageArchiveName.contains("orbs")) {
-									System.out.println(imageArchiveName + " " + images.size());
-								}
-
 								// the largest width found in this image archive
-								idxOut.writeShort(largestWidth);
+								idxOut.writeShort(resizeWidth);
 
 								// the largest height found in this image archive
-								idxOut.writeShort(largestHeight);
+								idxOut.writeShort(resizeHeight);
 
 								// the palette size
 								idxOut.writeByte(colorSet.size());
@@ -436,10 +447,6 @@ public final class Controller implements Initializable {
 
 						if (!imageArchiveDir.exists()) {
 							imageArchiveDir.mkdirs();
-						}
-
-						if (HashUtils.nameToHash("orbs.dat") == entry.getHash()) {
-							System.out.println(sprites.size());
 						}
 
 						for (int i = 0; i < sprites.size(); i++) {
