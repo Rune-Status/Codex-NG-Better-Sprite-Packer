@@ -29,7 +29,7 @@ public class App extends Application {
 
 	public static final Map<Integer, String> hashMap = new HashMap<>();
 
-	public static final Map<String, SpriteMeta> offsetMap = new LinkedHashMap<>();
+	public static final Map<String, Meta> offsetMap = new LinkedHashMap<>();
 
 	@Override
 	public void init() {

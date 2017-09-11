@@ -2,12 +2,19 @@ package io.nshusa.bsp;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.*;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import io.nshusa.bsp.util.Dialogue;
+import io.nshusa.bsp.util.MultiMapAdapter;
 import io.nshusa.bsp.util.SpritePackerUtils;
 import io.nshusa.rsam.binary.Archive;
 import io.nshusa.rsam.binary.sprite.Sprite;
@@ -53,7 +60,7 @@ public final class Controller implements Initializable {
 			protected Boolean call() throws Exception {
 				try {
 
-					readMetaFile(selectedDirectory);
+					Map<String, Meta> metaMap = readMetaFile(selectedDirectory);
 
 					final Archive archive = Archive.create();
 
@@ -64,13 +71,30 @@ public final class Controller implements Initializable {
 
 					try(DataOutputStream idxOut = new DataOutputStream(ibos)) {
 
-						// iterator over the image archives which are essentially directories that store images
 						for (File imageArchiveDir : selectedDirectory.listFiles()) {
 
 							// its not an image archive so skip it
 							if (!imageArchiveDir.isDirectory()) {
 								continue;
 							}
+
+//							//TODO sort images
+//
+//							File[] imageFiles = imageArchiveDir.listFiles();
+//
+//							SpritePackerUtils.sortImages(imageFiles);
+//
+//							// validate archives
+//
+//							Optional<File> result = SpritePackerUtils.validateArchiveColorLimit(imageFiles);
+//
+//							result.ifPresent(it -> SpritePackerUtils.calculateNextArchive(it));
+//
+//							//now do whatever
+//
+//							for (File imageFile : imageFiles) {
+//								SpritePackerUtils.markPixel(imageFile);
+//							}
 
 							String imageArchiveName = imageArchiveDir.getName();
 
@@ -114,7 +138,6 @@ public final class Controller implements Initializable {
 
 								// list that acts as a set, using a list for the #get and #indexOf functions
 								final List<Integer> colorSet = new ArrayList<>();
-
 								colorSet.add(0);
 
 								final File[] imageFiles = imageArchiveDir.listFiles();
@@ -127,55 +150,39 @@ public final class Controller implements Initializable {
 
 									final File imageFile = imageFiles[imageIndex];
 
-									if (imageArchiveName.contains("orbs")) {
-										System.out.println(imageArchiveName + " " + imageFile.getName());
-									}
-
 									// an image can't be a directory so skip it
 									if (!imageFile.exists() || imageFile.isDirectory() || !SpritePackerUtils.isValidImage(imageFile)) {
 										System.out.println("skipping: " + imageArchiveName + " " + imageIndex + " " + !SpritePackerUtils.isValidImage(imageFile));
 										continue;
 									}
 
-											final BufferedImage bimage = SpritePackerUtils.convertToGIF(imageFile);
+									final BufferedImage bimage = SpritePackerUtils.convertToGIF(imageFile);
 
-											if (largestWidth < bimage.getWidth()) {
-												largestWidth = bimage.getWidth();
+									if (largestWidth < bimage.getWidth()) {
+										largestWidth = bimage.getWidth();
+									}
+
+									if (largestHeight < bimage.getHeight()) {
+										largestHeight = bimage.getHeight();
+									}
+
+									for (int x = 0; x < bimage.getWidth(); x++) {
+										for (int y = 0; y < bimage.getHeight(); y++) {
+											final int argb = bimage.getRGB(x,y);
+
+											final int rgb = argb & 0xFFFFFF;
+
+											// make sure there's no duplicate rgb values
+											if (colorSet.contains(rgb)) {
+												continue;
 											}
 
-											if (largestHeight < bimage.getHeight()) {
-												largestHeight = bimage.getHeight();
-											}
+											colorSet.add(rgb);
 
-											int colorCount = 0;
-
-											for (int x = 0; x < bimage.getWidth(); x++) {
-												for (int y = 0; y < bimage.getHeight(); y++) {
-													final int argb = bimage.getRGB(x,y);
-
-													final int rgb = argb & 0xFFFFFF;
-
-													// make sure there's no duplicate rgb values
-													if (colorSet.contains(rgb)) {
-														continue;
-													}
-
-													colorCount++;
-
-													colorSet.add(rgb);
-
-												}
-											}
-
-									//TODO create a new archive
-
-										if ((colorCount + colorSet.size()) > 256 && imageIndex < imageFiles.length - 1) {
-											final int tempCount = colorCount;
-											Platform.runLater(() -> Dialogue.showWarning(String.format("Archive exceeds 256 colors on= %s colors current=%d predicted=%d", imageFile.getParentFile().getName() + "/" + imageFile.getName(), colorSet.size(), (tempCount + colorSet.size()))).showAndWait());
-											return false;
 										}
+									}
 
-										images.add(bimage);
+									images.add(bimage);
 
 								}
 
@@ -207,15 +214,15 @@ public final class Controller implements Initializable {
 
 								for (int i = 0; i < images.size(); i++) {
 
-									final BufferedImage bimage = images.get(i);
+									final BufferedImage bImage = images.get(i);
 
 									final String key = imageArchiveName.substring(0, imageArchiveName.lastIndexOf(".") != -1 ? imageArchiveName.lastIndexOf(".") : imageArchiveName.length()) + ":" + i;
 
-									final SpriteMeta meta = App.offsetMap.get(key);
+									Meta meta = metaMap.get(key);
 
-									final int offsetX = meta == null ? 0 : meta.getX();
+									final int offsetX = meta == null ? 0 : meta.getOffsetX();
 
-									final int offsetY = meta == null ? 0 : meta.getY();
+									final int offsetY = meta == null ? 0 : meta.getOffsetY();
 
 									final int format = meta == null ? 0 : meta.getFormat();
 
@@ -226,19 +233,15 @@ public final class Controller implements Initializable {
 									idxOut.writeByte(offsetY);
 
 									// image width
-									idxOut.writeShort(bimage.getWidth());
+									idxOut.writeShort(bImage.getWidth());
 
 									// image height
-									idxOut.writeShort(bimage.getHeight());
+									idxOut.writeShort(bImage.getHeight());
 
 									// encoding type (0 horizontal | 1 vertical)
 									idxOut.writeByte(format);
 
-//									if (imageArchiveHash == HashUtils.nameToHash("orbs.dat")) {
-//										System.out.println(String.format("id=%d offsetX=%d offsetY=%d width=%d height=%d format=%d colors=%d", i, offsetX, offsetY, bimage.getWidth(), bimage.getHeight(), format, colorSet.size()));
-//									}
-
-									wImages.add(new BufferedImageWrapper(bimage, format));
+									wImages.add(new BufferedImageWrapper(bImage, format));
 								}
 
 								datOut.writeShort(idxOffset);
@@ -247,12 +250,12 @@ public final class Controller implements Initializable {
 
 								for (BufferedImageWrapper wrapper : wImages) {
 
-									final BufferedImage bimage = wrapper.getBimage();
+									final BufferedImage bImage = wrapper.getBimage();
 
 									if (wrapper.getFormat() == 0) { // horizontal encoding
-										for (int y = 0; y < bimage.getHeight(); y++) {
-											for (int x = 0; x < bimage.getWidth(); x++) {
-												final int argb = bimage.getRGB(x, y);
+										for (int y = 0; y < bImage.getHeight(); y++) {
+											for (int x = 0; x < bImage.getWidth(); x++) {
+												final int argb = bImage.getRGB(x, y);
 
 												final int rgb = argb & 0xFFFFFF;
 
@@ -264,9 +267,9 @@ public final class Controller implements Initializable {
 											}
 										}
 									} else { // vertical encoding
-										for (int x = 0; x < bimage.getWidth(); x++) {
-											for (int y = 0; y < bimage.getHeight(); y++) {
-												final int argb = bimage.getRGB(x, y);
+										for (int x = 0; x < bImage.getWidth(); x++) {
+											for (int y = 0; y < bImage.getHeight(); y++) {
+												final int argb = bImage.getRGB(x, y);
 
 												final int rgb = argb & 0xFFFFFF;
 
@@ -281,8 +284,6 @@ public final class Controller implements Initializable {
 
 								}
 
-								//System.out.println(imageArchiveName + " " + colorSet.size());
-
 							}
 
 							final byte[] uncompresedData = dbos.toByteArray();
@@ -290,7 +291,6 @@ public final class Controller implements Initializable {
 							final byte[] compressedData = CompressionUtil.bzip2(uncompresedData);
 
 							archive.getEntries().add(new Archive.ArchiveEntry(imageArchiveHash, uncompresedData.length, compressedData.length, compressedData));
-
 						}
 
 						final byte[] uncompressed = ibos.toByteArray();
@@ -393,11 +393,11 @@ public final class Controller implements Initializable {
 
 			@Override
 			protected Boolean call() throws Exception {
-
 				try {
+
 					final int indexHash = HashUtils.nameToHash("index.dat");
 
-					final Map<String, SpriteMeta> offsetMap = new LinkedHashMap<>();
+					final Multimap<String, Meta> metaMap = MultimapBuilder.treeKeys((Comparator<String>) Comparator.naturalOrder()).arrayListValues().build();
 
 					for (Archive.ArchiveEntry entry : archive.getEntries()) {
 
@@ -450,11 +450,9 @@ public final class Controller implements Initializable {
 								continue;
 							}
 
-							String key = imageArchiveName + ":" + i;
+							Meta metaValue = new Meta(i, sprite.getOffsetX(), sprite.getOffsetY(), sprite.getLargestWidth(), sprite.getLargestHeight(), sprite.getFormat());
 
-							SpriteMeta value = new SpriteMeta(sprite.getOffsetX(), sprite.getOffsetY(), sprite.getFormat());
-
-							offsetMap.put(key, value);
+							metaMap.put(imageArchiveName, metaValue);
 
 							ImageIO.write(sprite.toBufferedImage(), "gif", new File(imageArchiveDir, Integer.toString(i) + ".gif"));
 
@@ -462,14 +460,14 @@ public final class Controller implements Initializable {
 
 					}
 
-					try(PrintWriter writer = new PrintWriter(new FileWriter(new File(outputDir, "meta.txt")))) {
-						for (Map.Entry<String, SpriteMeta> entry : offsetMap.entrySet()) {
+					Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-							if (entry.getValue().getX() != 0 || entry.getValue().getY() != 0 || entry.getValue().getFormat() != 0) {
-								writer.println(entry.getKey() + ":" + entry.getValue());
-							}
-						}
+					String json = gson.toJson(metaMap.asMap());
+
+					try(BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputDir, "meta.json")))) {
+						writer.write(json);
 					}
+
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -486,65 +484,45 @@ public final class Controller implements Initializable {
 
 	}
 
-	private void readMetaFile(File selectedDirectory) throws IOException {
-		final File offsetFile = new File(selectedDirectory, "meta.txt");
+	private Map<String, Meta> readMetaFile(File selectedDirectory) throws IOException {
+		final File metaFile = new File(selectedDirectory, "meta.json");
 
-		if (offsetFile.exists()) {
+		Map<String, Meta> map = new HashMap<>();
 
-			final List<String> lines = Files.readAllLines(offsetFile.toPath());
+		if (!metaFile.exists()) {
+			return map;
+		}
 
-			for (String line : lines) {
+			Gson gson = new GsonBuilder().enableComplexMapKeySerialization()
+					.registerTypeAdapter(Multimap.class, new MultiMapAdapter<String, Meta>()).create();
 
-				final String split[] = line.split(":");
+			try(BufferedReader reader = new BufferedReader(new FileReader(metaFile))) {
 
-				int x = 0;
-				int y = 0;
-				int format = 0;
+				Type type = new TypeToken<Multimap<String, Meta>>() {}.getType();
 
-				if (split.length == 5) {
-					try {
-						x = Integer.parseInt(split[2]);
-					} catch (NumberFormatException ex) {
+				Multimap<String, Meta> multimap = gson.fromJson(reader, type);
 
+				for (Map.Entry<String, Meta> entry : multimap.entries()) {
+
+					final String key = entry.getKey();
+
+					final Meta value = entry.getValue();
+
+					//System.out.println(entry.getKey() + " " + entry.getValue().toString());
+
+					if (!(value.getFormat() == 0 || value.getFormat() == 1)) {
+						Platform.runLater(() -> Dialogue.showWarning(String.format("Format must be either 0 (horizontal) or 1 (vertical) detected format=%d", value.getFormat())).showAndWait());
+						return map;
 					}
 
-					try {
-						y = Integer.parseInt(split[3]);
-					} catch (NumberFormatException ex) {
+					map.put(key + ":" + value.getId(), value);
 
-					}
-
-					try {
-						format = Integer.parseInt(split[4]);
-					} catch (NumberFormatException ex) {
-
-					}
-
-				} else if (split.length == 4) {
-					try {
-						x = Integer.parseInt(split[2]);
-					} catch (NumberFormatException ex) {
-
-					}
-
-					try {
-						y = Integer.parseInt(split[3]);
-					} catch (NumberFormatException ex) {
-
-					}
 				}
 
-				if (!(format == 0 || format == 1)) {
-					final int tempFormat = format;
-					Platform.runLater(() -> Dialogue.showWarning(String.format("Format must be either 0 (horizontal) or 1 (vertical) detected format=%d", tempFormat)).showAndWait());
-					return;
-				}
-
-				App.offsetMap.put(split[0] + ":" +  split[1], new SpriteMeta(x, y, format));
+				return map;
 
 			}
 
-		}
 	}
 
 	@FXML
