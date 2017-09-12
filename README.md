@@ -1,21 +1,27 @@
 # Better Sprite Packer
 ## What is better sprite packer?
-**Better sprite packer (BSP)** is a program that packs sprites into 317-377 format.
-
-Version 2.0 allows you to use your own operating system's file explorer to modify the sprites in your cache. You can unpack the sprites into their raw formats and pack them back into rs2 format. Because of this you don't need any libraries or any extra classes to unpack them. This works with a 317 deob.
+**Better sprite packer (BSP)** is a program designed to pack sprites into RuneScape's 2006 file system. Revision #317
 
 ### Features
 
 * Follows 317-377 sprite format
 * No needed libraries
 * No needed classes
-* I included javafx libs in the jar that's why it's a little bigger than normal. This is to add support for linux users and for people who don't have the javafx libs in their jre. (not all version of jre has jfxrt)
-* To change transparency you can change that in the sprite class (in your client). Most clients nowadays use the fusha/magenta color as transparency
+* Supports GIF, PNG
+* Exports to PNG-8
+* Includes jfxrt (some jre's don't contain the javafx libs especially pre 1.8)
 Compatiable with Linux and Windows 10 (I don't have a mac so I can't say it works on there. If you have a mac and this program works for you let me know)
+
+### Versions
+
+* 1.0 - 1.44: Designed to replace Galkon's custom sprite cache.
+* 1.45 - 1.49: New experimental formats.
+* 2.0 + Designed to work with RuneScape's format.
 
 ### Notes
 
-* Because the sprites in the RS2 format only have 256 colors it's best not to use image formats such as jpeg that are known to have a lot of distinct colors.
+* Don't use JPEG to pack sprites. JPEG is for realistic photos which has a lot more distinct colors. RuneScape sprites are similar to GIf's however there can only be 256 colors in a single archive. A single image can contain 256 colors if one of the rgb values is 0. If not then there can only be 255 colors.
+* Transparency is set in the client, not BSP
 * For more information regarding the format visit [RS2 Sprite Format](https://www.rune-server.ee/runescape-development/rs2-server/informative-threads/661911-rs2-sprite-format-depth.html)
 
 ### Issues
