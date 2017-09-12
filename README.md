@@ -16,7 +16,7 @@ Compatiable with Linux and Windows 10 (I don't have a mac so I can't say it work
 
 * 1.0 - 1.44: Designed to replace Galkon's custom sprite cache.
 * 1.45 - 1.49: New experimental formats.
-* 2.0 + Designed to work with RuneScape's format.
+* 2.0 + Designed to work with RuneScape's file system.
 
 ### Notes
 
