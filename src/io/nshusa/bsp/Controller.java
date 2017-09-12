@@ -148,10 +148,6 @@ public final class Controller implements Initializable {
 								// make sure the images are sorted, order is really important
 								SpritePackerUtils.sortImages(imageFiles);
 
-								if (imageArchiveName.contains("mapfunction")) {
-									System.out.println("There are " + imageFiles.length + " files in the mapfunction archive");
-								}
-
 								// iterator over the actual images
 								for (int imageIndex = 0; imageIndex < imageFiles.length; imageIndex++) {
 
@@ -259,10 +255,6 @@ public final class Controller implements Initializable {
 
 									// encoding type (0 horizontal | 1 vertical)
 									idxOut.writeByte(format);
-
-									if (imageArchiveName.contains("mapfunction")) {
-										//System.out.println(String.format("archive=%s id=%d offsetX=%d offsetY=%d width=%d height=%d format=%d", imageArchiveName, i, offsetX, offsetY, bImage.getWidth(), bImage.getHeight(), format));
-									}
 
 									wImages.add(new BufferedImageWrapper(bImage, format));
 								}
@@ -461,10 +453,6 @@ public final class Controller implements Initializable {
 							}
 						}
 
-						if (imageArchiveName.contains("mapfunction")) {
-							System.out.println(lastSpriteId);
-						}
-
 						if (sprites.isEmpty()) {
 							final String tempName = imageArchiveName;
 							final int tempLastSpriteId = lastSpriteId;
@@ -544,8 +532,6 @@ public final class Controller implements Initializable {
 					final String key = entry.getKey();
 
 					final Meta value = entry.getValue();
-
-					//System.out.println(entry.getKey() + " " + entry.getValue().toString());
 
 					if (!(value.getFormat() == 0 || value.getFormat() == 1)) {
 						Platform.runLater(() -> Dialogue.showWarning(String.format("Format must be either 0 (horizontal) or 1 (vertical) detected format=%d", value.getFormat())).showAndWait());
