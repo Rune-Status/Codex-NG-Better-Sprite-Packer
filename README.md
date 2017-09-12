@@ -9,6 +9,7 @@
 * No needed classes
 * Supports GIF, PNG
 * Exports to PNG-8
+* Exports meta information into a file called Meta.json in the root of your file archive
 * Includes jfxrt (some jre's don't contain the javafx libs especially pre 1.8)
 Compatiable with Linux and Windows 10 (I don't have a mac so I can't say it works on there. If you have a mac and this program works for you let me know)
 
@@ -17,6 +18,41 @@ Compatiable with Linux and Windows 10 (I don't have a mac so I can't say it work
 * 1.0 - 1.44: Designed to replace Galkon's custom sprite cache.
 * 1.45 - 1.49: New experimental formats.
 * 2.0 + Designed to work with RuneScape's file system.
+
+### Meta format
+
+```json
+{
+  "mod_icons": [
+    {
+      "id": 0,
+      "offsetX": 0,
+      "offsetY": 1,
+      "resizeWidth": 13,
+      "resizeHeight": 13,
+      "format": 1
+    },
+    {
+      "id": 1,
+      "offsetX": 0,
+      "offsetY": 1,
+      "resizeWidth": 13,
+      "resizeHeight": 13,
+      "format": 1
+    }
+  ],
+  "number_button": [
+    {
+      "id": 0,
+      "offsetX": 0,
+      "offsetY": 0,
+      "resizeWidth": 64,
+      "resizeHeight": 64,
+      "format": 0
+    }
+  ]
+}
+```
 
 ### Notes
 
