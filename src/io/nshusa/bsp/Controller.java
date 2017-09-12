@@ -20,6 +20,7 @@ import io.nshusa.rsam.binary.Archive;
 import io.nshusa.rsam.binary.sprite.Sprite;
 import io.nshusa.rsam.codec.ImageArchiveDecoder;
 import io.nshusa.rsam.util.ByteBufferUtils;
+import io.nshusa.rsam.util.ColorQuantizer;
 import io.nshusa.rsam.util.CompressionUtil;
 import io.nshusa.rsam.util.HashUtils;
 import javafx.application.Platform;
@@ -73,28 +74,31 @@ public final class Controller implements Initializable {
 
 						for (File imageArchiveDir : selectedDirectory.listFiles()) {
 
-							// its not an image archive so skip it
 							if (!imageArchiveDir.isDirectory()) {
 								continue;
 							}
 
-//							//TODO sort images
-//
-//							File[] imageFiles = imageArchiveDir.listFiles();
-//
-//							SpritePackerUtils.sortImages(imageFiles);
-//
-//							// validate archives
-//
-//							Optional<File> result = SpritePackerUtils.validateArchiveColorLimit(imageFiles);
-//
-//							result.ifPresent(it -> SpritePackerUtils.calculateNextArchive(it));
-//
-//							//now do whatever
-//
-//							for (File imageFile : imageFiles) {
-//								SpritePackerUtils.markPixel(imageFile);
-//							}
+							File[] imageFiles = imageArchiveDir.listFiles();
+							SpritePackerUtils.sortImages(imageFiles);
+
+							for(;;) {
+								Optional<File> result = SpritePackerUtils.validateArchiveColorLimit(imageFiles);
+
+								if (result.isPresent()) {
+									SpritePackerUtils.calculateNextArchive(result.get());
+								} else {
+									break;
+								}
+							}
+
+						}
+
+						for (File imageArchiveDir : selectedDirectory.listFiles()) {
+
+							// its not an image archive so skip it
+							if (!imageArchiveDir.isDirectory()) {
+								continue;
+							}
 
 							String imageArchiveName = imageArchiveDir.getName();
 
@@ -144,6 +148,10 @@ public final class Controller implements Initializable {
 								// make sure the images are sorted, order is really important
 								SpritePackerUtils.sortImages(imageFiles);
 
+								if (imageArchiveName.contains("mapfunction")) {
+									System.out.println("There are " + imageFiles.length + " files in the mapfunction archive");
+								}
+
 								// iterator over the actual images
 								for (int imageIndex = 0; imageIndex < imageFiles.length; imageIndex++) {
 
@@ -155,7 +163,7 @@ public final class Controller implements Initializable {
 										continue;
 									}
 
-									final BufferedImage bimage = SpritePackerUtils.convertToGIF(imageFile);
+									final BufferedImage bimage = ColorQuantizer.quantize(ImageIO.read(imageFile));
 
 									if (resizeWidth < bimage.getWidth()) {
 										resizeWidth = bimage.getWidth();
@@ -251,6 +259,10 @@ public final class Controller implements Initializable {
 
 									// encoding type (0 horizontal | 1 vertical)
 									idxOut.writeByte(format);
+
+									if (imageArchiveName.contains("mapfunction")) {
+										//System.out.println(String.format("archive=%s id=%d offsetX=%d offsetY=%d width=%d height=%d format=%d", imageArchiveName, i, offsetX, offsetY, bImage.getWidth(), bImage.getHeight(), format));
+									}
 
 									wImages.add(new BufferedImageWrapper(bImage, format));
 								}
@@ -430,17 +442,35 @@ public final class Controller implements Initializable {
 							imageArchiveName = imageArchiveName.substring(0, imageArchiveName.lastIndexOf("."));
 						}
 
-						List<Sprite> sprites = null;
+						final List<Sprite> sprites = new ArrayList<>();
 
-						try {
-							sprites = ImageArchiveDecoder.decode(ByteBuffer.wrap(archive.readFile(entry.getHash())), ByteBuffer.wrap(archive.readFile("index.dat")));
-						} catch (Exception ex) {
-							ex.printStackTrace();
+						int lastSpriteId;
+
+						for (lastSpriteId = 0; ;lastSpriteId++) {
+							try {
+
+								Sprite sprite = Sprite.decode(archive, entry.getHash(), lastSpriteId);
+
+								if (sprite.getWidth() > 765 || sprite.getHeight() > 765) {
+									continue;
+								}
+
+								sprites.add(sprite);
+							} catch (Exception ex) {
+								break;
+							}
 						}
 
-						if (sprites == null) {
-							System.out.println("sprite is null");
-							continue;
+						if (imageArchiveName.contains("mapfunction")) {
+							System.out.println(lastSpriteId);
+						}
+
+						if (sprites.isEmpty()) {
+							final String tempName = imageArchiveName;
+							final int tempLastSpriteId = lastSpriteId;
+
+							Platform.runLater(() -> Dialogue.showWarning(String.format("Could not decode image archive=%s at index=%d", tempName, tempLastSpriteId)));
+							return false;
 						}
 
 						final File imageArchiveDir = new File(outputDir, imageArchiveName);
@@ -457,11 +487,11 @@ public final class Controller implements Initializable {
 								continue;
 							}
 
-							Meta metaValue = new Meta(i, sprite.getOffsetX(), sprite.getOffsetY(), sprite.getLargestWidth(), sprite.getLargestHeight(), sprite.getFormat());
+							Meta metaValue = new Meta(i, sprite.getOffsetX(), sprite.getOffsetY(), sprite.getResizeWidth(), sprite.getResizeHeight(), sprite.getFormat());
 
 							metaMap.put(imageArchiveName, metaValue);
 
-							ImageIO.write(sprite.toBufferedImage(), "gif", new File(imageArchiveDir, Integer.toString(i) + ".gif"));
+							ImageIO.write(sprite.toBufferedImage(), "png", new File(imageArchiveDir, Integer.toString(i) + ".png"));
 
 						}
 
