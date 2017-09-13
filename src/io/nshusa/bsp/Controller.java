@@ -1,11 +1,9 @@
 package io.nshusa.bsp;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
@@ -22,7 +20,6 @@ import io.nshusa.bsp.util.SpritePackerUtils;
 import io.nshusa.rsam.binary.Archive;
 import io.nshusa.rsam.binary.sprite.Sprite;
 import io.nshusa.rsam.util.ByteBufferUtils;
-import io.nshusa.rsam.util.ColorQuantizer;
 import io.nshusa.rsam.util.CompressionUtil;
 import io.nshusa.rsam.util.HashUtils;
 import javafx.application.Platform;
@@ -74,6 +71,8 @@ public final class Controller implements Initializable {
 
 					try(DataOutputStream idxOut = new DataOutputStream(ibos)) {
 
+						boolean flag = false;
+
 						for (File imageArchiveDir : selectedDirectory.listFiles()) {
 
 							if (!imageArchiveDir.isDirectory()) {
@@ -87,10 +86,29 @@ public final class Controller implements Initializable {
 								Optional<File> result = SpritePackerUtils.validateArchiveColorLimit(imageFiles);
 
 								if (result.isPresent()) {
-									SpritePackerUtils.calculateNextArchive(imageFiles, result.get());
+									SpritePackerUtils.moveFile(result.get());
+									flag = true;
 								} else {
 									break;
 								}
+							}
+
+						}
+
+						if (flag) {
+							Platform.runLater(() -> Dialogue.showWarning(String.format(String.format("Images in dir=%s need their colors reduced.", selectedDirectory.getName() + "_output"))).showAndWait());
+							return false;
+						}
+
+						File toQuantOutputDir = new File(selectedDirectory.getParentFile(), selectedDirectory.getName() + "_output");
+
+						if (toQuantOutputDir.exists() && toQuantOutputDir.isDirectory()) {
+
+							File[] files = toQuantOutputDir.listFiles();
+
+							if (files.length > 0) {
+								Platform.runLater(() -> Dialogue.showWarning(String.format("Images in dir=%s need their colors reduced.", toQuantOutputDir.getName())).showAndWait());
+								return false;
 							}
 
 						}
@@ -347,16 +365,11 @@ public final class Controller implements Initializable {
 
 				} catch (Exception ex) {
 					ex.printStackTrace();
-					Platform.runLater(() -> {
-						Dialogue.showWarning(String.format("Failed to pack directory=%s", selectedDirectory.getName())).showAndWait();
-					});
+					Platform.runLater(() -> Dialogue.showWarning(String.format("Failed to pack directory=%s", selectedDirectory.getName())).showAndWait());
 					return false;
 				}
 
-				Platform.runLater(() -> {
-					Dialogue.showInfo("Information", "Success!").showAndWait();
-				});
-
+				Platform.runLater(() -> Dialogue.showInfo("Information", "Success!").showAndWait());
 				return true;
 			}
 		}).start();

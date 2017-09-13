@@ -7,7 +7,9 @@ import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import java.lang.reflect.Method;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 public final class SpritePackerUtils {
@@ -34,76 +36,6 @@ public final class SpritePackerUtils {
         return fill;
     }
 
-    public static void calculateNextArchive(File[] imageFiles, File bust) {
-        final File parentBust = bust.getParentFile();
-
-        if (parentBust == null) {
-            System.out.println("parentBust is null");
-            return;
-        }
-
-	    try {
-            BufferedImage quantized = ColorQuantizer.quantize(SpritePackerUtils.setColorTransparent(ImageIO.read(bust), Color.MAGENTA), new Color(0, 0, 1));
-
-            Set<Integer> set = new HashSet<>();
-
-            for (File imageFile : imageFiles) {
-
-                if (imageFile.getCanonicalPath().equals(bust.getCanonicalPath())) {
-                    continue;
-                }
-
-                BufferedImage image = ImageIO.read(imageFile);
-
-                for (int x = 0; x < image.getWidth(); x++) {
-                    for (int y = 0; y < image.getWidth(); y++) {
-                        set.add(image.getRGB(x, y));
-                    }
-                }
-
-            }
-
-            for (int x = 0; x < quantized.getWidth(); x++) {
-                for (int y = 0; y < quantized.getWidth(); y++) {
-                    set.add(quantized.getRGB(x, y));
-                }
-            }
-
-            if (set.size() <= 256) {
-                //System.out.println("rewriting file: " + bust.getParentFile().getName() + "/" + bust.getName());
-                ImageIO.write(SpritePackerUtils.draw(quantized, Color.MAGENTA), "png", bust);
-            } else {
-                final String prefix = getPrefix(parentBust);
-
-                // make sure the archive is not a hashed archive because we can't rebuild if it is
-                if (prefix.charAt(0) == '-' || Character.isDigit(prefix.charAt(0))) {
-                    System.out.println(String.format("Can't rebuild archive from a hashed archive=%s", parentBust.getName()));
-                    return;
-                }
-
-                final char[] array = prefix.toCharArray();
-
-                // determine if image archive is hashed
-                int index;
-                for (index = 0; index < array.length; index++) {
-                    if (Character.isDigit(array[index])) {
-                        break;
-                    }
-                }
-
-                final Optional<File> result = calculateNextDirectory(parentBust.getParentFile(), prefix, index == array.length ? -1 : Integer.parseInt(prefix.substring(index, prefix.length())));
-
-                if (result.isPresent()) {
-                    moveFile(parentBust, result.get(), bust);
-                }
-            }
-
-        } catch (IOException ex) {
-	        ex.printStackTrace();
-        }
-
-    }
-
     private static BufferedImage createPlaceholder() {
         BufferedImage bImage = new BufferedImage(16, 16, BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D graphics = bImage.createGraphics();
@@ -113,47 +45,40 @@ public final class SpritePackerUtils {
         return bImage;
     }
 
-    private static void moveFile(File prevDir, File nextDir, File fileToMove) {
-        if (!nextDir.exists()) {
-            nextDir.mkdirs();
-        }
+    public static boolean moveFile(File fileToMove) {
+	    try {
+            File imageArchiveDir = fileToMove.getParentFile();
 
-        final String prefix = getPrefix(fileToMove);
-        final String ext = getExtension(fileToMove);
+            if (imageArchiveDir == null) {
+                return false;
+            }
 
-        final File target = new File(nextDir, nextDir.listFiles().length + ext);
+            File mediaDir = imageArchiveDir.getParentFile();
 
-        int id = -1;
+            if (mediaDir == null) {
+                return false;
+            }
 
-        try {
-            id = Integer.parseInt(prefix);
+            File outputRootDir = new File(mediaDir.getParentFile(), mediaDir.getName() + "_output");
+
+            if (!outputRootDir.exists()) {
+                outputRootDir.mkdirs();
+            }
+
+            File outputDir = new File(outputRootDir, imageArchiveDir.getName());
+
+            if (!outputDir.exists()) {
+                outputDir.mkdirs();
+            }
+
+            File target = new File(outputDir, fileToMove.getName());
+
+            Files.move(fileToMove.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            return true;
         } catch (Exception ex) {
-            ex.printStackTrace();
+	        ex.printStackTrace();
+	        return false;
         }
-
-        if (id == -1) {
-            System.out.println(String.format("id shouldn't be -1 for %s", fileToMove.getName()));
-            return;
-        }
-
-        // move file
-        try {
-            //System.out.println("moving file: " + fileToMove.getParentFile().getName() + "/" + fileToMove.getName());
-            ImageIO.write(ColorQuantizer.quantize(SpritePackerUtils.setColorTransparent(ImageIO.read(fileToMove), Color.MAGENTA), new Color(0, 0, 1)), "png", target);
-            fileToMove.delete();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // create placeholder
-        BufferedImage placeholder = createPlaceholder();
-
-        try {
-            ImageIO.write(placeholder, "png", new File(prevDir, prefix + ext));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     public static Optional<File> calculateNextDirectory(File root, String prefix , int did) {
@@ -197,6 +122,10 @@ public final class SpritePackerUtils {
         final Set<Integer> set = new HashSet<>();
 
         for (File imageFile : imageFiles) {
+
+            if (!imageFile.exists() || imageFile.isDirectory()) {
+                continue;
+            }
 
             final BufferedImage bImage = ImageIO.read(imageFile);
 
