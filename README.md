@@ -7,7 +7,8 @@
 * Follows 317-377 sprite format
 * No needed libraries
 * No needed classes
-* Does not reduce image colors (you have to do that, photoshop or gimp both do this really well)
+* Images do not get modified at all
+* Does not reduce image colors (Use either Photoshop or GIMP, both work really well)
 * Supports GIF, PNG
 * Exports to PNG-8
 * Exports meta information into a file called Meta.json in the root of your file archive
@@ -58,7 +59,10 @@ Compatiable with Linux and Windows 10 (I don't have a mac so I can't say it work
 ### Notes
 
 * A single image archive can only contain 256 colors (255 if rgb 0 is not present)
-* To reduce image colors you can use either [photoshop](http://www.adobe.com/products/photoshop.html) or [gimp](https://www.gimp.org/) image -> mode -> indexed then change max number of colors or use web palette
+* To reduce image colors you can use either [Photoshop](http://www.adobe.com/products/photoshop.html) or [GIMP](https://www.gimp.org/) image -> mode -> indexed then change max number of colors or use web palette
+![image](https://i.imgur.com/Gl1KLHd.png)
+
+![image2](https://i.imgur.com/MTeObVB.png)
 * Transparency is set in the client, not BSP. (In a #317 rgb 0 aka black is used for transparency)
 * For more information regarding the format visit [RS2 Sprite Format](https://www.rune-server.ee/runescape-development/rs2-server/informative-threads/661911-rs2-sprite-format-depth.html)
 
