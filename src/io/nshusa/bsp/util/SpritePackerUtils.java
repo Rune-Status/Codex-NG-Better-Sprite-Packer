@@ -4,7 +4,7 @@ import io.nshusa.rsam.util.ColorQuantizer;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.BufferedImage;
+import java.awt.image.*;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -24,8 +24,17 @@ public final class SpritePackerUtils {
         return input.getName().substring(input.getName().lastIndexOf(".") != -1 ? input.getName().lastIndexOf(".") : input.getName().length(), input.getName().length());
     }
 
-    public static void calculateNextArchive(File bust) {
+    public static BufferedImage draw(BufferedImage src, Color trans) {
+        BufferedImage fill = new BufferedImage(src.getWidth(), src.getHeight(), src.getType());
+        Graphics2D g = fill.createGraphics();
 
+        g.setPaint (trans);
+        g.fillRect ( 0, 0, fill.getWidth(), fill.getHeight() );
+        g.drawImage(src, null, 0, 0);
+        return fill;
+    }
+
+    public static void calculateNextArchive(File[] imageFiles, File bust) {
         final File parentBust = bust.getParentFile();
 
         if (parentBust == null) {
@@ -33,28 +42,64 @@ public final class SpritePackerUtils {
             return;
         }
 
-        final String prefix = getPrefix(parentBust);
+	    try {
+            BufferedImage quantized = ColorQuantizer.quantize(SpritePackerUtils.setColorTransparent(ImageIO.read(bust), Color.MAGENTA), new Color(0, 0, 1));
 
-        // make sure the archive is not a hashed archive because we can't rebuild if it is
-        if (prefix.charAt(0) == '-' || Character.isDigit(prefix.charAt(0))) {
-            System.out.println(String.format("Can't rebuild archive from a hashed archive=%s", parentBust.getName()));
-            return;
-        }
+            Set<Integer> set = new HashSet<>();
 
-        final char[] array = prefix.toCharArray();
+            for (File imageFile : imageFiles) {
 
-        // determine if image archive is hashed
-        int index;
-        for (index = 0; index < array.length; index++) {
-            if (Character.isDigit(array[index])) {
-                break;
+                if (imageFile.getCanonicalPath().equals(bust.getCanonicalPath())) {
+                    continue;
+                }
+
+                BufferedImage image = ImageIO.read(imageFile);
+
+                for (int x = 0; x < image.getWidth(); x++) {
+                    for (int y = 0; y < image.getWidth(); y++) {
+                        set.add(image.getRGB(x, y));
+                    }
+                }
+
             }
-        }
 
-        final Optional<File> result = calculateNextDirectory(parentBust.getParentFile(), prefix, index == array.length ? -1 : Integer.parseInt(prefix.substring(index, prefix.length())));
+            for (int x = 0; x < quantized.getWidth(); x++) {
+                for (int y = 0; y < quantized.getWidth(); y++) {
+                    set.add(quantized.getRGB(x, y));
+                }
+            }
 
-        if (result.isPresent()) {
-            moveFile(parentBust, result.get(), bust);
+            if (set.size() <= 256) {
+                //System.out.println("rewriting file: " + bust.getParentFile().getName() + "/" + bust.getName());
+                ImageIO.write(SpritePackerUtils.draw(quantized, Color.MAGENTA), "png", bust);
+            } else {
+                final String prefix = getPrefix(parentBust);
+
+                // make sure the archive is not a hashed archive because we can't rebuild if it is
+                if (prefix.charAt(0) == '-' || Character.isDigit(prefix.charAt(0))) {
+                    System.out.println(String.format("Can't rebuild archive from a hashed archive=%s", parentBust.getName()));
+                    return;
+                }
+
+                final char[] array = prefix.toCharArray();
+
+                // determine if image archive is hashed
+                int index;
+                for (index = 0; index < array.length; index++) {
+                    if (Character.isDigit(array[index])) {
+                        break;
+                    }
+                }
+
+                final Optional<File> result = calculateNextDirectory(parentBust.getParentFile(), prefix, index == array.length ? -1 : Integer.parseInt(prefix.substring(index, prefix.length())));
+
+                if (result.isPresent()) {
+                    moveFile(parentBust, result.get(), bust);
+                }
+            }
+
+        } catch (IOException ex) {
+	        ex.printStackTrace();
         }
 
     }
@@ -93,7 +138,9 @@ public final class SpritePackerUtils {
 
         // move file
         try {
-            Files.move(fileToMove.toPath(), target.toPath());
+            //System.out.println("moving file: " + fileToMove.getParentFile().getName() + "/" + fileToMove.getName());
+            ImageIO.write(ColorQuantizer.quantize(SpritePackerUtils.setColorTransparent(ImageIO.read(fileToMove), Color.MAGENTA), new Color(0, 0, 1)), "png", target);
+            fileToMove.delete();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -144,12 +191,14 @@ public final class SpritePackerUtils {
         }
     }
 
+
+
     public static Optional<File> validateArchiveColorLimit(File[] imageFiles) throws IOException {
         final Set<Integer> set = new HashSet<>();
 
         for (File imageFile : imageFiles) {
 
-            final BufferedImage bImage = ColorQuantizer.quantize(ImageIO.read(imageFile));
+            final BufferedImage bImage = ImageIO.read(imageFile);
 
             for (int x = 0; x < bImage.getWidth(); x++) {
                 for (int y = 0; y < bImage.getHeight(); y++) {
@@ -175,6 +224,46 @@ public final class SpritePackerUtils {
 		}
 		return true;
 	}
+
+    private static BufferedImage imageToBufferedImage(Image image) {
+
+        BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = bufferedImage.createGraphics();
+        g2.drawImage(image, 0, 0, null);
+        g2.dispose();
+
+        return bufferedImage;
+
+    }
+
+    public static BufferedImage setColorTransparent(BufferedImage im, final Color color) {
+        ImageFilter filter = new RGBImageFilter() {
+
+            // the color we are looking for... Alpha bits are set to opaque
+            public int markerRGB = color.getRGB() | 0xFF000000;
+
+            public final int filterRGB(int x, int y, int rgb) {
+                if ((rgb | 0xFF000000) == markerRGB) {
+                    // Mark the alpha bits as zero - transparent
+                    return 0x00FFFFFF & rgb;
+                } else {
+                    // nothing to do
+                    return rgb;
+                }
+            }
+        };
+
+        ImageProducer ip = new FilteredImageSource(im.getSource(), filter);
+        return imageToBufferedImage(Toolkit.getDefaultToolkit().createImage(ip));
+    }
+
+	public static BufferedImage convertToGIF(BufferedImage bimage) throws IOException {
+	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	    ImageIO.write(bimage, "gif", bos);
+	    try(InputStream is = new ByteArrayInputStream(bos.toByteArray())) {
+	        return ImageIO.read(is);
+        }
+    }
 
 	public static boolean isValidImage(File file) {
         return file.getName().endsWith(".png") || file.getName().endsWith("gif");

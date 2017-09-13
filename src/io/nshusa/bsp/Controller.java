@@ -1,5 +1,6 @@
 package io.nshusa.bsp;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Type;
@@ -7,18 +8,19 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.List;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import io.nshusa.bsp.util.ColorUtils;
 import io.nshusa.bsp.util.Dialogue;
 import io.nshusa.bsp.util.MultiMapAdapter;
 import io.nshusa.bsp.util.SpritePackerUtils;
 import io.nshusa.rsam.binary.Archive;
 import io.nshusa.rsam.binary.sprite.Sprite;
-import io.nshusa.rsam.codec.ImageArchiveDecoder;
 import io.nshusa.rsam.util.ByteBufferUtils;
 import io.nshusa.rsam.util.ColorQuantizer;
 import io.nshusa.rsam.util.CompressionUtil;
@@ -85,7 +87,7 @@ public final class Controller implements Initializable {
 								Optional<File> result = SpritePackerUtils.validateArchiveColorLimit(imageFiles);
 
 								if (result.isPresent()) {
-									SpritePackerUtils.calculateNextArchive(result.get());
+									SpritePackerUtils.calculateNextArchive(imageFiles, result.get());
 								} else {
 									break;
 								}
@@ -159,7 +161,7 @@ public final class Controller implements Initializable {
 										continue;
 									}
 
-									final BufferedImage bimage = ColorQuantizer.quantize(ImageIO.read(imageFile));
+									final BufferedImage bimage = ImageIO.read(imageFile);
 
 									if (resizeWidth < bimage.getWidth()) {
 										resizeWidth = bimage.getWidth();
@@ -189,7 +191,12 @@ public final class Controller implements Initializable {
 										for (int y = 0; y < bimage.getHeight(); y++) {
 											final int argb = bimage.getRGB(x,y);
 
-											final int rgb = argb & 0xFFFFFF;
+											int rgb = argb & 0xFFFFFF;
+
+											if (ColorUtils.getRed(rgb) == 0xFF && ColorUtils.getGreen(rgb) == 0 && ColorUtils.getBlue(rgb) == 0xFF) {
+												bimage.setRGB(x, y, 0);
+												rgb = bimage.getRGB(x, y);
+											}
 
 											// make sure there's no duplicate rgb values
 											if (colorSet.contains(rgb)) {
