@@ -50,7 +50,7 @@ public final class Dialogue {
 		Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(message);
-        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();            
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(new Image(App.class.getResourceAsStream("/icons/info_icon.png")));
         
         return alert;
