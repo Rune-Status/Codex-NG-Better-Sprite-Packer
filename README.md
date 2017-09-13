@@ -68,8 +68,6 @@ Compatiable with Linux and Windows 10 (I don't have a mac so I can't say it work
 * If the program isn't working for you, feel free to submit an issue request. [Issues](https://github.com/nshusa/better-sprite-packer-gui/issues)
 
 ## Media
-**BSP**
 ![alt tag](http://i.imgur.com/ccimVaW.png)
-**GIMP**
 ![image](https://i.imgur.com/Gl1KLHd.png)
 ![image2](https://i.imgur.com/MTeObVB.png)
