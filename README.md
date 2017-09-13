@@ -60,9 +60,6 @@ Compatiable with Linux and Windows 10 (I don't have a mac so I can't say it work
 
 * A single image archive can only contain 256 colors (255 if rgb 0 is not present)
 * To reduce image colors you can use either [Photoshop](http://www.adobe.com/products/photoshop.html) or [GIMP](https://www.gimp.org/) image -> mode -> indexed then change max number of colors or use web palette
-![image](https://i.imgur.com/Gl1KLHd.png)
-
-![image2](https://i.imgur.com/MTeObVB.png)
 * Transparency is set in the client, not BSP. (In a #317 rgb 0 aka black is used for transparency)
 * For more information regarding the format visit [RS2 Sprite Format](https://www.rune-server.ee/runescape-development/rs2-server/informative-threads/661911-rs2-sprite-format-depth.html)
 
@@ -71,4 +68,8 @@ Compatiable with Linux and Windows 10 (I don't have a mac so I can't say it work
 * If the program isn't working for you, feel free to submit an issue request. [Issues](https://github.com/nshusa/better-sprite-packer-gui/issues)
 
 ## Media
+**BSP**
 ![alt tag](http://i.imgur.com/ccimVaW.png)
+**GIMP**
+![image](https://i.imgur.com/Gl1KLHd.png)
+![image2](https://i.imgur.com/MTeObVB.png)
