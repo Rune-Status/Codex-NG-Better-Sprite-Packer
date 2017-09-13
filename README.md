@@ -7,6 +7,7 @@
 * Follows 317-377 sprite format
 * No needed libraries
 * No needed classes
+* Does not reduce image colors (you have to do that, photoshop or gimp both do this really well)
 * Supports GIF, PNG
 * Exports to PNG-8
 * Exports meta information into a file called Meta.json in the root of your file archive
@@ -56,8 +57,9 @@ Compatiable with Linux and Windows 10 (I don't have a mac so I can't say it work
 
 ### Notes
 
-* Don't use JPEG to pack sprites. JPEG is for realistic photos which has a lot more distinct colors. RuneScape sprites are similar to GIf's however there can only be 256 colors in a single archive. A single image can contain 256 colors if one of the rgb values is 0. If not then there can only be 255 colors.
-* Transparency is set in the client, not BSP
+* A single image archive can only contain 256 colors (255 if rgb 0 is not present)
+* To reduce image colors you can use either [photoshop](http://www.adobe.com/products/photoshop.html) or [gimp](https://www.gimp.org/) image -> mode -> indexed then change max number of colors or use web palette
+* Transparency is set in the client, not BSP. (In a #317 rgb 0 aka black is used for transparency)
 * For more information regarding the format visit [RS2 Sprite Format](https://www.rune-server.ee/runescape-development/rs2-server/informative-threads/661911-rs2-sprite-format-depth.html)
 
 ### Issues
